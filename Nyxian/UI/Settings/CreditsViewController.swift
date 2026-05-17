@@ -27,14 +27,11 @@ class CreditsViewController: UIThemedTableViewController {
     
 #if !JAILBREAK_ENV
     private var credits: [Credit] = [
-        Credit(name: "LucaVmu", role: "Maintainer", githubURL: "https://github.com/LucaVmu"),
-        Credit(name: "Catelyn", role: "Co Maintainer", githubURL: "https://github.com/mimalloc"),
+        Credit(name: "emexLab", role: "Maintainer's", githubURL: "https://github.com/emexlab"),
+        Credit(name: "LiveContainer", role: "LiveContainer", githubURL: "https://github.com/livecontainer"),
         Credit(name: "zipgod", role: "Security Researcher", githubURL: "https://github.com/zipgod24"),
-        Credit(name: "Kyle", role: "Contributor", githubURL: "https://github.com/Kyle-Ye"),
         Credit(name: "엄세환", role: "Contributor", githubURL: "https://github.com/op06072"),
         Credit(name: "Simon Støvring", role: "Runestone", githubURL: "https://github.com/simonbs"),
-        Credit(name: "Duy Tran", role: "LiveContainer", githubURL: "https://github.com/khanhduytran0"),
-        Credit(name: "Huge_Black", role: "LiveContainer", githubURL: "https://github.com/hugeBlack"),
         Credit(name: "Vinogradov Daniil", role: "Massive help on LLVM-On-iOS", githubURL: "https://github.com/XITRIX"),
         Credit(name: "light-tech", role: "LLVM-On-iOS", githubURL: "https://github.com/light-tech"),
         Credit(name: "Lars Fröder", role: "Litehook", githubURL: "https://github.com/opa334"),
@@ -44,12 +41,10 @@ class CreditsViewController: UIThemedTableViewController {
     ]
 #else
     private var credits: [Credit] = [
-        Credit(name: "LucaVmu", role: "Maintainer", githubURL: "https://github.com/LucaVmu"),
-        Credit(name: "Catelyn", role: "Co Maintainer", githubURL: "https://github.com/mimalloc"),
-        Credit(name: "Kyle", role: "Contributor", githubURL: "https://github.com/Kyle-Ye"),
+        Credit(name: "emexLab", role: "Maintainer's", githubURL: "https://github.com/emexlab"),
+        Credit(name: "LiveContainer", role: "LiveContainer", githubURL: "https://github.com/livecontainer"),
         Credit(name: "엄세환", role: "Contributor", githubURL: "https://github.com/op06072"),
         Credit(name: "Simon Støvring", role: "Runestone", githubURL: "https://github.com/simonbs"),
-        Credit(name: "Duy Tran", role: "FrontBoardAppLauncher", githubURL: "https://github.com/khanhduytran0"),
         Credit(name: "Vinogradov Daniil", role: "Massive help on LLVM-On-iOS", githubURL: "https://github.com/XITRIX"),
         Credit(name: "light-tech", role: "LLVM-On-iOS", githubURL: "https://github.com/light-tech"),
         Credit(name: "Lars Fröder", role: "Litehook,Trollstore and libroot", githubURL: "https://github.com/opa334"),
