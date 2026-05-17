@@ -27,7 +27,7 @@ class CreditsViewController: UIThemedTableViewController {
     
 #if !JAILBREAK_ENV
     private var credits: [Credit] = [
-        Credit(name: "emexLab", role: "Maintainer", githubURL: "https://github.com/emexlab"),
+        Credit(name: "emexLabs", role: "Maintainer", githubURL: "https://github.com/emexlab"),
         Credit(name: "LiveContainer", role: "LiveContainer", githubURL: "https://github.com/livecontainer"),
         Credit(name: "zipgod", role: "Security Researcher", githubURL: "https://github.com/zipgod24"),
         Credit(name: "Simon Støvring", role: "Runestone", githubURL: "https://github.com/simonbs"),
@@ -42,12 +42,12 @@ class CreditsViewController: UIThemedTableViewController {
     ]
 #else
     private var credits: [Credit] = [
-        Credit(name: "emexLab", role: "Maintainer", githubURL: "https://github.com/emexlab"),
+        Credit(name: "emexLabs", role: "Maintainer", githubURL: "https://github.com/emexlab"),
         Credit(name: "LiveContainer", role: "LiveContainer", githubURL: "https://github.com/livecontainer"),
         Credit(name: "Simon Støvring", role: "Runestone", githubURL: "https://github.com/simonbs"),
         Credit(name: "Vinogradov Daniil", role: "Massive help on LLVM-On-iOS", githubURL: "https://github.com/XITRIX"),
         Credit(name: "light-tech", role: "LLVM-On-iOS", githubURL: "https://github.com/light-tech"),
-        Credit(name: "Lars Fröder", role: "Litehook,Trollstore and libroot", githubURL: "https://github.com/opa334"),
+        Credit(name: "Lars Fröder", role: "Litehook and TrollStore", githubURL: "https://github.com/opa334"),
         Credit(name: "Lotsen", role: "Contributor", githubURL: "https://github.com/l0tsen"),
         Credit(name: "엄세환", role: "Contributor", githubURL: "https://github.com/op06072"),
         Credit(name: "ayame09", role: "Original Nyxian app icons", githubURL: "https://github.com/ayayame09"),
