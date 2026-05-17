@@ -31,6 +31,7 @@ class CustomizationViewController: UIThemedTableViewController {
     
     var icons: [String] = [
         "Default",
+        "Legacy",
         "Drawn",
         "Nyxcat",
         "Nyxcat2",
