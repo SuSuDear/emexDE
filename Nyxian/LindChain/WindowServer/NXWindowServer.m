@@ -200,13 +200,10 @@
     {
         return;
     }
-
-    for(NXWindow *window in self.windows.allValues)
-    {
-        [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionAllowUserInteraction animations:^{
-            window.view.alpha = 0.25;
-        } completion:nil];
-    }
+    
+    [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionAllowUserInteraction animations:^{
+        self->_windowLayer.alpha = 0.25;
+    } completion:nil];
 }
 
 - (void)windowsGetInMyWay
@@ -216,12 +213,9 @@
         return;
     }
     
-    for(NXWindow *window in self.windows.allValues)
-    {
-        [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionAllowUserInteraction animations:^{
-            window.view.alpha = 1.0;
-        } completion:nil];
-    }
+    [UIView animateWithDuration:0.3 delay:0 options:UIViewAnimationOptionBeginFromCurrentState | UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionAllowUserInteraction animations:^{
+        self->_windowLayer.alpha = 1.0;
+    } completion:nil];
 }
 
 - (void)openWindowWithSession:(NXWindowSession*)session
