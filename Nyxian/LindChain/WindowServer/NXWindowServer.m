@@ -942,4 +942,50 @@
     });
 }
 
+- (UIModalPresentationStyle)styleForTransitionView:(id)view
+{
+    if(![view isKindOfClass:NSClassFromString(@"UITransitionView")])
+    {
+        return UIModalPresentationNone;
+    }
+    
+    __strong id delegate = nil;
+    if([view respondsToSelector:@selector(delegate)])
+    {
+        delegate = [view performSelector:@selector(delegate)];
+    }
+    
+    if(delegate == nil)
+    {
+        return UIModalPresentationNone;
+    }
+    
+    if([delegate isKindOfClass:NSClassFromString(@"_UIFullscreenPresentationController")])
+    {
+        return UIModalPresentationFullScreen;
+    }
+    
+    return UIModalPresentationNone;
+}
+
+- (void)addSubview:(UIView *)view
+{
+    [super addSubview:view];
+    
+    if([view isKindOfClass:NSClassFromString(@"UITransitionView")])
+    {
+        UIModalPresentationStyle presentationStyle = [self styleForTransitionView:view];
+        if(presentationStyle == UIModalPresentationFullScreen)
+        {
+            [super bringSubviewToFront:view];
+            [super bringSubviewToFront:_windowLayer];
+            if(_fullScreenWindow != nil)
+            {
+                [super bringSubviewToFront:_fullScreenWindow.view];
+            }
+        }
+        return;
+    }
+}
+
 @end
