@@ -4,7 +4,7 @@
 </div>
 <h6 align="center">
   <a target="_blank" href="https://discord.gg/Cbeg3gJzC7"><img src="https://dcbadge.limes.pink/api/server/Cbeg3gJzC7?style=flat" alt=""></a>
-  <a href="https://github.com/emexlab/emexDE/actions/workflows/build.yml"><img src="https://github.com/ProjectNyxian/Nyxian/actions/workflows/build.yml/badge.svg" alt="Build iOS App"></a>
+  <a href="https://github.com/emexlab/emexDE/actions/workflows/build.yml"><img src="https://github.com/emexlab/emexDE/actions/workflows/build.yml/badge.svg" alt="Build iOS App"></a>
 </h6>
 <p align="center">
   <img src="./mockup.png">
@@ -14,7 +14,7 @@
 emexDE is an iOS app that empowers developers with a full toolchain they can use while even being offline for iOS development on iPhone. It supports Swift, C, Objective-C, C++ and Objective-C++. It’s a powerful Xcode alternative that made the impossible possible, a fully on-device iOS IDE that doesn’t even need a cloud and can even be used with airplane mode enabled. It supports officially iOS 16 all the way up to the latest iOS version(iOS/iPadOS 26.5 tested). You can compile and run iOS apps on the go with ease, using the entire iOS 26.4 SDK.
 
 ## Installation
-To start using emexDE view the [Installation Guide](https://nyxian.app/docs/installation).
+To start using emexDE view the [Installation Guide](https://emexlab.org/docs/installation).
 
 ## Todo
 - [x] Code execution using NSExtension
