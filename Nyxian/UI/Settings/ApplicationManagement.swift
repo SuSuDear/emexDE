@@ -192,7 +192,7 @@ class ApplicationManagementViewController: UIThemedTableViewController, UITextFi
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.tableView.register(NXProjectTableCell.self, forCellReuseIdentifier: NXProjectTableCell.reuseIdentifier())
+        self.tableView.register(ProjectTableCell.self, forCellReuseIdentifier: ProjectTableCell.reuseIdentifier)
         LDEApplicationWorkspace.shared().ping()
         self.title = "Applications"
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: nil, image: UIImage(systemName: "square.and.arrow.down.fill"), target: self, action: #selector(plusButtonPressed))
@@ -208,8 +208,8 @@ class ApplicationManagementViewController: UIThemedTableViewController, UITextFi
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let application: LDEApplicationObject = self.applications[indexPath.row]
-        let cell: NXProjectTableCell = self.tableView.dequeueReusableCell(withIdentifier: NXProjectTableCell.reuseIdentifier()) as! NXProjectTableCell
-        cell.configure(withDisplayName: application.localizedName, withBundleIdentifier: application.bundleIdentifier, withAppIcon: application.icon, showAppIcon: true, showBundleID: true, showArrow: false)
+        let cell: ProjectTableCell = self.tableView.dequeueReusableCell(withIdentifier: ProjectTableCell.reuseIdentifier) as! ProjectTableCell
+        cell.configure(displayName: application.localizedName, bundleIdentifier: application.bundleIdentifier, appIcon: application.icon ?? UIImage(named: "DefaultIcon"), showArrow: true)
         return cell
     }
     

@@ -36,7 +36,7 @@ class ProjectTableCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle,
                   reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        super.init(style: .subtitle, reuseIdentifier: reuseIdentifier)
         self.setupConstraints()
     }
     
@@ -120,7 +120,7 @@ class ProjectTableCell: UITableViewCell {
             self.textCenterConstraintBox?.isActive = false
         }
         
-        if let appIcon = appIcon {
+        if let _ = appIcon {
             self.imageView?.isHidden = false
             NSLayoutConstraint.activate(self.imageConstraints!)
             self.leadingConstraintWHImage?.isActive = false

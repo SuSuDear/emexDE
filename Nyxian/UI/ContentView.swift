@@ -39,7 +39,7 @@ import UIKit
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.tableView.register(NXProjectTableCell.self, forCellReuseIdentifier: NXProjectTableCell.reuseIdentifier())
+        self.tableView.register(ProjectTableCell.self, forCellReuseIdentifier: ProjectTableCell.reuseIdentifier)
         
         self.title = "Projects"
 
@@ -277,8 +277,8 @@ import UIKit
         let key = keys[indexPath.section]
         let sectionProjects = self.projectsList[key] ?? []
         let project: NXProject = sectionProjects[indexPath.row];
-        let cell: NXProjectTableCell = self.tableView.dequeueReusableCell(withIdentifier: NXProjectTableCell.reuseIdentifier()) as! NXProjectTableCell
-        cell.configure(withDisplayName: project.projectConfig.displayName, withBundleIdentifier: project.projectConfig.bundleid, withAppIcon: nil, showAppIcon: project.projectConfig.schemeKind == .app, showBundleID: project.projectConfig.schemeKind == .app, showArrow: UIDevice.current.userInterfaceIdiom != .pad)
+        let cell: ProjectTableCell = self.tableView.dequeueReusableCell(withIdentifier: ProjectTableCell.reuseIdentifier) as! ProjectTableCell
+        cell.configure(displayName: project.projectConfig.displayName, bundleIdentifier: project.projectConfig.bundleid, appIcon: UIImage(named: "DefaultIcon"), showArrow: UIDevice.current.userInterfaceIdiom != .pad)
         return cell
     }
     
