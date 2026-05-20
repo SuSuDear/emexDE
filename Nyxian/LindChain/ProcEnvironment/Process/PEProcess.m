@@ -129,7 +129,7 @@
         settings.deviceOrientation = UIDevice.currentDevice.orientation;
         settings.interfaceOrientation = UIApplication.sharedApplication.statusBarOrientation;
         
-        settings.frame = (innerSelf.session == nil) ? CGRectMake(50, 94, 300, 400) : innerSelf.session.windowRect;
+        settings.frame = (innerSelf.session == nil) ? CGRectMake(50, 94, 300, 400) : innerSelf.session.startWindowRect;
         
         //settings.interruptionPolicy = 2; // reconnect
         settings.level = 1;

@@ -33,7 +33,7 @@
 @property (nonatomic,weak) NXWindow *window;
 @property (nonatomic) id_t windowIdentifier;
 
-@property (nonatomic) CGRect windowRect;
+@property (nonatomic) CGRect startWindowRect;
 @property (nonatomic,strong,getter=getWindowName,setter=setWindowName:) NSString *windowName;
 
 @property (nonatomic) BOOL isFullscreen;
@@ -49,7 +49,7 @@
 - (BOOL)focusWindow;
 - (BOOL)unfocusWindow;
 
-- (void)windowChangesToRect:(CGRect)rect;
+- (void)windowRectChanged;
 
 - (UIImage*)snapshotWindow;
 

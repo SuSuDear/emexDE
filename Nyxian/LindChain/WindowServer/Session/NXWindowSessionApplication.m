@@ -203,14 +203,11 @@ void UIKitFixesInit(void)
     return YES;
 }
 
-- (void)windowChangesToRect:(CGRect)rect
+- (void)windowRectChanged
 {
-    [super windowChangesToRect:rect];
+    [super windowRectChanged];
     
-    if(UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad)
-    {
-        rect = CGRectMake(0, 0, rect.size.width, rect.size.height);
-    }
+    CGRect rect = self.view.frame;
     
     os_unfair_lock_lock(&_lock);
     
@@ -225,7 +222,7 @@ void UIKitFixesInit(void)
 
         settings.deviceOrientation = UIDevice.currentDevice.orientation;
         settings.interfaceOrientation = self.view.window.windowScene.interfaceOrientation;
-        settings.frame = UIInterfaceOrientationIsLandscape(settings.interfaceOrientation) ? CGRectMake(rect.origin.x, rect.origin.y, rect.size.height, rect.size.width) : rect;
+        settings.frame = UIInterfaceOrientationIsLandscape(settings.interfaceOrientation) ? CGRectMake(rect.origin.y, rect.origin.x, rect.size.height, rect.size.width) : rect;
         
         UIEdgeInsets insets = (self.isFullscreen) ? NXWindowServer.shared.safeAreaInsets : UIEdgeInsetsZero;
         
@@ -284,7 +281,7 @@ void UIKitFixesInit(void)
     
     os_unfair_lock_unlock(&_lock);
     
-    [self windowChangesToRect:self.windowRect];
+    [self windowRectChanged];
 }
 
 - (BOOL)shouldUpdateFocusInContext:(nonnull UIFocusUpdateContext *)context
@@ -371,7 +368,7 @@ void UIKitFixesInit(void)
     
     os_unfair_lock_unlock(&_lock);
     
-    [self windowChangesToRect:self.windowRect];
+    [self windowRectChanged];
     
     /* animate transition */
     [UIView animateWithDuration:0.3 delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^{

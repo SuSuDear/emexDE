@@ -140,7 +140,7 @@
     }
     
     /* finally starting terminal */
-    _terminal = [[TerminalViewObjC alloc] initWithFrame:self.windowRect masterFD:tty->userspacefd[MASTERFD]];
+    _terminal = [[TerminalViewObjC alloc] initWithFrame:self.startWindowRect masterFD:tty->userspacefd[MASTERFD]];
     
     if(_terminal == nil)
     {
@@ -150,7 +150,6 @@
     }
     
     _terminal.objcDelegate = self;
-    _terminal.translatesAutoresizingMaskIntoConstraints = NO;
     
     __weak typeof(self) weakSelf = self;
     
@@ -229,9 +228,11 @@
     return YES;
 }
 
-- (void)windowChangesToRect:(CGRect)rect
+- (void)windowRectChanged
 {
-    [super windowChangesToRect:rect];
+    [super windowRectChanged];
+    
+    CGRect rect = self.view.frame;
     
     _heigthConstraint.constant = rect.size.height;
     _widthConstraint.constant = rect.size.width;

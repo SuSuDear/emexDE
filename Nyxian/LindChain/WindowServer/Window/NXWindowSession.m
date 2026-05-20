@@ -26,7 +26,7 @@
 
 - (BOOL)openWindow
 {
-    self.windowRect = CGRectMake(50, 50, 375, 667);
+    _startWindowRect = CGRectMake(50, 50, 375, 667);
     return (self.windowScene != nil);
 }
 
@@ -65,9 +65,8 @@
     return snapshot;
 }
 
-- (void)windowChangesToRect:(CGRect)rect
+- (void)windowRectChanged
 {
-    self.windowRect = rect;
     return;
 }
 

@@ -46,7 +46,7 @@
     _session.isFullscreen = NO;
     _delegate = delegate;
     
-    self.view = [[UIStackView alloc] initWithFrame:[_session windowRect]];
+    self.view = [[UIStackView alloc] initWithFrame:[_session startWindowRect]];
     self.view.backgroundColor = UIColor.clearColor;
     self.view.autoresizingMask = UIViewAutoresizingNone;
     
@@ -518,20 +518,16 @@
 
 - (void)updateSceneFrame
 {
-    CGRect frame = self.view.frame;
-    frame.origin.y += _windowBar.frame.size.height;
-    frame.size.height -= _windowBar.frame.size.height;
-    
-    [self.session windowChangesToRect:frame];
+    [_session windowRectChanged];
 }
 
 - (void)resizeActionStart
 {
     if(_resizeEndDebounceRefCnt == 0)
     {
-        [self->_resizeEndDebounceTimer invalidate];
-        self->_resizeEndDebounceTimer = nil;
-        self->_resizeDisplayLink.paused = NO;
+        [_resizeEndDebounceTimer invalidate];
+        _resizeEndDebounceTimer = nil;
+        _resizeDisplayLink.paused = NO;
     }
     
     _resizeEndDebounceRefCnt += 1;
