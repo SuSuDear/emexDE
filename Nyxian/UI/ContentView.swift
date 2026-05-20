@@ -391,9 +391,9 @@ import UIKit
         let keys = Array(self.projectsList.keys).sorted()
         let key = keys[indexPath.section]
         if #available(iOS 26.0, *) {
-            return (key == "applications") ? 80 : UITableView.automaticDimension
+            return 80
         } else {
-            return (key == "applications") ? 70 : UITableView.automaticDimension
+            return 70
         }
     }
 }
