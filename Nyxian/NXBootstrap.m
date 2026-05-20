@@ -68,7 +68,7 @@
 
 - (NSURL*)sdkURL
 {
-    return [self.rootURL URLByAppendingPathComponent:@"/SDK/iPhoneOS26.4.sdk"];
+    return [self.rootURL URLByAppendingPathComponent:@"/SDK/iPhoneOS26.5.sdk"];
 }
 
 - (NSURL*)includeURL
@@ -264,44 +264,6 @@
                 self.version = 15;
             }
             
-            if(self.version < 21)
-            {
-                /*
-                 * the SDK is very important to use iOS API which
-                 * is very cool.
-                 */
-                NSLog(@"bootstrapping SDK");
-                [[NSFileManager defaultManager] removeItemAtURL:[self.rootURL URLByAppendingPathComponent:@"SDK"] error:nil];
-                [[NSFileManager defaultManager] removeItemAtURL:self.swiftModuleCacheURL error:nil];    /* clearing module cache */
-                
-                if(!fdownload(@"https://nyxian.app/bootstrap/iPhoneOS26.4.sdk.zip", @"sdk.zip"))
-                {
-                    error = [NSError errorWithDomain:@"" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"downloading \"https://nyxian.app/bootstrap/iPhoneOS26.4.sdk.zip\" failed" }];
-                    goto report_error;
-                }
-                
-                if(!unzipArchiveAtPath([NSTemporaryDirectory() stringByAppendingPathComponent:@"sdk.zip"], [self.rootURL URLByAppendingPathComponent:@"SDK"].path))
-                {
-                    error = [NSError errorWithDomain:@"" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"extracting \"sdl.zip\" failed" }];
-                    goto report_error;
-                }
-                
-                NSArray<NSURL*> *symlinkSDKs = @[
-                    [self.rootURL URLByAppendingPathComponent:@"/SDK/iPhoneOS26.2.sdk"],
-                    [self.rootURL URLByAppendingPathComponent:@"/SDK/iPhoneOS26.4.1.sdk"]
-                ];
-                
-                for(NSURL *symlink in symlinkSDKs)
-                {
-                    if(![[NSFileManager defaultManager] createSymbolicLinkAtURL:symlink withDestinationURL:self.sdkURL error:&error])
-                    {
-                        goto report_error;
-                    }
-                }
-                
-                self.version = 21;
-            }
-            
             if(self.version < 23)
             {
                 /*
@@ -328,6 +290,45 @@
                 }
                 
                 self.version = 23;
+            }
+            
+            if(self.version < 24)
+            {
+                /*
+                 * the SDK is very important to use iOS API which
+                 * is very cool.
+                 */
+                NSLog(@"bootstrapping SDK");
+                [[NSFileManager defaultManager] removeItemAtURL:[self.rootURL URLByAppendingPathComponent:@"SDK"] error:nil];
+                [[NSFileManager defaultManager] removeItemAtURL:self.swiftModuleCacheURL error:nil];    /* clearing module cache */
+                
+                if(!fdownload(@"https://nyxian.app/bootstrap/iPhoneOS26.5.sdk.zip", @"sdk.zip"))
+                {
+                    error = [NSError errorWithDomain:@"" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"downloading \"https://nyxian.app/bootstrap/iPhoneOS26.5.sdk.zip\" failed" }];
+                    goto report_error;
+                }
+                
+                if(!unzipArchiveAtPath([NSTemporaryDirectory() stringByAppendingPathComponent:@"sdk.zip"], [self.rootURL URLByAppendingPathComponent:@"SDK"].path))
+                {
+                    error = [NSError errorWithDomain:@"" code:0 userInfo:@{ NSLocalizedDescriptionKey: @"extracting \"sdk.zip\" failed" }];
+                    goto report_error;
+                }
+                
+                NSArray<NSURL*> *symlinkSDKs = @[
+                    [self.rootURL URLByAppendingPathComponent:@"/SDK/iPhoneOS26.2.sdk"],
+                    [self.rootURL URLByAppendingPathComponent:@"/SDK/iPhoneOS26.4.1.sdk"],
+                    [self.rootURL URLByAppendingPathComponent:@"/SDK/iPhoneOS26.4.sdk"]
+                ];
+                
+                for(NSURL *symlink in symlinkSDKs)
+                {
+                    if(![[NSFileManager defaultManager] createSymbolicLinkAtURL:symlink withDestinationURL:self.sdkURL error:&error])
+                    {
+                        goto report_error;
+                    }
+                }
+                
+                self.version = 24;
             }
         }
         
