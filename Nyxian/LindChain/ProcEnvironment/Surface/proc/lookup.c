@@ -155,14 +155,15 @@ kern_return_t proc_task_for_proc(ksurface_proc_t *proc,
              * becomes a attack vector for
              * system(ksurface) termination.
              */
-            task_unlock();
-            return KERN_INVALID_NAME;
+            kr = KERN_INVALID_RIGHT;
     }
     
     task_unlock();
     
+    /* what happened ?? :3 */
     if(kr != KERN_SUCCESS)
     {
+        /* something went wrong :< */
         return KERN_INVALID_NAME;
     }
     
