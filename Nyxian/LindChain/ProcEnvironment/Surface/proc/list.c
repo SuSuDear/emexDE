@@ -37,20 +37,10 @@ proc_visibility_t get_proc_visibility(ksurface_proc_snapshot_t *caller)
     }
     
     /*
-     * only show them other SID processes
-     * in case it can spawn processes.
-     */
-    if(entitlement_got_entitlement(proc_getentitlements(caller), PEEntitlementProcessSpawn) ||
-       entitlement_got_entitlement(proc_getentitlements(caller), PEEntitlementProcessSpawnSignedOnly))
-    {
-        return PROC_VIS_SAME_SID;
-    }
-    
-    /*
      * nope, only them, them selves, and processes in their
      * session.
      */
-    return PROC_VIS_SELF;
+    return PROC_VIS_SAME_SID;
 }
 
 bool can_see_process(ksurface_proc_snapshot_t *caller,
@@ -69,8 +59,6 @@ bool can_see_process(ksurface_proc_snapshot_t *caller,
             return true;
         case PROC_VIS_SAME_SID:
             return proc_getsid(caller) == proc_getsid(target);
-        case PROC_VIS_SELF:
-            return proc_getpid(caller) == proc_getpid(target);
         default:
             /* none is none */
             return false;
@@ -151,7 +139,7 @@ kern_return_t proc_list(ksurface_proc_snapshot_t *proc_copy,
     }
     
     /* optimized path for pid query */
-    if(flavour == PROC_FLV_PID && vis >= PROC_VIS_SELF)
+    if(flavour == PROC_FLV_PID)
     {
         ksurface_proc_t *proc;
         kern_return_t ksr = proc_for_pid(dsid, &proc);
