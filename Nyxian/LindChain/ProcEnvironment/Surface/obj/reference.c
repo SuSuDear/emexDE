@@ -88,14 +88,8 @@ void kvobject_release(kvobject_strong_t *kvo)
                     kvo_release(kvo->orig);
                 }
                 break;
-            case kvObjBaseTypeObjectRCU:
-                kvo_invalidate(kvo);
-                rcu_kvobject_strong_t *kvrcuo = (rcu_kvobject_strong_t*)kvo;
-                /* TODO: cleanup is missing for now */
-                (void)kvrcuo->current;
-                (void)kvrcuo->header;
-                /* fallthrough */
             default:
+                environment_panic("unknown object %d type got deinitilized", kvo->base_type);
                 break;
         }
         

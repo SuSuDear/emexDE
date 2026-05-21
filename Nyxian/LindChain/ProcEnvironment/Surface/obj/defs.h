@@ -39,7 +39,6 @@
 enum kvObjBaseType {
     kvObjBaseTypeObject = 0,                        /* normal allocated object with referencing */
     kvObjBaseTypeObjectSnapshot = 1,                /* snapshot of object also with referencing, but with seperate memory */
-    kvObjBaseTypeObjectRCU = 2,                     /* rcu allocated object with referencing        MARK: not used yet */
 };
 
 /* enumeration of kernel virt object events */
@@ -143,18 +142,6 @@ struct kvobject {
     
     /* reference back to original (for snapshot) */
     kvobject_strong_t *orig;
-};
-
-struct rcu_kvobject {
-    /* object header (yes rcu objects them selves will be objects) */
-    kvobject_t header;
-    
-    /* current kvobject */
-    kvobject_strong_t * current;
-    
-    /* locks for concurrence safety */
-    os_unfair_lock cur_lock;
-    os_unfair_lock wrt_lock;
 };
 
 #endif /* KVOBJECT_DEFS_H */

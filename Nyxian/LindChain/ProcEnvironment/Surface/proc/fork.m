@@ -35,7 +35,6 @@ ksurface_proc_t *proc_fork(ksurface_proc_t *parent,
     assert(parent != NULL && path != NULL);
     
     ksurface_proc_t *child = kvo_copy(parent);
-    
     if(child == NULL)
     {
         return NULL;
