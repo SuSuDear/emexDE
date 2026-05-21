@@ -30,11 +30,11 @@ kern_return_t proc_for_pid(pid_t pid,
 {
     assert(proc != NULL);
     
-    /* process lookup */
     proc_table_rdlock();
-    *proc = radix_lookup(&(ksurface->proc_info.tree), pid);
     
-    if(*proc == NULL)
+    /* process lookup */
+    ksurface_proc_t *found = radix_lookup(&(ksurface->proc_info.tree), pid);
+    if(found == NULL)
     {
         proc_table_unlock();
         return KERN_NO_ACCESS;
@@ -45,13 +45,15 @@ kern_return_t proc_for_pid(pid_t pid,
      * attempting to retain it and if it doesnt work
      * returning with an error.
      */
-    if(!kvo_retain(*proc))
+    bool retained = kvo_retain(found);
+    proc_table_unlock();
+    
+    if(!retained)
     {
-        proc_table_unlock();
         return KERN_FAILURE;
     }
     
-    proc_table_unlock();
+    *proc = found;
     return KERN_SUCCESS;
 }
 
@@ -178,28 +180,6 @@ kern_return_t proc_task_for_proc(ksurface_proc_t *proc,
     return KERN_SUCCESS;
 }
 
-kern_return_t proc_task_for_pid(pid_t pid,
-                                task_special_port_t flavour,
-                                task_t *task)
-{
-    assert(task != NULL);
-    
-    /* looking up proc (creates reference) */
-    ksurface_proc_t *proc = NULL;
-    kern_return_t ksr = proc_for_pid(pid, &proc);
-    if(ksr != KERN_SUCCESS)
-    {
-        /* lookup failed */
-        return ksr;
-    }
-    
-    /* attempt to look up task port */
-    ksr = proc_task_for_proc(proc, flavour, task);
-    kvo_release(proc);
-    
-    return ksr;
-}
-
 kern_return_t proc_parent_for_proc(ksurface_proc_t *child,
                                    ksurface_proc_t **parent)
 {
@@ -212,8 +192,8 @@ kern_return_t proc_parent_for_proc(ksurface_proc_t *child,
      * the mutex dance.
      */
     pthread_mutex_lock(&(child->children.mutex));
-    ksurface_proc_t *strong_parent = child->children.parent;
     
+    ksurface_proc_t *strong_parent = child->children.parent;
     if(strong_parent == NULL || !kvo_retain(strong_parent))
     {
         pthread_mutex_unlock(&(child->children.mutex));
