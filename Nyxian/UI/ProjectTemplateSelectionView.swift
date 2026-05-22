@@ -34,9 +34,21 @@ struct ProjectTemplateSelectionView: View {
             templateRow(
                 title: "App",
                 subtitle: "Application project",
-                systemImage: "appstore.app.fill",
+                systemImage: {
+                    if #available(iOS 18.0, *) {
+                        return "appstore.app.fill"
+                    } else {
+                        return "app.badge.fill"
+                    }
+                }(),
                 schemeKind: .app,
-                scale: .large
+                scale: {
+                    if #available(iOS 18.0, *) {
+                        return .large
+                    } else {
+                        return .default
+                    }
+                }()
             )
             
             templateRow(
