@@ -107,19 +107,13 @@ struct ProjectTemplateSelectionView: View {
                         .font(.caption)
                         .foregroundStyle(textColor.opacity(0.6))
                 }
-                
-                Spacer(minLength: 8)
-                
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(isSelected ? textColor : textColor.opacity(0.3))
             }
             .padding(10)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(textColor.opacity(0.05))
-            .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 13, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .stroke(isSelected ? textColor : hairlineColor.opacity(0.0), lineWidth: 1.5)
             }
         }
