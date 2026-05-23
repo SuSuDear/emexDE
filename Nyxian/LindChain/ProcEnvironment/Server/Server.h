@@ -32,8 +32,6 @@
 
 @interface Server : NSObject <NSXPCListenerDelegate>
 
-@property (nonatomic,readonly) NSMutableSet<xpc_endpoint_t> *canConnectTable;
-
 + (NSXPCListenerEndpoint*)getTicket;
 - (BOOL)endpointUnregisterAndValidate:(xpc_endpoint_t)endpoint;
 

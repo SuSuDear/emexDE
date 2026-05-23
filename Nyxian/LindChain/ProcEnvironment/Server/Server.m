@@ -27,6 +27,7 @@
 
 @implementation Server {
     os_unfair_lock _lock;
+    NSMutableSet<xpc_endpoint_t> *_canConnectTable;
 }
 
 - (instancetype)init
@@ -39,19 +40,24 @@
 
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 {
-    // Checking if valid, if valid remove from list
-    if(![self endpointUnregisterAndValidate:[listener.endpoint _endpoint]]) return NO;
+    if(![self endpointUnregisterAndValidate:[listener.endpoint _endpoint]])
+    {
+        return NO;
+    }
     
-    // Setting protocol interface
+    /*
+     * setting connection to the host up.
+     *
+     * note: this is a very early API still from the
+     *       Nyxian 0.7.x days, we are heading deprecation
+     *       of this API. so please do not add new features
+     *       to this API, we are not microsoft and we will
+     *       not support 20 APIs at the same time which
+     *       do the exact same thing.
+     */
     newConnection.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(ServerProtocol)];
-    
-    // Setting up server session
     ServerSession *serverSession = [[ServerSession alloc] initWithProcessidentifier:newConnection.processIdentifier];
-    
-    // Set exported object to the created server session
     newConnection.exportedObject = serverSession;
-    
-    // Resume connection
     [newConnection resume];
     
     return YES;
@@ -61,25 +67,18 @@
 {
     os_unfair_lock_lock(&_lock);
     
-    xpc_endpoint_t catchedEndpoint = nil;
     for(xpc_endpoint_t allowedEndpoint in _canConnectTable)
     {
         if(xpc_equal(allowedEndpoint, endpoint))
         {
-            catchedEndpoint = allowedEndpoint;
-            break;
+            [_canConnectTable removeObject:allowedEndpoint];
+            os_unfair_lock_unlock(&_lock);
+            return true;
         }
-    }
-    
-    if(catchedEndpoint != nil)
-    {
-        [_canConnectTable removeObject:catchedEndpoint];
-        os_unfair_lock_unlock(&_lock);
-        return YES;
     }
 
     os_unfair_lock_unlock(&_lock);
-    return NO;
+    return false;
 }
 
 - (NSXPCListener*)getTicketListener
