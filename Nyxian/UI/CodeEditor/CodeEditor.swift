@@ -127,7 +127,8 @@ class CodeEditorViewController: UIViewController, NXDocumentDelegate {
         
         self.title = self.file.fileURL.lastPathComponent
         
-        if UIDevice.current.userInterfaceIdiom != .pad {
+        if UIDevice.current.userInterfaceIdiom != .pad,
+           !self.isReadOnly {
             let saveButton: UIBarButtonItem = UIBarButtonItem()
             saveButton.tintColor = .label
             saveButton.title = "Save"
