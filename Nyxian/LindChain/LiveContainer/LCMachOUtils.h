@@ -39,8 +39,6 @@ typedef struct {
     struct mach_header_64 *header;
 } LCMachO;
 
-typedef void (^LCParseMachOCallback)(LCMachO *machO);
-
 #define PATCH_EXEC_RESULT_NO_SPACE_FOR_TWEAKLOADER 1
 
 LCMachO *LCMapMachO(const char *path, bool readOnly);
