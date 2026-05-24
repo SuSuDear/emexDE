@@ -86,9 +86,38 @@ bool proc_snapshot_permitive_over_pid_allowed(ksurface_proc_snapshot_t *proc,
         goto out_no;
     }
     
-    if(proc_getsid(proc) == proc_getsid(targetProc))
+    if(proc_getsid(proc) == proc_getsid(targetProc) && proc->header.orig != NULL)
     {
-        goto out_euid_check;
+        /*
+         * check if the target is a child
+         * of the parent in any way, previously
+         * we checked if the process is in the
+         * same session, but that would be still
+         * way too generous so we close any
+         * escalatory paths down, as otherwise
+         * a platform process could spawn a
+         * unpriveleged process and then the
+         * unpriveleged process just gets the task
+         * port of the parent and abuses it's
+         * entitlements.
+         */
+        ksurface_proc_t *parent = NULL;
+        proc_parent_for_proc(targetProc, &parent);
+        while(parent != NULL)
+        {
+            bool isParent = parent == (ksurface_proc_t*)proc->header.orig;
+            kvo_release(parent);
+            if(isParent)
+            {
+                goto out_euid_check;
+            }
+            
+            kern_return_t kr = proc_parent_for_proc(targetProc, &parent);
+            if(kr != KERN_SUCCESS)
+            {
+                break;
+            }
+        }
     }
     
     /*
