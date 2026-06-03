@@ -22,21 +22,31 @@
  * SOFTWARE.
  */
 
-#ifndef MDKSDK_H
-#define MDKSDK_H
+#ifndef MDKOSVERSION_H
+#define MDKOSVERSION_H
 
 #import <Foundation/Foundation.h>
-#import <MobileDevelopmentKit/MDKCFType.h>
-#import <MobileDevelopmentKit/MDKOSVersion.h>
 
-@interface MDKSDK : MDKCFType
+#define MDKOSNumericVersionConversionFailed 0xFFFFFFFF
 
-@property (nonatomic, readonly, nonnull) NSURL *directoryURL;
-@property (nonatomic, readonly, nullable) MDKOSVersion *version;
-@property (nonatomic, readonly, nullable) NSArray<MDKOSVersion*> *supportedVersions;
+uint32_t MDKVersionStringToNumeric(NSString * _Nonnull versionString);
 
-+ (instancetype _Nullable)sdkForDirectoryURL:(NSURL * _Nonnull)directoryURL;
+@interface MDKOSVersion : NSObject
+
+@property (nonatomic, strong, readonly, nonnull) NSString *versionString;
+@property (nonatomic, readonly) uint32_t versionNumeric;
+
+@property (class, nonatomic, strong, readonly, nonnull) MDKOSVersion *hostVersion;
+@property (class, nonatomic, strong, readonly, nonnull) MDKOSVersion *iPadOSFirstVersion;
+
++ (instancetype _Nullable)versionWithVersionString:(NSString * _Nullable)versionString;
+
+- (instancetype _Nonnull)init;
+- (instancetype _Nullable)initWithVersionString:(NSString * _Nullable)versionString;
+
+- (BOOL)isEqual:(MDKOSVersion * _Nonnull)version;
+- (NSString*)description;
 
 @end
 
-#endif /* MDKSDK_H */
+#endif /* MDKOSVERSION_H */

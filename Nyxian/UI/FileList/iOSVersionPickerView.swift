@@ -20,6 +20,17 @@
 */
 
 import UIKit
+import MobileDevelopmentKit
+
+fileprivate var _NXSDK: MDKSDK? = nil
+fileprivate var NXSDK: MDKSDK? {
+    get {
+        if(_NXSDK == nil) {
+            _NXSDK = MDKSDK(forDirectoryURL: NXBootstrap.shared().sdkURL)
+        }
+        return _NXSDK
+    }
+}
 
 fileprivate var _NXOSVersionSupportedBuildVersions: [String] = []
 var NXOSVersionSupportedBuildVersions: [String] {
@@ -28,122 +39,15 @@ var NXOSVersionSupportedBuildVersions: [String] {
             return _NXOSVersionSupportedBuildVersions
         }
         
-        let sdkURL = NXBootstrap.shared().sdkURL
-        let settingsURL = sdkURL.appendingPathComponent("SDKSettings.plist")
-        if let root: [String:Any] = NSDictionary(contentsOf: settingsURL) as? [String:Any] {
-            /* modern SDK handling */
-            if let supported: [String:Any] = root["SupportedTargets"] as? [String:Any],
-               let platformEntry: [String:Any] = supported["iphoneos"] as? [String:Any],
-               let validDeploymentTargets: [String] = platformEntry["ValidDeploymentTargets"] as? [String] {
-                _NXOSVersionSupportedBuildVersions = validDeploymentTargets
-                return _NXOSVersionSupportedBuildVersions
+        if let sdk = NXSDK,
+           let supportedVersions = sdk.supportedVersions {
+            for version in supportedVersions {
+                _NXOSVersionSupportedBuildVersions.append(version.versionString)
             }
-            
-            /* legacy SDK handling */
-            if let validDeploymentTargets: [String] = root["ValidDeploymentTargets"] as? [String] {
-                _NXOSVersionSupportedBuildVersions = validDeploymentTargets
-                return _NXOSVersionSupportedBuildVersions
-            }
+            return _NXOSVersionSupportedBuildVersions
         }
         
-        return ["26.4"]
-    }
-}
-
-fileprivate func numericValue(_ version: String) -> Double {
-    let parts = version.split(separator: ".").compactMap { Double($0) }
-    let major = parts.count > 0 ? parts[0] : 0
-    let minor = parts.count > 1 ? parts[1] : 0
-    let patch = parts.count > 2 ? parts[2] : 0
-    return major * 1_000_000 + minor * 1_000 + patch
-}
-
-@objc class NXOSVersion: NSObject, Comparable {
-    @objc let versionString: String
-    @objc let versionNumeric: Double
-    
-    @objc private(set) var pickerVersionString: String
-    
-    @objc static let hostVersion: NXOSVersion = NXOSVersion()
-    @objc static var minimumBuildVersion: NXOSVersion {
-        get {
-            return NXOSVersion(versionString: NXOSVersionSupportedBuildVersions.first)!
-        }
-    }
-    @objc static var maximumBuildVersion: NXOSVersion {
-        get {
-            NXOSVersion(versionString: NXOSVersionSupportedBuildVersions.last)!
-        }
-    }
-    @objc static var iPadOSMinimumValidityVersion: NXOSVersion {
-        get {
-            NXOSVersion(versionString: "13.0")!
-        }
-    }
-    
-    @objc init?(versionString inputString: String?) {
-        var inputString = inputString ?? "9.0"
-        if !NXOSVersion.isValidVersionString(inputString) {
-            inputString = "9.0"
-        }
-        versionString = inputString
-        versionNumeric = numericValue(versionString)
-        pickerVersionString = versionString
-        let numeric = versionNumeric
-        pickerVersionString = NXOSVersionSupportedBuildVersions.min(by: {
-            abs(numericValue($0) - numeric) < abs(numericValue($1) - numeric)
-        }) ?? pickerVersionString
-    }
-    
-    @objc override convenience init() {
-        self.init(versionString: UIDevice.current.systemVersion)!
-    }
-    
-    static private func isValidVersionString(_ version: String) -> Bool {
-        let parts = version.split(separator: ".", omittingEmptySubsequences: false)
-        guard (1...3).contains(parts.count) else { return false }
-        return parts.allSatisfy { part in
-            guard !part.isEmpty, let value = Int(part) else { return false }
-            return value >= 0
-        }
-    }
-    
-    static func == (lhs: NXOSVersion, rhs: NXOSVersion) -> Bool {
-        lhs.versionNumeric == rhs.versionNumeric
-    }
-    
-    static func < (lhs: NXOSVersion, rhs: NXOSVersion) -> Bool {
-        lhs.versionNumeric < rhs.versionNumeric
-    }
-    
-    @objc override var description: String {
-        var osFlavour: String {
-            switch UIDevice.current.userInterfaceIdiom {
-                case .phone: return "iOS"
-                case .pad:
-                    if NXOSVersion.iPadOSMinimumValidityVersion <= self {
-                        return "iPadOS"
-                    } else {
-                        return "iOS"
-                    }
-                case .tv: return "tvOS"
-                case .mac: return ProcessInfo.processInfo.isiOSAppOnMac ? "iOS-on-Mac" : "macOS"
-                case .vision: return "visionOS"
-                case .carPlay: return "CarPlay"
-                default: return "Unknown"
-            }
-        }
-        
-        return "\(osFlavour) \(versionString)"
-    }
-    
-    @objc override func isEqual(_ object: Any?) -> Bool {
-        guard let other = object as? NXOSVersion else { return false }
-        return versionNumeric == other.versionNumeric
-    }
-
-    @objc override var hash: Int {
-        versionNumeric.hashValue
+        return ["26.5"]
     }
 }
 
@@ -157,10 +61,9 @@ class IOSVersionPickerViewController: UIThemedViewController, UIPickerViewDelega
     private let pickerTitle: String
 
     init(title: String, selectedVersion: String) {
-        let osVersion: NXOSVersion = NXOSVersion(versionString: selectedVersion) ?? NXOSVersion.maximumBuildVersion
-        let selectedVersion = osVersion.pickerVersionString
+        let osVersion: MDKOSVersion = MDKOSVersion(versionString: selectedVersion) ?? MDKOSVersion(versionString: NXOSVersionSupportedBuildVersions.last!)!
         self.pickerTitle = title
-        self.selectedVersion = selectedVersion
+        self.selectedVersion = osVersion.versionString
         super.init(nibName: nil, bundle: nil)
     }
 

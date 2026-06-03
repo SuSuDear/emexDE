@@ -77,7 +77,7 @@
         _displayName = [self.dictionary objectForKey:@"NXDisplayName" withDefaultObject:[self executable]];
         _organizationPrefix = [self.dictionary objectForKey:@"NXOrganizationPrefix" withDefaultObject:@"com.example"];
         _bundleid = [self.dictionary objectForKey:@"NXBundleIdentifier" withDefaultObject:[NSString stringWithFormat:@"app.nyxian.%@.%@", [[NXUser shared] username], [self executable]]];
-        _deploymentTarget = [self.dictionary objectForKey:@"NXDeploymentTarget" withDefaultObject:NXOSVersion.maximumBuildVersion.pickerVersionString];
+        _deploymentTarget = [self.dictionary objectForKey:@"NXDeploymentTarget" withDefaultObject:@"25.0"];
         _outputPath = [self.dictionary varObjectForKey:@"NXOutputPath"];
         _signMachOWithNyxianEntitlements = [self.dictionary booleanForKey:@"NXSignMachOWithNyxianEntitlements" withDefaultValue:true];
         
@@ -268,7 +268,7 @@
         @"NXDisplayName": name,
         @"NXOrganizationPrefix": organizationIdentifierValue,
         @"NXBundleIdentifier": bundleIdentifierValue,
-        @"NXDeploymentTarget": NXOSVersion.hostVersion.pickerVersionString ?: NXOSVersion.maximumBuildVersion.versionString,
+        @"NXDeploymentTarget": MDKOSVersion.hostVersion.versionString ?: @"26.5",
         @"NXClangFlags": NXCompilerFlagsForCodeTemplateLanguage(schemeKind, languageKind),
         @"NXLinkerFlags": @[],
         @"NXSwiftFlags": NXSwiftFlagsForCodeTemplateLanguage(schemeKind, languageKind),

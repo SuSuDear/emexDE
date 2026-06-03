@@ -22,6 +22,7 @@
 #import <LindChain/WindowServer/Session/NXWindowSessionApplication.h>
 #import <LindChain/ProcEnvironment/Surface/proc/proc.h>
 #import <LindChain/WindowServer/NXWindowServer.h>
+#import <LindChain/ProcEnvironment/Process/PEExtension.h>
 #import <LindChain/Utils/Swizzle.h>
 
 #if !JAILBREAK_ENV
@@ -55,15 +56,12 @@ void UIKitFixesInit(void)
     }
 }
 
-@implementation NXWindowSessionApplication {
-    os_unfair_lock _lock;
-}
+@implementation NXWindowSessionApplication
 
 - (instancetype)initWithProcess:(PEProcess*)process;
 {
     self = [super init];
     _process = process;
-    _lock = OS_UNFAIR_LOCK_INIT;
     return self;
 }
 
@@ -142,7 +140,7 @@ void UIKitFixesInit(void)
 
 - (BOOL)activateWindow
 {
-    os_unfair_lock_lock(&_lock);
+    assert([NSThread isMainThread]);
     
     /* set presenter to foreground */
     [self.presenter.scene updateSettingsWithBlock:^(UIMutableApplicationSceneSettings *settings) {
@@ -162,14 +160,12 @@ void UIKitFixesInit(void)
     /* resume process */
     /* [self.process resume]; */
     
-    os_unfair_lock_unlock(&_lock);
-    
     return YES;
 }
 
 - (BOOL)deactivateWindow
 {
-    os_unfair_lock_lock(&_lock);
+    assert([NSThread isMainThread]);
     
     /* set presenter to background */
     [self.presenter.scene updateSettingsWithBlock:^(UIMutableApplicationSceneSettings *settings) {
@@ -198,22 +194,19 @@ void UIKitFixesInit(void)
         [innerSelf.process suspend];
     }];*/
     
-    os_unfair_lock_unlock(&_lock);
-    
     return YES;
 }
 
 - (void)windowRectChanged
 {
+    assert([NSThread isMainThread]);
+    
     [super windowRectChanged];
     
     CGRect rect = self.view.frame;
     
-    os_unfair_lock_lock(&_lock);
-    
     if(self.process.isSuspended)
     {
-        os_unfair_lock_unlock(&_lock);
         return;
     }
     
@@ -246,13 +239,6 @@ void UIKitFixesInit(void)
                 break;
         }
     }];
-    
-    os_unfair_lock_unlock(&_lock);
-}
-
-- (void)sessionIdentifierAssigned:(int)identifier
-{
-    _process.wid = identifier;
 }
 
 - (void)_performActionsForUIScene:(UIScene *)scene
@@ -262,11 +248,10 @@ void UIKitFixesInit(void)
                 transitionContext:(id)context
               lifecycleActionType:(uint32_t)actionType
 {
-    os_unfair_lock_lock(&_lock);
+    assert([NSThread isMainThread]);
     
-    if(!self.process.process.running || self.process.isSuspended || !diff)
+    /*if(!self.process.process.running || self.process.isSuspended || !diff)
     {
-        os_unfair_lock_unlock(&_lock);
         return;
     }
     
@@ -277,11 +262,9 @@ void UIKitFixesInit(void)
     UIMutableApplicationSceneSettings *newSettings = [self.presenter.scene.settings mutableCopy];
     newSettings.userInterfaceStyle = baseSettings.userInterfaceStyle;
     
-    [self.presenter.scene updateSettings:newSettings withTransitionContext:newContext completion:nil];
+    [self.presenter.scene updateSettings:newSettings withTransitionContext:newContext completion:nil];*/
     
-    os_unfair_lock_unlock(&_lock);
-    
-    [self windowRectChanged];
+    //bn[self windowRectChanged];
 }
 
 - (BOOL)shouldUpdateFocusInContext:(nonnull UIFocusUpdateContext *)context
@@ -291,13 +274,12 @@ void UIKitFixesInit(void)
 
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection
 {
+    assert([NSThread isMainThread]);
+    
     [super traitCollectionDidChange:previousTraitCollection];
- 
-    os_unfair_lock_lock(&_lock);
     
     if(!self.process.process.running || self.process.isSuspended)
     {
-        os_unfair_lock_unlock(&_lock);
         return;
     }
     
@@ -307,8 +289,6 @@ void UIKitFixesInit(void)
             settings.userInterfaceStyle = self.traitCollection.userInterfaceStyle;
         }];
     }
-    
-    os_unfair_lock_unlock(&_lock);
 }
 
 - (NSString*)windowName
@@ -325,7 +305,7 @@ void UIKitFixesInit(void)
 
 - (BOOL)injectProcess:(PEProcess*)process
 {
-    os_unfair_lock_lock(&_lock);
+    assert([NSThread isMainThread]);
     
     /* keep reference to old presenter for animation */
     UIView *oldPresentationView = self.presenter.presentationView;
@@ -345,7 +325,6 @@ void UIKitFixesInit(void)
 #if !JAILBREAK_ENV
         klog_log("NXWindowSessionApplication", "presenter creation failed: %s", [exception.reason UTF8String]);
 #endif /* !JAILBREAK_ENV */
-        os_unfair_lock_unlock(&_lock);
         return NO;
     }
     
@@ -365,8 +344,6 @@ void UIKitFixesInit(void)
     
     /* register new window */
     [self.windowScene _registerSettingsDiffActionArray:@[self] forKey:process.scene.identifier];
-    
-    os_unfair_lock_unlock(&_lock);
     
     [self windowRectChanged];
     

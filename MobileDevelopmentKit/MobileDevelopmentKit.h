@@ -27,7 +27,7 @@ FOUNDATION_EXPORT const unsigned char MobileDevelopmentKitVersionString[];
 #import <MobileDevelopmentKit/MDKPhase.h>
 #import <MobileDevelopmentKit/MDKPhaseEngine.h>
 #import <MobileDevelopmentKit/MDKPhaseRunner.h>
-#import <MobileDevelopmentKit/MDKTarget.h>
+#import <MobileDevelopmentKit/MDKOSVersion.h>
 #import <MobileDevelopmentKit/MDKThreadPool.h>
 #import <MobileDevelopmentKit/MDKThreadPoolGroup.h>
 #import <MobileDevelopmentKit/MDKDriver.h>

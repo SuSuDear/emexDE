@@ -33,6 +33,7 @@ static CFTypeID gCCSDKTypeID = _kCFRuntimeNotATypeID;
 
 struct opaque_ccsdk {
     CFRuntimeBase _base;
+    CFURLRef directoryURL;
     std::unique_ptr<clang::DarwinSDKInfo>(sdkInfo);
 };
 
@@ -72,10 +73,10 @@ CFTypeID CCSDKGetTypeID(void)
     return gCCSDKTypeID;
 }
 
-CCSDKRef CCSDKCreateWithFileURL(CFAllocatorRef allocator,
-                                CFURLRef fileURL)
+CCSDKRef CCSDKCreateWithDirectoryURL(CFAllocatorRef allocator,
+                                     CFURLRef directoryURL)
 {
-    assert(fileURL != nullptr);
+    assert(directoryURL != nullptr);
     
     CCSDKRef sdkRef = (CCSDKRef)_CFRuntimeCreateInstance(allocator, CCSDKGetTypeID(), sizeof(struct opaque_ccsdk) - sizeof(CFRuntimeBase), NULL);
     if(sdkRef == nullptr)
@@ -83,7 +84,14 @@ CCSDKRef CCSDKCreateWithFileURL(CFAllocatorRef allocator,
         return nullptr;
     }
     
-    CFStringRef pathStr = CFURLGetString(fileURL);
+    sdkRef->directoryURL = (CFURLRef)CFRetain(directoryURL);
+    if(sdkRef->directoryURL == nullptr)
+    {
+        CFRelease(sdkRef);
+        return nullptr;
+    }
+    
+    CFStringRef pathStr = CFURLGetString(directoryURL);
     if(pathStr == nullptr)
     {
         CFRelease(sdkRef);
@@ -102,13 +110,21 @@ CCSDKRef CCSDKCreateWithFileURL(CFAllocatorRef allocator,
         std::string(cPathStr)
     );
     
-    if(!result || !*result)
+    if(!result)
     {
         CFRelease(sdkRef);
         return nullptr;
     }
     
-    sdkRef->sdkInfo = std::make_unique<clang::DarwinSDKInfo>(std::move(**result));
+    if(!*result)
+    {
+        sdkRef->sdkInfo = nullptr;
+        return sdkRef;
+    }
+    
+    sdkRef->sdkInfo = std::make_unique<clang::DarwinSDKInfo>(
+        std::move(**result)
+    );
     
     return sdkRef;
 }
@@ -129,4 +145,20 @@ CFStringRef CCSDKCopyVersion(CCSDKRef sdk)
     }
     
     return CFStringCreateWithCString(CFGetAllocator(sdk), versionCStr, kCFStringEncodingUTF8);
+}
+
+CFURLRef CCSDKGetDirectoryURL(CCSDKRef sdk)
+{
+    return sdk->directoryURL;
+}
+
+CCSDKOSType CCSDKGetOSType(CCSDKRef sdk)
+{
+    switch(sdk->sdkInfo->getOS())
+    {
+        case Triple::OSType::Darwin:
+            return CCSDKOSTypeDarwin;
+        default:
+            return CCSDKOSTypeUnknown;
+    }
 }

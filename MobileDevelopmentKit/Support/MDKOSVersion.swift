@@ -22,21 +22,14 @@
  * SOFTWARE.
  */
 
-#ifndef MDKSDK_H
-#define MDKSDK_H
+import Foundation
 
-#import <Foundation/Foundation.h>
-#import <MobileDevelopmentKit/MDKCFType.h>
-#import <MobileDevelopmentKit/MDKOSVersion.h>
-
-@interface MDKSDK : MDKCFType
-
-@property (nonatomic, readonly, nonnull) NSURL *directoryURL;
-@property (nonatomic, readonly, nullable) MDKOSVersion *version;
-@property (nonatomic, readonly, nullable) NSArray<MDKOSVersion*> *supportedVersions;
-
-+ (instancetype _Nullable)sdkForDirectoryURL:(NSURL * _Nonnull)directoryURL;
-
-@end
-
-#endif /* MDKSDK_H */
+extension MDKOSVersion: Comparable {
+    public static func == (lhs: MDKOSVersion, rhs: MDKOSVersion) -> Bool {
+        lhs.versionNumeric == rhs.versionNumeric
+    }
+    
+    public static func < (lhs: MDKOSVersion, rhs: MDKOSVersion) -> Bool {
+        lhs.versionNumeric < rhs.versionNumeric
+    }
+}

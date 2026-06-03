@@ -100,7 +100,7 @@
         _displayName = [dictionary objectForKey:@"NXDisplayName" withDefaultObject:_bundleName];
         _bundleIdentifier = [dictionary objectForKey:@"NXBundleIdentifier" withDefaultObject:[NSString stringWithFormat:@"com.%@.%@", [[NXUser shared] username], _bundleName]];
         _bundleResourceURLs = bundleResourceURLs;
-        _deploymentTarget = [dictionary objectForKey:@"NXDeploymentTarget" withDefaultObject:[[NXOSVersion maximumBuildVersion] versionString]];
+        _deploymentTarget = [dictionary objectForKey:@"NXDeploymentTarget" withDefaultObject:[[MDKOSVersion versionWithVersionString:@"25.0"] versionString]];
         _sdkURL = [dictionary objectForKey:@"NXSDKPath" withDefaultObject:[[NXBootstrap shared] sdkURL].path];
         _sourceURLs = sourceURLs;
         _headerSearchURLs = headerSearchURLs;

@@ -374,7 +374,7 @@
 				Support/MDKFile.h,
 				Support/MDKFileSourceLocation.h,
 				Support/MDKJob.h,
-				Support/MDKTarget.h,
+				Support/MDKOSVersion.h,
 				Support/MDKThreadPool.h,
 				Support/MDKThreadPoolGroup.h,
 				Tools/Compiler/MDKCompiler.h,
@@ -845,7 +845,7 @@
 					};
 					860D91742FAE1F95000D321B = {
 						CreatedOnToolsVersion = 26.4.1;
-						LastSwiftMigration = 2640;
+						LastSwiftMigration = 2650;
 					};
 					86DCC2592FA5209600973169 = {
 						CreatedOnToolsVersion = 26.4.1;

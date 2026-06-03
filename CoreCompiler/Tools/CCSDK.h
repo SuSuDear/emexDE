@@ -27,12 +27,21 @@
 
 #include <CoreCompiler/CCBase.h>
 
+typedef CF_ENUM(uint8_t, CCSDKOSType) {
+    CCSDKOSTypeUnknown,
+    
+    CCSDKOSTypeDarwin,
+    /* doesn't matter */
+};
+
 typedef struct opaque_ccsdk *CCSDKRef;
 
 CC_EXPORT CFTypeID CCSDKGetTypeID(void);
 
-CC_EXPORT CCSDKRef CCSDKCreateWithFileURL(CFAllocatorRef allocator, CFURLRef fileURL);
+CC_EXPORT CCSDKRef CCSDKCreateWithDirectoryURL(CFAllocatorRef allocator, CFURLRef directoryURL);
 
 CC_EXPORT CFStringRef CCSDKCopyVersion(CCSDKRef sdk);
+CC_EXPORT CFURLRef CCSDKGetDirectoryURL(CCSDKRef sdk);
+CC_EXPORT CCSDKOSType CCSDKGetOSType(CCSDKRef sdk);
 
 #endif /* CCSDK_H */
