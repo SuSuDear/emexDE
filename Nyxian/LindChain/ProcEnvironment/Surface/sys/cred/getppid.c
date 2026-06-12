@@ -19,7 +19,7 @@
  along with Nyxian. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <LindChain/ProcEnvironment/Surface/sys/cred/getpid.h>
+#include <LindChain/ProcEnvironment/Surface/sys/cred/getppid.h>
 #include <LindChain/ProcEnvironment/Surface/proc/def.h>
 
 DEFINE_SYSCALL_HANDLER(getppid)

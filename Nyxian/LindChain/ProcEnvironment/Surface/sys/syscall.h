@@ -27,7 +27,7 @@
 #include <LindChain/ProcEnvironment/Surface/sys/cred/setuid.h>
 #include <LindChain/ProcEnvironment/Surface/sys/cred/setgid.h>
 #include <LindChain/ProcEnvironment/Surface/sys/compat/getent.h>
-#include <LindChain/ProcEnvironment/Surface/sys/cred/getpid.h>
+#include <LindChain/ProcEnvironment/Surface/sys/cred/getppid.h>
 #include <LindChain/ProcEnvironment/Surface/sys/cred/getuid.h>
 #include <LindChain/ProcEnvironment/Surface/sys/cred/getgid.h>
 #include <LindChain/ProcEnvironment/Surface/sys/compat/gettask.h>
