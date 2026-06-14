@@ -308,27 +308,35 @@ void* getGuestAppHeader(void)
 bool initGuestSDKVersionInfo(void)
 {
     void* dyldBase = getDyldBase();
-    /*
-     * it seems Apple is constantly changing findVersionSetEquivalent's
-     * signature so we directly search sVersionMap instead.
-     */
-    const char* dyldPath = "/usr/lib/dyld";
-    uint64_t offset = LCFindSymbolOffset(dyldPath, "__ZN5dyld3L11sVersionMapE");
-    uint32_t *versionMapPtr = dyldBase + offset;
+    // it seems Apple is constantly changing findVersionSetEquivalent's signature so we directly search sVersionMap instead
+    uint32_t* versionMapPtr = LCFindSymbolOffsetUnsafe(@"__ZN5dyld3L11sVersionMapE", dyldBase);
+    if(!versionMapPtr) {
+#if !TARGET_OS_SIMULATOR
+        const char* dyldPath = "/usr/lib/dyld";
+        uint64_t offset = 0;
+        if(@available(iOS 27.0, *)) {
+            offset = LCFindSymbolOffset(dyldPath, "__ZN5dyld311sVersionMapE");
+        } else {
+            offset = LCFindSymbolOffset(dyldPath, "__ZN5dyld3L11sVersionMapE");
+        }
+#else
+        void *result = litehook_find_symbol(dyldBase, "__ZN5dyld3L11sVersionMapE");
+        uint64_t offset = (uint64_t)result - (uint64_t)dyldBase;
+#endif
+        assert(offset);
+        versionMapPtr = dyldBase + offset;
+    }
     
     assert(versionMapPtr);
-    /*
-     * however sVersionMap's struct size is also unknown, but we can figure it out
-     * we assume the size is 10K so we won't need to change this line until maybe iOS 40
-     */
+    // however sVersionMap's struct size is also unknown, but we can figure it out
+    // we assume the size is 10K so we won't need to change this line until maybe iOS 40
     uint32_t* versionMapEnd = versionMapPtr + 2560;
-    /* ensure the first is versionSet and the third is iOS version (5.0.0) */
+    // ensure the first is versionSet and the third is iOS version (5.0.0)
     assert(versionMapPtr[0] == 0x07db0901 && versionMapPtr[2] == 0x00050000);
-    /* get struct size. we assume size is smaller then 128. appearently Apple won't have so many platforms */
+    // get struct size. we assume size is smaller then 128. appearently Apple won't have so many platforms
     uint32_t size = 0;
-    for(int i = 1; i < 128; ++i)
-    {
-        /* find the next versionSet (for 6.0.0) */
+    for(int i = 1; i < 128; ++i) {
+        // find the next versionSet (for 6.0.0)
         if(versionMapPtr[i] == 0x07dc0901) {
             size = i;
             break;
@@ -338,26 +346,19 @@ bool initGuestSDKVersionInfo(void)
     
     NSOperatingSystemVersion currentVersion = [[NSProcessInfo processInfo] operatingSystemVersion];
     uint32_t maxVersion = ((uint32_t)currentVersion.majorVersion << 16) | ((uint32_t)currentVersion.minorVersion << 8);
+    
     uint32_t candidateVersion = 0;
     uint32_t candidateVersionEquivalent = 0;
     uint32_t newVersionSetVersion = 0;
-    for(uint32_t* nowVersionMapItem = versionMapPtr; nowVersionMapItem < versionMapEnd; nowVersionMapItem += size)
-    {
+    for(uint32_t* nowVersionMapItem = versionMapPtr; nowVersionMapItem < versionMapEnd; nowVersionMapItem += size) {
         newVersionSetVersion = nowVersionMapItem[2];
-        if(newVersionSetVersion > guestAppSdkVersion)
-        {
-            break;
-        }
+        if (newVersionSetVersion > guestAppSdkVersion) { break; }
         candidateVersion = newVersionSetVersion;
         candidateVersionEquivalent = nowVersionMapItem[0];
-        if(newVersionSetVersion >= maxVersion)
-        {
-            break;
-        }
+        if(newVersionSetVersion >= maxVersion) { break; }
     }
     
-    if(newVersionSetVersion == 0xffffffff && candidateVersion == 0)
-    {
+    if (newVersionSetVersion == 0xffffffff && candidateVersion == 0) {
         candidateVersionEquivalent = newVersionSetVersion;
     }
 
@@ -392,13 +393,13 @@ void DyldHooksInit(void)
             DO_HOOK_GLOBAL(dlopen);
         }
         
-        /*guestAppSdkVersion = getDyldImageBuildVersion(getGuestAppHeader()).version;
+        guestAppSdkVersion = getDyldImageBuildVersion(getGuestAppHeader()).version;
         if(!initGuestSDKVersionInfo() ||
            !performHookDyldApi("dyld_program_sdk_at_least", 1, NULL, hook_dyld_program_sdk_at_least) ||
            !performHookDyldApi("dyld_get_program_sdk_version", 0, NULL, hook_dyld_get_program_sdk_version))
         {
             exit(0);
-        }*/
+        }
         return;
     });
 }

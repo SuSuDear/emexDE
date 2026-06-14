@@ -402,7 +402,7 @@ void *getDyldBase(void)
 #endif
 }
 
-uint64_t LCFindSymbolOffset(const char *basePath, const char *symbol)
+uint64_t LCFindSymbolOffsetUnsafe(const char *basePath, const char *symbol)
 {
 #if !TARGET_OS_SIMULATOR
     const char *path = basePath;
@@ -429,7 +429,13 @@ break_out:
     {
         LCUnmapMachO(machO);
     }
-    NSCAssert(offset != 0, @"Failed to find symbol %s in %s", symbol, path);
+    return offset;
+}
+
+uint64_t LCFindSymbolOffset(const char *basePath, const char *symbol)
+{
+    uint64_t offset = LCFindSymbolOffsetUnsafe(basePath, symbol);
+    NSCAssert(offset != 0, @"Failed to find symbol %s", symbol);
     return offset;
 }
 
