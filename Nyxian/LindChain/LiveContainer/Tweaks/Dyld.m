@@ -392,13 +392,13 @@ void DyldHooksInit(void)
             DO_HOOK_GLOBAL(dlopen);
         }
         
-        guestAppSdkVersion = getDyldImageBuildVersion(getGuestAppHeader()).version;
+        /*guestAppSdkVersion = getDyldImageBuildVersion(getGuestAppHeader()).version;
         if(!initGuestSDKVersionInfo() ||
            !performHookDyldApi("dyld_program_sdk_at_least", 1, NULL, hook_dyld_program_sdk_at_least) ||
            !performHookDyldApi("dyld_get_program_sdk_version", 0, NULL, hook_dyld_get_program_sdk_version))
         {
             exit(0);
-        }
+        }*/
         return;
     });
 }
