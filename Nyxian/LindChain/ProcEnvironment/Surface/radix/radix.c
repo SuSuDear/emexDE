@@ -62,6 +62,10 @@ int radix_insert(radix_tree_t *tree,
     if(tree->root == NULL)
     {
         tree->root = calloc(1, sizeof(radix_node_t));
+        if(tree->root == NULL)
+        {
+            return -1;
+        }
     }
     
     radix_node_t *node = tree->root;
