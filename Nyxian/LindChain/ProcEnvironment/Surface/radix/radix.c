@@ -77,6 +77,10 @@ int radix_insert(radix_tree_t *tree,
         if(node->slots[chunk] == NULL)
         {
             node->slots[chunk] = calloc(1, sizeof(radix_node_t));
+            if(node->slots[chunk] == NULL)
+            {
+                return -1;
+            }
         }
         
         node = (radix_node_t *)node->slots[chunk];
