@@ -112,6 +112,7 @@ int environment_init(EnvironmentExec exec,
         environment_libproc_init();
         environment_ioctl_init();
         environment_application_init();
+        environment_kbdportal_init();
         
         /*
          * since PEProcess needs to register this process

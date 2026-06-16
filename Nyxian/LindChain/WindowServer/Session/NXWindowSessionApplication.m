@@ -49,6 +49,7 @@
 __attribute__((constructor))
 void UIKitFixesInit(void)
 {
+    /* FIXME: iOS 27.x keyboard is entirely broken on guest apps */
     /* fix physical keyboard focus on iOS 17+ */
     if(@available(iOS 17.0, *))
     {
@@ -109,8 +110,6 @@ void UIKitFixesInit(void)
     
     /* ready to show the presenter :3 */
     [self.view addSubview:self.presenter.presentationView];
-    
-    /* registering to window */
     [self.windowScene _registerSettingsDiffActionArray:@[self] forKey:self.process.scene.identifier];
     
     return YES;
@@ -120,13 +119,9 @@ void UIKitFixesInit(void)
 {
     [super closeWindow];
     
-    /* invalidate presenter */
+    /* bye bye presenter */
     [_presenter invalidate];
-    
-    /* unregistering scene lol */
     [self.windowScene _unregisterSettingsDiffActionArrayForKey:self.process.scene.identifier];
-    
-    /* terminating process so it stops eating our cores x3 */
     [_process terminate];
     
     return YES;
@@ -150,16 +145,6 @@ void UIKitFixesInit(void)
     /* re-activate presenter */
     [self.presenter activate];
     
-    /* invalidate background enforcement timer if applicable */
-    /*if(self.backgroundEnforcementTimer)
-    {
-        [self.backgroundEnforcementTimer invalidate];
-        self.backgroundEnforcementTimer = nil;
-    }*/
-    
-    /* resume process */
-    /* [self.process resume]; */
-    
     return YES;
 }
 
@@ -179,20 +164,6 @@ void UIKitFixesInit(void)
     
     /* deactivate the presenter */
     [self.presenter deactivate];
-    
-    /* FIXME: likely bug in apples lifetime watchdog that can randomly freeze up your entire idevice */
-    // Do it like on iOS, give application time window for background tasks
-    /*__weak typeof(self) weakSelf = self;
-    self.backgroundEnforcementTimer = [NSTimer scheduledTimerWithTimeInterval:15.0 repeats:NO block:^(NSTimer *sender){
-        __strong typeof(self) innerSelf = weakSelf;
-        if(innerSelf == nil)
-        {
-            return;
-        }
-        
-        if(!innerSelf.backgroundEnforcementTimer) return;
-        [innerSelf.process suspend];
-    }];*/
     
     return YES;
 }

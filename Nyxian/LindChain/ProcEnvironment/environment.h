@@ -39,6 +39,7 @@
 #import <LindChain/ProcEnvironment/ioctl.h>
 #import <LindChain/ProcEnvironment/vfork.h>
 #import <LindChain/ProcEnvironment/cred.h>
+#import <LindChain/ProcEnvironment/kbdportal.h>
 #import <LindChain/ProcEnvironment/Object/PEMachPort.h>
 #import <LindChain/ProcEnvironment/Object/FDMapObject.h>
 #import <LindChain/ProcEnvironment/Surface/surface.h>
