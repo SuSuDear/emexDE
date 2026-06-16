@@ -27,6 +27,9 @@
 
 #import <LindChain/WindowServer/NXWindowServer.h>
 
+#include <sys/socket.h>
+#include <sys/stat.h>
+
 DEFINE_SYSCALL_HANDLER(kbdctl)
 {
     if(!@available(iOS 27.0, *))
@@ -42,6 +45,27 @@ DEFINE_SYSCALL_HANDLER(kbdctl)
     if(fd < 0)
     {
         sys_return_failure(EBADF);
+    }
+    
+    struct stat fd_stat;
+    if(fstat(fd, &fd_stat) != 0)
+    {
+        close(fd);
+        sys_return_failure(EBADF);
+    }
+    
+    if(!S_ISSOCK(fd_stat.st_mode))
+    {
+        close(fd);
+        sys_return_failure(ENOTSOCK);
+    }
+    
+    int optval;
+    socklen_t optlen = sizeof(optval);
+    if(getsockopt(fd, SOL_SOCKET, SO_TYPE, &optval, &optlen) != 0)
+    {
+        close(fd);
+        sys_return_failure(ENOTSOCK);
     }
     
     klog_log("kbdctl", "trigger pulled! ;3");

@@ -19,6 +19,8 @@
  along with Nyxian. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#import <sys/socket.h>
+
 #import <UIKit/UIKit.h>
 
 #import <LindChain/ProcEnvironment/kbdportal.h>
@@ -97,8 +99,7 @@ void *ReaderThread(void *arg)
 void StartInputPipe(id<UITextInput> input)
 {
     int fds[2];
-
-    if(pipe(fds) != 0)
+    if(socketpair(AF_UNIX, SOCK_STREAM, 0, fds) != 0)
     {
         return;
     }
@@ -106,6 +107,9 @@ void StartInputPipe(id<UITextInput> input)
     gReadFD = fds[0];
     gWriteFD = fds[1];
     
+    int set = 1;
+    setsockopt(gWriteFD, SOL_SOCKET, SO_NOSIGPIPE, &set, sizeof(set));
+    setsockopt(gReadFD, SOL_SOCKET, SO_NOSIGPIPE, &set, sizeof(set));
     environment_syscall(SYS_kbdctl, gWriteFD);
 
     gActiveInput = input;
@@ -120,11 +124,13 @@ void StopInputPipe(void)
 
     if(gReadFD != -1)
     {
+        shutdown(gReadFD, SHUT_RDWR);
         close(gReadFD);
     }
 
     if(gWriteFD != -1)
     {
+        shutdown(gWriteFD, SHUT_RDWR);
         close(gWriteFD);
     }
 
