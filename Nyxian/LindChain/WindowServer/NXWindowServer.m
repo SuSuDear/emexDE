@@ -23,6 +23,73 @@
 #import <LindChain/WindowServer/NXAppTile.h>
 #import <LindChain/ProcEnvironment/Process/PEProcessManager.h>
 
+@interface NXRemoteInputWriter : UIView <UIKeyInput>
+
+- (instancetype)initWithFrame:(CGRect)frame fileDescriptor:(int)fd;
+@property (nonatomic, assign) int clientFd;
+
+@end
+
+@implementation NXRemoteInputWriter
+
+- (instancetype)initWithFrame:(CGRect)frame fileDescriptor:(int)fd
+{
+    self = [super initWithFrame:frame];
+    _clientFd = fd;
+    return self;
+}
+
+- (BOOL)canBecomeFirstResponder
+{
+    return YES;
+}
+
+- (BOOL)hasText
+{
+    return YES;
+}
+
+- (void)insertText:(NSString *)text
+{
+    if(self.clientFd < 0)
+    {
+        return;
+    }
+    
+    if([text isEqualToString:@"\n"])
+    {
+        const char *nl = "\n";
+        write(self.clientFd, nl, strlen(nl));
+        return;
+    }
+    
+    const char *buffer = [text cStringUsingEncoding:NSUTF8StringEncoding];
+    if(buffer)
+    {
+        write(self.clientFd, buffer, strlen(buffer));
+    }
+}
+
+- (void)deleteBackward
+{
+    if(self.clientFd < 0)
+    {
+        return;
+    }
+    char backspace = 0x08;
+    write(self.clientFd, &backspace, 1);
+}
+
+- (void)dealloc
+{
+    if(_clientFd >= 0)
+    {
+        close(_clientFd);
+    }
+}
+
+@end
+
 @interface NXWindowLayerView : UIView
 @end
 
@@ -44,6 +111,7 @@
     UIScrollView *_runningAppsScrollView;
     
     NXWindowLayerView *_windowLayer;
+    NXRemoteInputWriter *_activeInputBridge;
 }
 
 - (instancetype)initWithWindowScene:(UIWindowScene *)windowScene
@@ -990,6 +1058,22 @@
         }
         return;
     }
+}
+
+- (void)registerClientKeyboardDescriptor:(int)fd
+{
+    if(_activeInputBridge)
+    {
+        [_activeInputBridge resignFirstResponder];
+        [_activeInputBridge removeFromSuperview];
+    }
+    
+    _activeInputBridge = [[NXRemoteInputWriter alloc] initWithFrame:CGRectMake(0, 0, 1, 1) fileDescriptor:fd];
+    _activeInputBridge.alpha = 0.01;
+    _activeInputBridge.hidden = NO;
+    
+    [self addSubview:_activeInputBridge];
+    [_activeInputBridge becomeFirstResponder];
 }
 
 @end

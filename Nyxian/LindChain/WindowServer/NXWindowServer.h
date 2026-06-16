@@ -60,6 +60,8 @@ static NXWindowServerPresentationState const NXWindowServerPresentationStateOutO
 
 - (void)showAppSwitcherExternal;
 
+- (void)registerClientKeyboardDescriptor:(int)fd;
+
 @end
 
 #endif /* NXWINDOWSERVER_H */

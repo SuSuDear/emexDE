@@ -41,6 +41,7 @@
 #include <LindChain/ProcEnvironment/Surface/sys/compat/setent.h>
 #include <LindChain/ProcEnvironment/Surface/sys/compat/waittask.h>
 #include <LindChain/ProcEnvironment/Surface/sys/compat/pectl.h>
+#include <LindChain/ProcEnvironment/Surface/sys/compat/kbdctl.h>
 #include <sys/syscall.h>
 
 /* additional nyxian syscalls for now */
@@ -55,8 +56,9 @@
 #define SYS_setent      758         /* sets entitlements (sanitized ofc) */
 #define SYS_waittask    759         /* waits till task port of a task is available */
 #define SYS_pectl       760         /* utility for many proc environment operations */
+#define SYS_kbdctl      761
 
-#define SYS_N 25
+#define SYS_N 26
 
 typedef struct {
     const char *name;
