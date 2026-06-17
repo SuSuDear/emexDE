@@ -29,7 +29,7 @@
 #define PECTL_LS_GET_ENDPOINT   0b00000001  /* gets the endpoint of a launch service identifier (i.e. com.cr4zy.containerd) */
 
 /* environment */
-#define PECTL_PE_SET_BAMSET     0b00000010  /* sets background audio mode (i.e Spotify playing music in background)         */
+#define PECTL_PE_SET_BAMSET     0b00000010  /* sets background audio mode (i.e Spotify playing music in background) MARK: noop currently */
 
 /* code signing */
 #define PECTL_CS_GET_PUBKEY     0b00000011  /* getting the code signature public key                                        */

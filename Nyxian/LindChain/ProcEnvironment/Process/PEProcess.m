@@ -210,25 +210,6 @@
 #endif /* !JAILBREAK_ENV */
 }
 
-- (BOOL)suspend
-{
-    if(!_audioBackgroundModeUsage)
-    {
-        [self sendSignal:SIGSTOP];
-        return YES;
-    }
-    else
-    {
-        return NO;
-    }
-}
-
-- (BOOL)resume
-{
-    [self sendSignal:SIGCONT];
-    return YES;
-}
-
 - (BOOL)terminate
 {
     [self sendSignal:SIGKILL];

@@ -29,24 +29,6 @@
 #import <LindChain/ProcEnvironment/Surface/sys/syscall.h>
 #import <LindChain/ProcEnvironment/syscall.h>
 
-#pragma mark - Audio background mode fix (Fixes playing music in spotify while spotify is not in nyxians foreground)
-
-@implementation AVAudioSession (ProcEnvironment)
-
-- (BOOL)hook_setActive:(BOOL)active error:(NSError*)outError
-{
-    environment_syscall(SYS_pectl, PECTL_PE_SET_BAMSET, active, MACH_PORT_NULL, NULL);
-    return [self hook_setActive:active error:outError];
-}
-
-- (BOOL)hook_setActive:(BOOL)active withOptions:(AVAudioSessionSetActiveOptions)options error:(NSError **)outError
-{
-    environment_syscall(SYS_pectl, PECTL_PE_SET_BAMSET, active, MACH_PORT_NULL, NULL);
-    return [self hook_setActive:active withOptions:options error:outError];
-}
-
-@end
-
 #pragma mark - Initilizer
 
 void environment_signal_child_handler(int code)
@@ -99,28 +81,6 @@ void environment_signal_child_handler(int code)
                 
                 /* sending to host */
                 environment_proxy_set_snapshot(snapshot);
-                
-                /* notifying application/scene delegate about background entrance */
-                if(sharedApplication.connectedScenes.count > 0)
-                {
-                    /* its scene based */
-                    for(UIWindowScene *scene in sharedApplication.connectedScenes)
-                    {
-                        if(![scene isKindOfClass:[UIWindowScene class]])
-                        {
-                            continue;
-                        }
-                        
-                        [[NSNotificationCenter defaultCenter] postNotificationName:UISceneWillDeactivateNotification object:scene];
-                        [[NSNotificationCenter defaultCenter] postNotificationName:UISceneDidEnterBackgroundNotification object:scene];
-                    }
-                }
-                else
-                {
-                    /* ugh a legacyyy iOS app again */
-                    [[NSNotificationCenter defaultCenter] postNotificationName:UIApplicationWillResignActiveNotification object:sharedApplication];
-                    [[NSNotificationCenter defaultCenter] postNotificationName:UIApplicationDidEnterBackgroundNotification object:sharedApplication];
-                }
             });
         }
         return;
@@ -129,8 +89,5 @@ void environment_signal_child_handler(int code)
 
 void environment_application_init(void)
 {
-    swizzle_objc_method(@selector(setActive:error:), [AVAudioSession class], @selector(hook_setActive:error:), nil);
-    swizzle_objc_method(@selector(setActive:withOptions:error:), [AVAudioSession class], @selector(hook_setActive:withOptions:error:), nil);
-    
     signal(SIGUSR1, environment_signal_child_handler);
 }

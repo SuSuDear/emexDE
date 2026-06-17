@@ -240,7 +240,7 @@ void UIKitFixesInit(void)
 
 - (BOOL)shouldUpdateFocusInContext:(nonnull UIFocusUpdateContext *)context
 {
-    return NO;
+    return YES;
 }
 
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection

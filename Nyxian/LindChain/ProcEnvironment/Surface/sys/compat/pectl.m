@@ -162,21 +162,7 @@ DEFINE_SYSCALL_HANDLER(pectl)
         }
         case PECTL_PE_SET_BAMSET:
         {
-            /* getting boolean */
-            bool active = args[0];
-            
-            /* getting process */
-            PEProcess *process = [[PEProcessManager shared] processForProcessIdentifier:proc_getpid(sys_proc_snapshot_)];
-            if(process)
-            {
-                process.audioBackgroundModeUsage = active;
-            }
-            else
-            {
-                sys_return_failure(EACCES);
-            }
-            
-            sys_return;
+            sys_return_failure(ENOSYS);
         }
         case PECTL_CS_GET_PUBKEY:
         {

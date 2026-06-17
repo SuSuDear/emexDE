@@ -51,9 +51,6 @@
 @property (nonatomic) pid_t pid;
 @property (nonatomic) id_t wid;
 
-// Background modes suspension fix
-@property (nonatomic) BOOL audioBackgroundModeUsage;
-
 // Other boolean flags
 @property (nonatomic) BOOL isSuspended;
 
@@ -65,8 +62,6 @@
 #endif /* !JAILBREAK_ENV */
 
 - (void)sendSignal:(int)signal;
-- (BOOL)suspend;
-- (BOOL)resume;
 - (BOOL)terminate;
 
 - (void)setExitingCallback:(void(^)(void))callback;
