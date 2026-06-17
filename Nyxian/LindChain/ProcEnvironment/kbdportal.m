@@ -54,6 +54,12 @@ void *ReaderThread(void *arg)
         {
             char c = buf[i];
             
+            if(c == 0x00)
+            {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [(UIResponder*)gActiveInput resignFirstResponder];
+                });
+            }
             if(c == 0x08 || c == 0x7F)
             {
                 if(i > startIdx)

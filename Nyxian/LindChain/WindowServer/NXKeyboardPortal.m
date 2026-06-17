@@ -74,6 +74,18 @@
     write(self.clientFd, &backspace, 1);
 }
 
+- (BOOL)resignFirstResponder
+{
+    BOOL didResign = [super resignFirstResponder];
+    if(didResign)
+    {
+        char unfocus = 0x00;
+        write(self.clientFd, &unfocus, 1);
+    }
+    
+    return didResign;
+}
+
 - (void)dealloc
 {
     if(_clientFd >= 0)
