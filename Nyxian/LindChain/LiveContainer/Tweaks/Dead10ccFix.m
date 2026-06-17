@@ -73,50 +73,62 @@ void initDead10ccFix(void)
 - (NSMutableSet *)_lock_lockedFilePathsIgnoring: (NSMutableSet *)ignoring {
     int pid = getpid();
     int pidinfo_size = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, NULL, 0);
-    if (pidinfo_size <= 0) {
-        // _rbs_process_log with strerr
+    if(pidinfo_size <= 0)
+    {
         return nil;
     }
 
     void *pidinfo = malloc(pidinfo_size);
+    if(pidinfo == NULL)
+    {
+        return nil;
+    }
     pidinfo_size = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, pidinfo, pidinfo_size);
 
     NSMutableSet *openFilePaths = [NSMutableSet set];
 
-    if (pidinfo_size >= 8) {
+    if(pidinfo_size >= 8)
+    {
         uint64_t count = pidinfo_size / sizeof(struct proc_fdinfo);
         struct proc_fdinfo *fdinfo = (struct proc_fdinfo *)pidinfo;
-        
-        while (count--) {
-            if (fdinfo->proc_fdtype == PROX_FDTYPE_VNODE) {
-                struct vnode_fdinfowithpath vnodeinfo;
-                //memset(&vnodeinfo, 0, 0x200); // TODO: Why not sizeof(vnodeinfo)?
-                int vnodeinfo_size = proc_pidfdinfo(pid, fdinfo->proc_fd, PROC_PIDFDVNODEPATHINFO, &vnodeinfo, sizeof(vnodeinfo));
-                if (vnodeinfo_size == 0) {
-                    // _rbs_process_log with %{public}@ proc_pidfdinfo failed for fd %d with errno %d
-                    continue;
-                } else if (vnodeinfo_size < sizeof(vnodeinfo)) {
-                    // _rbs_process_log with %{public}@ Weird size (%d != %lu) for fd %d
-                    continue;
-                }
 
-                int64_t pathlen = strlen(vnodeinfo.pvip.vip_path);
-                if (pathlen == 0) {
-                    // _rbs_process_log with%{public}@ nodeFDInfo.pvip.vip_path is empty for one fd
-                    continue;
-                }
-
-                NSString *path = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:vnodeinfo.pvip.vip_path length:pathlen];
-                if (path == nil) {
-                    continue;
-                }
-
-                path = [path stringByStandardizingPath];
-                [openFilePaths addObject:path];
+        for(uint64_t i = 0; i < count; i++)
+        {
+            struct proc_fdinfo *entry = &fdinfo[i];
+            if(entry->proc_fdtype != PROX_FDTYPE_VNODE)
+            {
+                continue;
             }
-            fdinfo++;
+
+            struct vnode_fdinfowithpath vnodeinfo;
+            int vnodeinfo_size = proc_pidfdinfo(pid, entry->proc_fd, PROC_PIDFDVNODEPATHINFO, &vnodeinfo, sizeof(vnodeinfo));
+            if(vnodeinfo_size == 0)
+            {
+                continue;
+            }
+            else if (vnodeinfo_size < sizeof(vnodeinfo))
+            {
+                continue;
+            }
+
+            int64_t pathlen = strlen(vnodeinfo.pvip.vip_path);
+            if(pathlen == 0)
+            {
+                continue;
+            }
+
+            NSString *path = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:vnodeinfo.pvip.vip_path length:pathlen];
+            if(path == nil)
+            {
+                continue;
+            }
+
+            path = [path stringByStandardizingPath];
+            [openFilePaths addObject:path];
         }
     }
+
+    free(pidinfo);
 
     NSMutableSet *lockedFilePaths = [NSMutableSet set];
 
@@ -159,21 +171,21 @@ void initDead10ccFix(void)
             }
         }
         int (*_sqlite3_lockstate)(char*, int) = dlsym(RTLD_DEFAULT, "_sqlite3_lockstate");
-        int sqlite_lock = _sqlite3_lockstate(path_c, pid);
-        if (sqlite_lock == 0) {
-            // _rbs_process_log with %{public}@ Ignoring unlocked SQLite database: %{public}@
-//            NSLog(@"Ignoring unlocked SQLite database: %@", path);
+        int sqlite_lock = _sqlite3_lockstate ? _sqlite3_lockstate(path_c, pid) : -1;
+        if(sqlite_lock == 0)
+        {
             continue;
         }
 
-        if (sqlite_lock == 1) {
-            // _rbs_process_log with %{public}@ Found locked SQLite database: %{public}@
-//            NSLog(@"Found locked SQLite database: %@", path);
+        if(sqlite_lock == 1)
+        {
             [lockedFilePaths addObject:path];
-            
-        } else {
+        }
+        else
+        {
             int fd = open(path_c, O_RDONLY | O_NOCTTY);
-            if (fd <= 1) {
+            if(fd < 0)
+            {
                 continue;
             }
 
@@ -183,13 +195,15 @@ void initDead10ccFix(void)
             fl.l_pid = pid;
 
             int lock = fcntl(fd, F_GETLKPID, &fl);
-            if (lock == -1) {
+            close(fd);
+
+            if(lock == -1)
+            {
                 continue;
             }
 
-            if ((fl.l_type &~ F_UNLCK) == 1) {
-                // _rbs_process_log with %{public}@ Found locked file lock: %{public}@
-//                NSLog(@"Found locked file lock: %@", path);
+            if((fl.l_type &~ F_UNLCK) == 1)
+            {
                 [lockedFilePaths addObject:path];
             }
         }
