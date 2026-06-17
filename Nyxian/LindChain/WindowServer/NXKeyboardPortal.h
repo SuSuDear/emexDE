@@ -26,9 +26,10 @@
 
 @interface NXKeyboardPortal : UIView <UIKeyInput>
 
-@property (nonatomic, assign) pid_t clientPid;
-- (instancetype)initWithFrame:(CGRect)frame fileDescriptor:(int)fd processIdentifier:(pid_t)pid;
+@property (nonatomic, assign) id_t clientWid;
 @property (nonatomic, assign) int clientFd;
+
+- (instancetype)initWithFrame:(CGRect)frame fileDescriptor:(int)fd windowIdentifier:(id_t)wid;
 
 @end
 

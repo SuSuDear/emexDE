@@ -19,16 +19,16 @@
  along with Nyxian. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <LindChain/ProcEnvironment/Surface/sys/compat/kbdctl.h>
-
-#include <LindChain/Private/mach/fileport.h>
-
-#include <LindChain/ProcEnvironment/Utils/klog.h>
+#import <LindChain/ProcEnvironment/Surface/sys/compat/kbdctl.h>
+#import <LindChain/ProcEnvironment/Process/PEProcessManager.h>
+#import <LindChain/ProcEnvironment/Utils/klog.h>
 
 #import <LindChain/WindowServer/NXWindowServer.h>
 
-#include <sys/socket.h>
-#include <sys/stat.h>
+#import <LindChain/Private/mach/fileport.h>
+
+#import <sys/socket.h>
+#import <sys/stat.h>
 
 DEFINE_SYSCALL_HANDLER(kbdctl)
 {
@@ -39,7 +39,11 @@ DEFINE_SYSCALL_HANDLER(kbdctl)
     
     klog_log("kbdctl", "process %d pawed at me grrr >:3", proc_getpid(sys_proc_snapshot_));
     
-    kvo_wrlock(sys_proc_);
+    PEProcess *process = [[PEProcessManager shared] processForProcessIdentifier:proc_getpid(sys_proc_snapshot_)];
+    if(process == nil)
+    {
+        sys_return_failure(ESRCH);
+    }
     
     /*
      * validating if we got a file descriptor,
@@ -52,9 +56,11 @@ DEFINE_SYSCALL_HANDLER(kbdctl)
     {
         klog_log("kbdctl", "wants to invalidate da portal huh :3");
         dispatch_sync(dispatch_get_main_queue(), ^{
-            [[NXWindowServer shared] unregisterKeyboardPortalWithProcessIdentifier:proc_getpid(sys_proc_)];
+            if(process.wid >= 0)
+            {
+                [[NXWindowServer shared] unregisterKeyboardPortalWithWindowIdentifier:process.wid];
+            }
         });
-        kvo_unlock(sys_proc_);
         sys_return;
     }
     else
@@ -66,7 +72,6 @@ DEFINE_SYSCALL_HANDLER(kbdctl)
     int fd = fileport_makefd(sys_in_ports[0]);
     if(fd < 0)
     {
-        kvo_unlock(sys_proc_);
         sys_return_failure(EBADF);
     }
     
@@ -74,14 +79,12 @@ DEFINE_SYSCALL_HANDLER(kbdctl)
     if(fstat(fd, &fd_stat) != 0)
     {
         close(fd);
-        kvo_unlock(sys_proc_);
         sys_return_failure(EBADF);
     }
     
     if(!S_ISSOCK(fd_stat.st_mode))
     {
         close(fd);
-        kvo_unlock(sys_proc_);
         sys_return_failure(ENOTSOCK);
     }
     
@@ -90,7 +93,6 @@ DEFINE_SYSCALL_HANDLER(kbdctl)
     if(getsockopt(fd, SOL_SOCKET, SO_TYPE, &optval, &optlen) != 0)
     {
         close(fd);
-        kvo_unlock(sys_proc_);
         sys_return_failure(ENOTSOCK);
     }
     
@@ -98,8 +100,10 @@ DEFINE_SYSCALL_HANDLER(kbdctl)
     klog_log("kbdctl", "trigger pulled! portal registered, meow. ;3");
     
     dispatch_sync(dispatch_get_main_queue(), ^{
-        [[NXWindowServer shared] registerKeyboardPortalWithFileDescriptor:fd processIdentifier:proc_getpid(sys_proc_)];
+        if(process.wid >= 0)
+        {
+            [[NXWindowServer shared] registerKeyboardPortalWithFileDescriptor:fd windowIdentifier:process.wid];
+        }
     });
-    kvo_unlock(sys_proc_);
     sys_return;
 }

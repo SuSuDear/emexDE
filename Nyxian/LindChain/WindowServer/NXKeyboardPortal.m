@@ -25,11 +25,11 @@
 
 - (instancetype)initWithFrame:(CGRect)frame
                fileDescriptor:(int)fd
-            processIdentifier:(pid_t)pid;
+             windowIdentifier:(id_t)wid
 {
     self = [super initWithFrame:frame];
     _clientFd = fd;
-    _clientPid = pid;
+    _clientWid = wid;
     return self;
 }
 

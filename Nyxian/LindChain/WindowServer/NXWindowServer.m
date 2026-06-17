@@ -279,6 +279,8 @@
 {
     assert([NSThread isMainThread]);
     
+    [self unregisterKeyboardPortalWithWindowIdentifier:identifier];
+    
     if(_activeWindowIdentifier == identifier)
     {
         _activeWindowIdentifier = (id_t)-1;
@@ -995,7 +997,7 @@
 }
 
 - (void)registerKeyboardPortalWithFileDescriptor:(int)fd
-                               processIdentifier:(pid_t)pid
+                                windowIdentifier:(id_t)wid
 {
     assert([NSThread isMainThread]);
     
@@ -1005,7 +1007,7 @@
         [_activePortal removeFromSuperview];
     }
     
-    _activePortal = [[NXKeyboardPortal alloc] initWithFrame:CGRectMake(0, 0, 1, 1) fileDescriptor:fd processIdentifier:pid];
+    _activePortal = [[NXKeyboardPortal alloc] initWithFrame:CGRectMake(0, 0, 1, 1) fileDescriptor:fd windowIdentifier:wid];
     _activePortal.alpha = 0.01;
     _activePortal.hidden = NO;
     
@@ -1013,11 +1015,11 @@
     [_activePortal becomeFirstResponder];
 }
 
-- (void)unregisterKeyboardPortalWithProcessIdentifier:(pid_t)pid
+- (void)unregisterKeyboardPortalWithWindowIdentifier:(id_t)wid
 {
     assert([NSThread isMainThread]);
     
-    if(_activePortal.clientPid == pid)
+    if(_activePortal.clientWid == wid)
     {
         [_activePortal resignFirstResponder];
         [_activePortal removeFromSuperview];
