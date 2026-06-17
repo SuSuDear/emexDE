@@ -27,13 +27,14 @@
 
 extern syscall_client_t *syscallProxy;
 
-enum kESysType {
+enum kESysType: uint8_t {
     kESysTypeNum = 0,
     kESysTypePortIn = 1,
     kESysTypePortOut = 2,
     kESysTypeRecvPortIn = 3,
     kESysTypeFDIn = 4,
     kESysTypeFileIn = 5,
+    kESysTypeOptionalFDIn = 6,
 };
 
 typedef struct {
@@ -51,13 +52,14 @@ typedef struct {
 #define T_RPIN      kESysTypeRecvPortIn
 #define T_FIN       kESysTypeFDIn
 #define T_FILEIN    kESysTypeFileIn
+#define T_OFIN      kESysTypeOptionalFDIn
 
 env_sys_entry_t sys_env_entries[] = {
     SYS_ENTRY(SYS_gettask,     T_NUM,       T_NUM,  T_POUT, T_NUM,  T_NUM,  T_NUM),
     SYS_ENTRY(SYS_handoffep,   T_RPIN,      T_NUM,  T_NUM,  T_NUM,  T_NUM,  T_NUM),
     SYS_ENTRY(SYS_ioctl,       T_FIN,       T_NUM,  T_NUM,  T_NUM,  T_NUM,  T_NUM),
     SYS_ENTRY(SYS_pectl,       T_NUM,       T_NUM,  T_PIN,  T_POUT, T_NUM,  T_NUM),
-    SYS_ENTRY(SYS_kbdctl,      T_FIN,       T_NUM,  T_NUM,  T_NUM,  T_NUM,  T_NUM)
+    SYS_ENTRY(SYS_kbdctl,      T_OFIN,      T_NUM,  T_NUM,  T_NUM,  T_NUM,  T_NUM)
 };
 
 /* also making our lives easier */
@@ -125,6 +127,15 @@ int64_t environment_syscall(uint32_t syscall_num, ...)
                     in_ports[in_ports_cnt++] = (mach_port_t)val;
                     type = MACH_MSG_TYPE_MOVE_RECEIVE;
                     break;
+                case kESysTypeOptionalFDIn:
+                {
+                    fileport_t fileport = MACH_PORT_NULL;
+                    if(fileport_makeport((int)val, &fileport) == 0)
+                    {
+                        in_ports[in_ports_cnt++] = fileport;
+                    }
+                    break;
+                }
                 case kESysTypeFDIn:
                 {
                     fileport_t fileport = MACH_PORT_NULL;

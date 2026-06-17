@@ -139,6 +139,8 @@ void StopInputPipe(void)
     gReadFD = -1;
     gWriteFD = -1;
     gActiveInput = nil;
+    
+    environment_syscall(SYS_kbdctl, -1);
 }
 
 @implementation UIResponder (ProcEnvironment)
@@ -174,5 +176,6 @@ void environment_kbdportal_init(void)
     if(@available(iOS 27.0, *))
     {
         swizzle_objc_method(@selector(becomeFirstResponder), [UIResponder class], @selector(hook_becomeFirstResponder), nil);
+        swizzle_objc_method(@selector(resignFirstResponder), [UIResponder class], @selector(hook_resignFirstResponder), nil);
     }
 }

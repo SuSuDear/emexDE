@@ -25,17 +25,21 @@
 
 @interface NXRemoteInputWriter : UIView <UIKeyInput>
 
-- (instancetype)initWithFrame:(CGRect)frame fileDescriptor:(int)fd;
+@property (nonatomic, assign) pid_t clientPid;
+- (instancetype)initWithFrame:(CGRect)frame fileDescriptor:(int)fd processIdentifier:(pid_t)pid;
 @property (nonatomic, assign) int clientFd;
 
 @end
 
 @implementation NXRemoteInputWriter
 
-- (instancetype)initWithFrame:(CGRect)frame fileDescriptor:(int)fd
+- (instancetype)initWithFrame:(CGRect)frame
+               fileDescriptor:(int)fd
+            processIdentifier:(pid_t)pid;
 {
     self = [super initWithFrame:frame];
     _clientFd = fd;
+    _clientPid = pid;
     return self;
 }
 
@@ -1061,19 +1065,34 @@
 }
 
 - (void)registerClientKeyboardDescriptor:(int)fd
+                       processIdentifier:(pid_t)pid
 {
+    assert([NSThread isMainThread]);
+    
     if(_activeInputBridge)
     {
         [_activeInputBridge resignFirstResponder];
         [_activeInputBridge removeFromSuperview];
     }
     
-    _activeInputBridge = [[NXRemoteInputWriter alloc] initWithFrame:CGRectMake(0, 0, 1, 1) fileDescriptor:fd];
+    _activeInputBridge = [[NXRemoteInputWriter alloc] initWithFrame:CGRectMake(0, 0, 1, 1) fileDescriptor:fd processIdentifier:pid];
     _activeInputBridge.alpha = 0.01;
     _activeInputBridge.hidden = NO;
     
     [self addSubview:_activeInputBridge];
     [_activeInputBridge becomeFirstResponder];
+}
+
+- (void)unregisterClientKeyboardDescriptorWithProcessIdentifier:(pid_t)pid
+{
+    assert([NSThread isMainThread]);
+    
+    if(_activeInputBridge.clientPid == pid)
+    {
+        [_activeInputBridge resignFirstResponder];
+        [_activeInputBridge removeFromSuperview];
+        _activeInputBridge = nil;
+    }
 }
 
 @end

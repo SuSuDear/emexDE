@@ -37,13 +37,36 @@ DEFINE_SYSCALL_HANDLER(kbdctl)
         sys_return_failure(ENOSYS);
     }
     
-    sys_need_in_ports(1, MACH_MSG_TYPE_MOVE_SEND);
+    klog_log("kbdctl", "process %d pawed at me grrr >:3", proc_getpid(sys_proc_snapshot_));
     
-    fileport_t port = sys_in_ports[0];
+    kvo_wrlock(sys_proc_);
     
-    int fd = fileport_makefd(port);
+    /*
+     * validating if we got a file descriptor,
+     * if not the client wants to invalidate
+     * it's focus.
+     */
+    if(in_ports.address == VM_MIN_ADDRESS ||
+       in_ports.count < 1 ||
+       in_ports.disposition != MACH_MSG_TYPE_MOVE_SEND)
+    {
+        klog_log("kbdctl", "wants to invalidate da portal huh :3");
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            [[NXWindowServer shared] unregisterClientKeyboardDescriptorWithProcessIdentifier:proc_getpid(sys_proc_)];
+        });
+        kvo_unlock(sys_proc_);
+        sys_return;
+    }
+    else
+    {
+        klog_log("kbdctl", "received mach port");
+    }
+    
+    /* validate received file descriptor */
+    int fd = fileport_makefd(sys_in_ports[0]);
     if(fd < 0)
     {
+        kvo_unlock(sys_proc_);
         sys_return_failure(EBADF);
     }
     
@@ -51,12 +74,14 @@ DEFINE_SYSCALL_HANDLER(kbdctl)
     if(fstat(fd, &fd_stat) != 0)
     {
         close(fd);
+        kvo_unlock(sys_proc_);
         sys_return_failure(EBADF);
     }
     
     if(!S_ISSOCK(fd_stat.st_mode))
     {
         close(fd);
+        kvo_unlock(sys_proc_);
         sys_return_failure(ENOTSOCK);
     }
     
@@ -65,14 +90,16 @@ DEFINE_SYSCALL_HANDLER(kbdctl)
     if(getsockopt(fd, SOL_SOCKET, SO_TYPE, &optval, &optlen) != 0)
     {
         close(fd);
+        kvo_unlock(sys_proc_);
         sys_return_failure(ENOTSOCK);
     }
     
-    klog_log("kbdctl", "trigger pulled! ;3");
+    /* registering portal */
+    klog_log("kbdctl", "trigger pulled! portal registered, meow. ;3");
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [[NXWindowServer shared] registerClientKeyboardDescriptor:fd];
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        [[NXWindowServer shared] registerClientKeyboardDescriptor:fd processIdentifier:proc_getpid(sys_proc_)];
     });
-    
+    kvo_unlock(sys_proc_);
     sys_return;
 }
