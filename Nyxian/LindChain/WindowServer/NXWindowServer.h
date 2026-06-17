@@ -60,8 +60,8 @@ static NXWindowServerPresentationState const NXWindowServerPresentationStateOutO
 
 - (void)showAppSwitcherExternal;
 
-- (void)registerClientKeyboardDescriptor:(int)fd processIdentifier:(pid_t)pid;
-- (void)unregisterClientKeyboardDescriptorWithProcessIdentifier:(pid_t)pid;
+- (void)registerKeyboardPortalWithFileDescriptor:(int)fd processIdentifier:(pid_t)pid;
+- (void)unregisterKeyboardPortalWithProcessIdentifier:(pid_t)pid;
 
 @end
 

@@ -52,7 +52,7 @@ DEFINE_SYSCALL_HANDLER(kbdctl)
     {
         klog_log("kbdctl", "wants to invalidate da portal huh :3");
         dispatch_sync(dispatch_get_main_queue(), ^{
-            [[NXWindowServer shared] unregisterClientKeyboardDescriptorWithProcessIdentifier:proc_getpid(sys_proc_)];
+            [[NXWindowServer shared] unregisterKeyboardPortalWithProcessIdentifier:proc_getpid(sys_proc_)];
         });
         kvo_unlock(sys_proc_);
         sys_return;
@@ -98,7 +98,7 @@ DEFINE_SYSCALL_HANDLER(kbdctl)
     klog_log("kbdctl", "trigger pulled! portal registered, meow. ;3");
     
     dispatch_sync(dispatch_get_main_queue(), ^{
-        [[NXWindowServer shared] registerClientKeyboardDescriptor:fd processIdentifier:proc_getpid(sys_proc_)];
+        [[NXWindowServer shared] registerKeyboardPortalWithFileDescriptor:fd processIdentifier:proc_getpid(sys_proc_)];
     });
     kvo_unlock(sys_proc_);
     sys_return;
