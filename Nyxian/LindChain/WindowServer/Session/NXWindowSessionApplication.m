@@ -221,7 +221,7 @@ void UIKitFixesInit(void)
 {
     assert([NSThread isMainThread]);
     
-    /*if(!self.process.process.running || self.process.isSuspended || !diff)
+    if(!self.process.process.running || self.process.isSuspended || !diff)
     {
         return;
     }
@@ -233,9 +233,9 @@ void UIKitFixesInit(void)
     UIMutableApplicationSceneSettings *newSettings = [self.presenter.scene.settings mutableCopy];
     newSettings.userInterfaceStyle = baseSettings.userInterfaceStyle;
     
-    [self.presenter.scene updateSettings:newSettings withTransitionContext:newContext completion:nil];*/
+    [self.presenter.scene updateSettings:newSettings withTransitionContext:newContext completion:nil];
     
-    //bn[self windowRectChanged];
+    [self windowRectChanged];
 }
 
 - (BOOL)shouldUpdateFocusInContext:(nonnull UIFocusUpdateContext *)context
