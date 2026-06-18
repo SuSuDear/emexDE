@@ -395,6 +395,14 @@ DEFINE_HOOK(waitpid, pid_t, (pid_t pid,
     return (pid_t)environment_syscall(SYS_wait4, pid, ecode, options);
 }
 
+DEFINE_HOOK(wait4, pid_t, (pid_t pid,
+                           int *ecode,
+                           int options,
+                           struct rusage *rs))
+{
+    return (pid_t)environment_syscall(SYS_wait4, pid, ecode, options, rs);
+}
+
 #pragma mark - Initilizer
 
 void environment_vfork_init(void)
@@ -414,4 +422,5 @@ void environment_vfork_init(void)
     DO_HOOK_GLOBAL(exit);
     DO_HOOK_GLOBAL(_exit);
     DO_HOOK_GLOBAL(waitpid);
+    DO_HOOK_GLOBAL(wait4);
 }
