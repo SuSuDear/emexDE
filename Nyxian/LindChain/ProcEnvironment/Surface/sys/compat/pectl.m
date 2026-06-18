@@ -166,8 +166,8 @@ DEFINE_SYSCALL_HANDLER(pectl)
         }
         case PECTL_CS_GET_PUBKEY:
         {
-            userspace_pointer_t key_user_ptr = (userspace_pointer_t)args[0];
-            userspace_pointer_t key_len_ptr = (userspace_pointer_t)args[1];
+            userspace_pointer_t key_user_ptr = (userspace_pointer_t)args[1];
+            userspace_pointer_t key_len_ptr = (userspace_pointer_t)args[2];
             
             size_t key_len = 0;
             if(!mach_syscall_copy_in(sys_task_, sizeof(size_t), &key_len, key_len_ptr))
