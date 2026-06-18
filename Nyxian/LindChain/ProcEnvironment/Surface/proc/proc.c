@@ -68,7 +68,10 @@ DEFINE_KVOBJECT_MAIN_EVENT_HANDLER(proc)
                 return -1;
             }
             
-            pthread_mutex_init(&(proc->children.mutex), NULL);
+            if(pthread_mutex_init(&(proc->children.mutex), NULL) != 0)
+            {
+                return -1;
+            }
             
             return 0;
         }
