@@ -28,8 +28,6 @@
 #include <mach/mach.h>
 #include <unistd.h>
 
-kern_return_t environment_task_for_pid(mach_port_name_t tp_in, pid_t pid,  mach_port_name_t *tp_out);
-
 void environment_tfp_init(void);
 
 #endif /* PROCENVIRONMENT_TFP_H */

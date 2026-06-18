@@ -26,61 +26,45 @@
 #include <LindChain/ProcEnvironment/Utils/ktfp.h>
 #include <mach/mach.h>
 
-kern_return_t environment_task_for_pid(mach_port_name_t tp_in,
-                                       pid_t pid,
-                                       mach_port_name_t *tp_out)
+static kern_return_t __environment_task_for_pid(mach_port_name_t tp_in,
+                                                pid_t pid,
+                                                mach_port_name_t *tp_out,
+                                                bool name_port)
 {
-    /* sanity check */
     if(tp_out == NULL)
     {
         return KERN_FAILURE;
     }
     
-    int64_t ret = environment_syscall(SYS_gettask, pid, false, tp_out);
-    
-    if(ret == -1 ||
-       *tp_out == MACH_PORT_NULL)
+    int64_t ret = environment_syscall(SYS_gettask, pid, name_port, tp_out);
+    if(ret == -1 || *tp_out == MACH_PORT_NULL)
     {
         return KERN_FAILURE;
     }
     
     return KERN_SUCCESS;
+}
+
+DEFINE_HOOK(task_for_pid, kern_return_t, (mach_port_name_t tp_in,
+                                          pid_t pid,
+                                          mach_port_name_t *tp_out))
+{
+    return __environment_task_for_pid(tp_in, pid, tp_out, false);
 }
 
 DEFINE_HOOK(task_name_for_pid, kern_return_t, (mach_port_name_t tp_in,
                                                pid_t pid,
                                                mach_port_name_t *tp_out))
 {
-    /* sanity check */
-    if(tp_out == NULL)
-    {
-        return KERN_FAILURE;
-    }
-    
-    /*
-     * boolean flag to true means that we only want
-     * the name port.
-     */
-    int64_t ret = environment_syscall(SYS_gettask, pid, true, tp_out);
-    
-    if(ret == -1 ||
-       *tp_out == MACH_PORT_NULL)
-    {
-        return KERN_FAILURE;
-    }
-    
-    return KERN_SUCCESS;
+    return __environment_task_for_pid(tp_in, pid, tp_out, true);
 }
 
-/*
- Init
- */
 void environment_tfp_init(void)
 {
     /* sending our task port to the task port system */
     ktfp(MACH_PORT_NULL);
     
     /* hooking tfp api */
-    litehook_rebind_symbol(LITEHOOK_REBIND_GLOBAL, task_for_pid, environment_task_for_pid, NULL);
+    DO_HOOK_GLOBAL(task_for_pid);
     DO_HOOK_GLOBAL(task_name_for_pid);
 }
