@@ -36,13 +36,13 @@
 #define KVOBJECT_EVENT_MAX 128
 
 /* enumeration of kernel virt object base types */
-enum kvObjBaseType {
+enum kvObjBaseType: uint8_t {
     kvObjBaseTypeObject = 0,                        /* normal allocated object with referencing */
     kvObjBaseTypeObjectSnapshot = 1,                /* snapshot of object also with referencing, but with seperate memory */
 };
 
 /* enumeration of kernel virt object events */
-enum kvObjEvent {
+enum kvObjEvent: uint32_t {
     kvObjEventNone = 0,                             /* nothing, but for event registration relevant, they cannot escape getting deinit or unregistration notif */
     kvObjEventInit = 1ull << 0,                     /* object initilizes                            MARK: important for main event handler */
     kvObjEventDeinit = 1ull << 1,                   /* object deinitilizes                          MARK: important for main event handler */
@@ -64,13 +64,13 @@ enum kvObjEvent {
 };
 
 /* enumeration of kernel virt object states */
-enum kvObjState {
+enum kvObjState: uint8_t {
     kvObjStateNormal = 0,                           /* object is in normal state */
     kvObjStateInvalid                               /* object is invalidated and cannot be retained, only released, its used to mark a object as meaningless */
 };
 
 /* enumeration for type of snapshotting */
-enum kvObjSnap {
+enum kvObjSnap: uint8_t {
     kvObjSnapStatic = 0,                            /* dont create reference back nor set orig pointer */
     kvObjSnapReferenced,                            /* creates new reference and sets orig pointer */
     kvObjSnapConsumeReference                       /* consumes callers reference and sets orig pointer */
