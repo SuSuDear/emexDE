@@ -105,8 +105,6 @@ int64_t environment_syscall(uint32_t syscall_num, ...)
     
     /* decoding payloads if applicable */
     const env_sys_entry_t *entry = find_syscall_entry(syscall_num);
-    
-    /* null pointer check */
     if(entry != NULL)
     {
         /* iterating through systypes */
@@ -155,7 +153,6 @@ int64_t environment_syscall(uint32_t syscall_num, ...)
                     const char *path = (char*)val;
                     
                     int fd = open(path, O_RDWR);
-                    
                     if(fd < 0)
                     {
                         errno = EINVAL;

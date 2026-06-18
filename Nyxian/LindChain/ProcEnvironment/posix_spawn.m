@@ -156,7 +156,6 @@ int environment_posix_spawn(pid_t *process_identifier,
      * apple validity. I got no idea tbh.
      */
     char *resolved = realpath(path, NULL);
-    
     if(resolved == NULL)
     {
         /* errno comes from realpath */
@@ -174,7 +173,6 @@ int environment_posix_spawn(pid_t *process_identifier,
     {
         /* attempt signing */
         int ret = (int)environment_syscall(SYS_pectl, PECTL_CS_SIGN_PATH, resolved, MACH_PORT_NULL);
-        
         if(ret != 0)
         {
             /* errno comes from the syscall in this case */
@@ -276,7 +274,6 @@ skip_fileactions:
     
     /* the old ServerSession api requires paths as NSString */
     NSString *nsCwd = [NSString stringWithCString:cwd encoding:NSUTF8StringEncoding];
-    
     if(nsCwd == nil)
     {
         free(resolved);
@@ -288,8 +285,6 @@ skip_fileactions:
      * then triggers the subsystem LDEProcess on the host side.
      */
     int64_t pid = environment_proxy_spawn_process_at_path([NSString stringWithCString:resolved encoding:NSUTF8StringEncoding], NSArrayFromCArray(argv), NSDictionaryFromCDictionary(envp), mapObject, nsCwd);
-    
-    /* it shouldnt be negative */
     if(pid < 0)
     {
         /* lacking entitlements? */

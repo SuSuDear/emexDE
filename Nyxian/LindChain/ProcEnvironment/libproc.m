@@ -80,23 +80,19 @@ DEFINE_HOOK(proc_name, int, (pid_t pid,
     {
         return 0;
     }
-    
+
+    int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, (int)pid };
     kinfo_proc_t kp;
-    uint32_t olen = sizeof(kp);
-    
-    /* syscall with SYS_PROCPATH */
-    int64_t retval = environment_syscall(SYS_procbsd, pid, &kp, &olen);
-    
-    /* sanity check numero two */
+    size_t olen = sizeof(kp);
+    int64_t retval = environment_syscall(SYS_sysctl, mib, 4, &kp, &olen, NULL, 0);
     if(retval != 0 || olen < sizeof(kp))
     {
         return (int)retval;
     }
-    
+
     size_t full_len = strlen(kp.kp_proc.p_comm);
     size_t copy_len = (full_len >= buffersize) ? buffersize - 1 : full_len;
-    
-    /* copying name over */
+
     strlcpy((char*)buffer, kp.kp_proc.p_comm, buffersize);
     return (int)copy_len;
 }
@@ -113,8 +109,6 @@ DEFINE_HOOK(proc_pidpath, int, (pid_t pid,
     
     /* syscall with SYS_PROCPATH */
     int64_t retval = environment_syscall(SYS_procpath, pid, buffer, &buffersize);
-    
-    /* sanity check numero two */
     if(retval != 0)
     {
         return 0;
