@@ -34,6 +34,17 @@ ksurface_proc_t *proc_fork(ksurface_proc_t *parent,
 {
     assert(parent != NULL && path != NULL);
     
+    /*
+     * must convert to a nsPath, we shall not
+     * even give attackers room to play with
+     * entitlement handling failures.
+     */
+    NSString *nsPath = [NSString stringWithCString:path encoding:NSUTF8StringEncoding];
+    if(nsPath == nil)
+    {
+        return NULL;
+    }
+    
     ksurface_proc_t *child = kvo_copy(parent);
     if(child == NULL)
     {
@@ -57,8 +68,7 @@ ksurface_proc_t *proc_fork(ksurface_proc_t *parent,
      * will return the entitlements of
      * sayed executable.
      */
-    NSString *nsPath = [NSString stringWithCString:path encoding:NSUTF8StringEncoding];
-    PEEntitlement entitlement = (nsPath == nil) ? PEEntitlementNone : [[PEContainer shared] entitlementForExecutableAtPath:nsPath];
+    PEEntitlement entitlement = [[PEContainer shared] entitlementForExecutableAtPath:nsPath];
     PEEntitlement currentEntitlement = proc_getentitlements(child);
     PEEntitlement currentMaxEntitlement = proc_getmaxentitlements(child);
     

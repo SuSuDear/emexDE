@@ -45,7 +45,9 @@
 
 #if !JAILBREAK_ENV
 
-- (instancetype)initWithItems:(NSDictionary*)items withKernelSurfaceProcess:(ksurface_proc_t*)proc withSession:(NXWindowSessionApplication*)session
+- (instancetype)initWithItems:(NSDictionary*)items
+     withKernelSurfaceProcess:(ksurface_proc_t*)proc
+                  withSession:(NXWindowSessionApplication*)session
 {
     if(!proc_count())
     {
@@ -57,7 +59,10 @@
     self.session = session;
     
     self.executablePath = items[@"PEExecutablePath"];
-    if(self.executablePath == nil) return nil;
+    if(self.executablePath == nil)
+    {
+        return nil;
+    }
     /* FIXME: before it was a isExecutableFileAtPath check, but since installd broke the permissions at install time we can forget that lol */
     if(![[PEContainer shared] isReadableFileAtPath:self.executablePath]) return nil;
     
@@ -80,6 +85,10 @@
     [self.process addObserver:self];
     if(!self.process.running)
     {
+        /*
+         * prevents a race condition, when we add a observer
+         * and it already died then we shall handle the exit.
+         */
         FBProcessManager *manager = [PrivClass(FBProcessManager) sharedInstance];
         [manager _removeProcess:self.process];
         return nil;
