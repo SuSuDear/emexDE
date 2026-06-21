@@ -27,10 +27,9 @@
 #include <string.h>
 #include <assert.h>
 
-kvobject_t *kvobject_alloc(kvobject_main_event_handler_t handler)
+static inline kvobject_t *__kvobject_alloc(kvobject_main_event_handler_t handler,
+                                           kvobject_base_type_t base_type)
 {
-    assert(handler != NULL);
-    
     /* get object size first */
     size_t size = (size_t)handler(NULL, kvObjEventInit);
     
@@ -42,8 +41,6 @@ kvobject_t *kvobject_alloc(kvobject_main_event_handler_t handler)
     
     /* allocating brand new kvobject */
     kvobject_t *kvo = calloc(1, size);
-    
-    /* checking if allocation suceeded */
     if(kvo == NULL)
     {
         return NULL;
@@ -51,24 +48,39 @@ kvobject_t *kvobject_alloc(kvobject_main_event_handler_t handler)
     
     /* setting up kvobject for usage */
     kvo->refcount = 1;                          /* starting as retained for the caller, cuz the caller gets one reference */
-    kvo->base_type = kvObjBaseTypeObject;
+    kvo->base_type = base_type;
     kvo->state = kvObjStateNormal;
-    kvo->orig = NULL;
     
-    /* setting handlers and running init straight */
-    kvo->main_handler = handler;
-    
-    /* safely initilizing both locks */
-    if(pthread_rwlock_init(&(kvo->rwlock), NULL) != 0)
+    /* only normal objects get this setup */
+    if(base_type != kvObjBaseTypeObjectSnapshot)
     {
-        free(kvo);
-        return NULL;
+        kvo->main_handler = handler;
+        
+        /* safely initilizing both locks */
+        if(pthread_rwlock_init(&(kvo->rwlock), NULL) != 0)
+        {
+            free(kvo);
+            return NULL;
+        }
+        
+        if(pthread_rwlock_init(&(kvo->event_rwlock), NULL) != 0)
+        {
+            pthread_rwlock_destroy(&(kvo->rwlock));
+            free(kvo);
+            return NULL;
+        }
     }
     
-    if(pthread_rwlock_init(&(kvo->event_rwlock), NULL) != 0)
+    return kvo;
+}
+
+kvobject_t *kvobject_alloc(kvobject_main_event_handler_t handler)
+{
+    assert(handler != NULL);
+    
+    kvobject_t *kvo = __kvobject_alloc(handler, kvObjBaseTypeObject);
+    if(kvo == NULL)
     {
-        pthread_rwlock_destroy(&(kvo->rwlock));
-        free(kvo);
         return NULL;
     }
     
@@ -89,56 +101,18 @@ kvobject_t *kvobject_copy(kvobject_t *kvo)
 {
     assert(kvo != NULL);
     
-    /* sanity check */
-    if(!kvo_retain(kvo))
-    {
-        return NULL;
-    }
-    
     kvo_rdlock(kvo);
     
     assert(kvo->base_type == kvObjBaseTypeObject && kvo->main_handler != NULL);
     
-    /* getting object size */
-    size_t size = (size_t)kvo->main_handler(NULL, kvObjEventInit);
-    
-    /* creating new object */
-    kvobject_t *kvo_dup = calloc(1, size);
-    
-    /* checking if allocation was successful */
+    kvobject_t *kvo_dup = __kvobject_alloc(kvo->main_handler, kvObjBaseTypeObject);
     if(kvo_dup == NULL)
     {
-        goto out_unlock;
-    }
-    
-    /* setup object initially */
-    kvo_dup->refcount = 1;                                  /* starting as retained for the caller, cuz the caller gets one reference */
-    kvo_dup->base_type = kvObjBaseTypeObject;
-    kvo_dup->state = kvObjStateNormal;
-    kvo_dup->orig = NULL;
-    
-    /* setting handlers and running copyit straight */
-    kvo_dup->main_handler = kvo->main_handler;
-    
-    /* preparing stack array */
-    kvobject_t *kvoarr[2] = { kvo_dup, kvo };
-    
-    /* safely initilizing both locks */
-    if(pthread_rwlock_init(&(kvo_dup->rwlock), NULL) != 0)
-    {
-        free(kvo_dup);
-        goto out_unlock;
-    }
-    
-    if(pthread_rwlock_init(&(kvo_dup->event_rwlock), NULL) != 0)
-    {
-        pthread_rwlock_destroy(&(kvo_dup->rwlock));
-        free(kvo_dup);
-        kvo_dup = NULL;
-        goto out_unlock;
+        return NULL;
     }
     
     /* checking init handler and executing if nonnull */
+    kvobject_t *kvoarr[2] = { kvo_dup, kvo };
     if(kvo_dup->main_handler(kvoarr, kvObjEventCopy) != 0)
     {
         pthread_rwlock_destroy(&(kvo_dup->rwlock));
@@ -149,7 +123,6 @@ kvobject_t *kvobject_copy(kvobject_t *kvo)
     
 out_unlock:
     kvo_unlock(kvo);
-    kvo_release(kvo);
     return kvo_dup;
 }
 
@@ -167,22 +140,11 @@ kvobject_snapshot_t *kvobject_snapshot(kvobject_t *kvo,
     
     assert(kvo->base_type == kvObjBaseTypeObject && kvo->main_handler != NULL);
     
-    /* getting object size */
-    size_t size = (size_t)kvo->main_handler(NULL, kvObjEventInit);
-    
-    /* creating new snapshot object */
-    kvobject_t *kvo_snap = calloc(1, size);
-    
-    /* checking if allocation was successful */
+    kvobject_t *kvo_snap = __kvobject_alloc(kvo->main_handler, kvObjBaseTypeObjectSnapshot);
     if(kvo_snap == NULL)
     {
-        goto out_unlock;
+        return NULL;
     }
-    
-    /* setup object initially */
-    kvo_snap->refcount = 1;                                 /* starting as retained for the caller, cuz the caller gets one reference */
-    kvo_snap->base_type = kvObjBaseTypeObjectSnapshot;
-    kvo_snap->state = kvObjStateNormal;
     
     /* set orig pointer if applicable */
     if(option == kvObjSnapReferenced ||
