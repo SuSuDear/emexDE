@@ -256,8 +256,6 @@ kern_return_t proc_reap(ksurface_proc_t *proc)
     
     /* remove from parent */
     ksurface_proc_t *parent = proc->children.parent;
-    
-    /* null pointer checking parent */
     if(parent != NULL)
     {
         /* retaining the parent */

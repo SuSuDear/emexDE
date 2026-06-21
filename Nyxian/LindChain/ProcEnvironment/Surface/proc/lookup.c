@@ -193,17 +193,14 @@ kern_return_t proc_parent_for_proc(ksurface_proc_t *child,
      * the mutex dance.
      */
     pthread_mutex_lock(&(child->children.mutex));
-    
     ksurface_proc_t *strong_parent = child->children.parent;
-    if(strong_parent == NULL || !kvo_retain(strong_parent))
+    bool success = !(strong_parent == NULL || !kvo_retain(strong_parent));
+    pthread_mutex_unlock(&(child->children.mutex));
+    if(success)
     {
-        pthread_mutex_unlock(&(child->children.mutex));
-        return KERN_NO_ACCESS;
+        *parent = strong_parent;
+        return KERN_SUCCESS;
     }
     
-    pthread_mutex_unlock(&(child->children.mutex));
-    
-    *parent = strong_parent;
-    
-    return KERN_SUCCESS;
+    return KERN_NO_ACCESS;
 }

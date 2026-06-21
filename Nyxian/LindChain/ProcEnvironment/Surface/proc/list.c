@@ -175,8 +175,6 @@ kern_return_t proc_list(ksurface_proc_snapshot_t *proc_copy,
      * we need.
      */
     proc_list_radix_walker_t *w = malloc(sizeof(proc_list_radix_walker_t));
-    
-    /* sanity check */
     if(w == NULL)
     {
         return KERN_RESOURCE_SHORTAGE;
@@ -195,7 +193,6 @@ kern_return_t proc_list(ksurface_proc_snapshot_t *proc_copy,
     proc_table_rdlock();
     
     w->kp = malloc(sizeof(kinfo_proc_t) * ksurface->proc_info.proc_count);
-    
     if(w->kp == NULL)
     {
         proc_table_unlock();
