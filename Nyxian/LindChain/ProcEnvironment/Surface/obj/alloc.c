@@ -50,12 +50,11 @@ static inline kvobject_t *__kvobject_alloc(kvobject_main_event_handler_t handler
     kvo->refcount = 1;                          /* starting as retained for the caller, cuz the caller gets one reference */
     kvo->base_type = base_type;
     kvo->state = kvObjStateNormal;
+    kvo->main_handler = handler;
     
-    /* only normal objects get this setup */
+    /* only normal objects get those locks */
     if(base_type != kvObjBaseTypeObjectSnapshot)
     {
-        kvo->main_handler = handler;
-        
         /* safely initilizing both locks */
         if(pthread_rwlock_init(&(kvo->rwlock), NULL) != 0)
         {
@@ -153,13 +152,8 @@ kvobject_snapshot_t *kvobject_snapshot(kvobject_t *kvo,
         kvo_snap->orig = kvo;
     }
     
-    /* setting handlers and running copyit straight */
-    kvo_snap->main_handler = kvo->main_handler;
-    
     /* preparing stack array */
     kvobject_t *kvoarr[2] = { kvo_snap, kvo };
-    
-    /* checking init handler and executing if nonnull */
     if(kvo_snap->main_handler(kvoarr, kvObjEventSnapshot) != 0)
     {
         free(kvo_snap);

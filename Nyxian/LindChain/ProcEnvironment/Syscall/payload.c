@@ -26,12 +26,8 @@ kern_return_t mach_syscall_payload_create(void *ptr,
                                           size_t size,
                                           vm_address_t *vm_address)
 {
-    /* allocate using vm_allocate */
     kern_return_t kr = vm_allocate(mach_task_self(), vm_address, size, VM_FLAGS_ANYWHERE);
-    
-    /* null pointer check */
-    if(kr == KERN_SUCCESS &&
-       ptr != NULL)
+    if(kr == KERN_SUCCESS && ptr != NULL)
     {
         /* you belong into here buffer pointed to by ptr ^^ */
         memcpy((void*)(*vm_address), ptr, size);
@@ -59,10 +55,7 @@ bool mach_syscall_copy_in(task_t task,
      */
     vm_size_t reply = 0;
     kern_return_t kr = vm_read_overwrite(task, (vm_address_t)src, size, (vm_address_t)kptr, &reply);
-    
-    /* checking if successful */
-    if(kr != KERN_SUCCESS ||
-       reply < size)
+    if(kr != KERN_SUCCESS || reply < size)
     {
         return false;
     }
@@ -79,19 +72,16 @@ kernelspace_pointer_t mach_syscall_alloc_in(task_t task,
         return NULL;
     }
     
-    /* allocate kernelspace buffer */
-    kernelspace_pointer_t kptr = malloc(size);
-    
-    /* sanity check */
+    /*
+     * allocate zeroed out kernelspace buffer,
+     * so this doesnt become a attack vector some day
+     */
+    kernelspace_pointer_t kptr = calloc(1, size);
     if(kptr == NULL)
     {
         return NULL;
     }
     
-    /* zero out so this doesnt become a attack vector some day */
-    bzero(kptr, size);
-    
-    /* trigger copy in */
     if(!mach_syscall_copy_in(task, size, kptr, src))
     {
         free(kptr);
@@ -119,8 +109,6 @@ bool mach_syscall_copy_out(task_t task,
      * was written, because thats not our buisness.
      */
     kern_return_t kr = vm_write(task, (vm_address_t)dst, (vm_offset_t)kptr, (mach_msg_type_number_t)size);
-    
-    /* sanity check */
     if(kr != KERN_SUCCESS)
     {
         

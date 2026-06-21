@@ -57,8 +57,6 @@ static ksurface_proc_snapshot_t *get_caller_proc_snapshot(mach_msg_header_t *msg
     /* getting process */
     ksurface_proc_t *proc = NULL;
     kern_return_t ret = proc_for_pid(xnu_pid, &proc);
-    
-    /* null pointer check */
     if(ret != KERN_SUCCESS)
     {
         return NULL;
@@ -290,13 +288,7 @@ static void* syscall_worker_thread(void *ctx)
 
 syscall_server_t* syscall_server_create(void)
 {
-    /* allocating server */
-    syscall_server_t *server = calloc(1, sizeof(syscall_server_t));
-    if(server == NULL)
-    {
-        return NULL;
-    }
-    return server;
+    return calloc(1, sizeof(syscall_server_t));
 }
 
 void syscall_server_register(syscall_server_t *server,
@@ -306,18 +298,13 @@ void syscall_server_register(syscall_server_t *server,
     assert(server->port == MACH_PORT_NULL && server != NULL && syscall_num < MAX_SYSCALLS);
     
 #if DEBUG
-    /* trying to get syscall handler */
     syscall_handler_t phandler = server->handlers[syscall_num];
-    
-    /* if its already present panic */
     if(phandler != NULL)
     {
-        /* shall never ever happen */
         environment_panic("syscall handler for %lu is already registered", syscall_num);
     }
 #endif /* DEBUG */
     
-    /* setting syscall handler */
     server->handlers[syscall_num] = handler;
 }
 
@@ -325,27 +312,22 @@ int syscall_server_start(syscall_server_t *server)
 {
     assert(server != NULL);
     
-    /* creating syscall server port */
     mach_port_options_t options = {
         .flags = MPO_PORT | MPO_IMMOVABLE_RECEIVE | MPO_INSERT_SEND_RIGHT | MPO_QLIMIT | MPO_STRICT,
         .mpl = SYSCALL_QUEUE_LIMIT,
     };
         
     kern_return_t kr = mach_port_construct(mach_task_self(), &options, 0, &server->port);
-    
-    /* mach return check */
     if(kr != KERN_SUCCESS)
     {
         mach_port_deallocate(mach_task_self(), server->port);
         return -1;
     }
     
-    /* starting syscall server */
     extern int CCGetMaximumPerformanceCores(void);
     server->threads_cnt = (int)CCGetMaximumPerformanceCores();
     if(server->threads_cnt == 0)
     {
-        /* shall never happen */
         environment_panic("got 0 return from LDEGetOptimalThreadCount()");
     }
     server->threads = calloc(server->threads_cnt, sizeof(pthread_t));
@@ -360,6 +342,5 @@ int syscall_server_start(syscall_server_t *server)
 
 mach_port_t syscall_server_get_port(syscall_server_t *server)
 {
-    /* returning server port */
     return server->port;
 }
