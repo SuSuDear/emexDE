@@ -100,8 +100,7 @@ kern_return_t proc_task_for_proc(ksurface_proc_t *proc,
      * to their type.
      */
     ipc_info_object_type_t ipc_port_type;
-    mach_vm_address_t placeholder_address;
-    kern_return_t kr = mach_port_kobject(mach_task_self(), tmp_task, &ipc_port_type, &placeholder_address);
+    kern_return_t kr = mach_port_kernel_object(mach_task_self(), tmp_task, &ipc_port_type, NULL);
     if(kr != KERN_SUCCESS)
     {
         /*
