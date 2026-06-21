@@ -47,7 +47,6 @@ kern_return_t proc_for_pid(pid_t pid,
      */
     bool retained = kvo_retain(found);
     proc_table_unlock();
-    
     if(!retained)
     {
         return KERN_FAILURE;

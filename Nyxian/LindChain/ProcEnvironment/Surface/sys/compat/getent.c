@@ -24,8 +24,5 @@
 
 DEFINE_SYSCALL_HANDLER(getent)
 {
-    kvo_rdlock(sys_proc_);
-    PEEntitlement entitlement = proc_getentitlements(sys_proc_snapshot_);
-    kvo_unlock(sys_proc_);
-    return entitlement;
+    return proc_getentitlements(sys_proc_snapshot_);
 }
