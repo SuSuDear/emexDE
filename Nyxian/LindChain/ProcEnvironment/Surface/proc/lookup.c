@@ -156,6 +156,7 @@ kern_return_t proc_task_for_proc(ksurface_proc_t *proc,
              * system(ksurface) termination.
              */
             kr = KERN_INVALID_RIGHT;
+            break;
     }
     
     task_unlock();
@@ -164,7 +165,7 @@ kern_return_t proc_task_for_proc(ksurface_proc_t *proc,
     if(kr != KERN_SUCCESS)
     {
         /* something went wrong :< */
-        return KERN_INVALID_NAME;
+        return kr;
     }
     
     /*
