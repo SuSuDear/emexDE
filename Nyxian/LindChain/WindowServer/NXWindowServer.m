@@ -89,6 +89,10 @@
 + (instancetype)sharedWithWindowScene:(UIWindowScene*)windowScene
 {
     static NXWindowServer *multitaskManagerSingleton = nil;
+    if(windowScene == nil && multitaskManagerSingleton == nil)
+    {
+        return nil;
+    }
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         multitaskManagerSingleton = [[NXWindowServer alloc] initWithWindowScene:windowScene];

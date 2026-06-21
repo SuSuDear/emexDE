@@ -96,6 +96,14 @@
         self.proc = child;
     }
     
+    /* do not initilize when there is no window server */
+    NXWindowServer *windowServer = [NXWindowServer shared];
+    if(windowServer == nil)
+    {
+        /* no window server, no window */
+        return self;
+    }
+    
     NSString *sceneID = [NSString stringWithFormat:@"sceneID:%@-%@", @"LiveProcess", self.process.identifier];
     
     FBSMutableSceneDefinition *definition = [PrivClass(FBSMutableSceneDefinition) definition];
@@ -127,7 +135,7 @@
         settings.foreground = NO;
         
         settings.deviceOrientation = UIDevice.currentDevice.orientation;
-        settings.interfaceOrientation = UIApplication.sharedApplication.statusBarOrientation;
+        settings.interfaceOrientation = windowServer.windowScene.interfaceOrientation;
         
         settings.frame = (innerSelf.session == nil) ? CGRectMake(50, 94, 300, 400) : innerSelf.session.startWindowRect;
         
