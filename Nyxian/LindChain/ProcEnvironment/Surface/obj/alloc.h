@@ -29,8 +29,8 @@
 #define kvo_copy(kvo) (void*)kvobject_copy((kvobject_t*)kvo)
 #define kvo_snapshot(kvo, option) (void*)kvobject_snapshot((kvobject_t*)kvo, option)
 
-kvobject_strong_t *kvobject_alloc(kvobject_main_event_handler_t handler);
-kvobject_strong_t *kvobject_copy(kvobject_t *kvo);
+kvobject_t *kvobject_alloc(kvobject_main_event_handler_t handler);
+kvobject_t *kvobject_copy(kvobject_t *kvo);
 kvobject_snapshot_t *kvobject_snapshot(kvobject_t *kvo, kvobject_snapshot_options_t option);
 
 #endif /* KVOBJECT_ALLOC_H */

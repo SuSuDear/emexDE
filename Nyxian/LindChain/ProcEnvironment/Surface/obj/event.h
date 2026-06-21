@@ -28,7 +28,7 @@
 #define kvo_event_register(kvo, mask, handler, context, event) kvobject_event_register((kvobject_t*)kvo, mask, handler, context, event)
 #define kvo_event_trigger(kvo, mask, value) kvobject_event_trigger((kvobject_t*)kvo, mask, value)
 
-kern_return_t kvobject_event_register(kvobject_strong_t *kvo, kvobject_event_type_t mask, kvobject_event_handler_t handler, void *context, kvobject_event_t **event);
-void kvobject_event_trigger(kvobject_strong_t *kvo, kvobject_event_type_t mask, uint64_t value);
+kern_return_t kvobject_event_register(kvobject_t *kvo, kvobject_event_type_t mask, kvobject_event_handler_t handler, void *context, kvobject_event_t **event);
+void kvobject_event_trigger(kvobject_t *kvo, kvobject_event_type_t mask, uint64_t value);
 
 #endif /* KVOBJECT_EVENT_H */

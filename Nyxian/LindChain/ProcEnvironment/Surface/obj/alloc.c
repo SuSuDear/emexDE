@@ -27,7 +27,7 @@
 #include <string.h>
 #include <assert.h>
 
-kvobject_strong_t *kvobject_alloc(kvobject_main_event_handler_t handler)
+kvobject_t *kvobject_alloc(kvobject_main_event_handler_t handler)
 {
     assert(handler != NULL);
     
@@ -85,7 +85,7 @@ kvobject_strong_t *kvobject_alloc(kvobject_main_event_handler_t handler)
     return kvo;
 }
 
-kvobject_strong_t *kvobject_copy(kvobject_t *kvo)
+kvobject_t *kvobject_copy(kvobject_t *kvo)
 {
     assert(kvo != NULL);
     

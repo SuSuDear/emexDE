@@ -58,14 +58,14 @@ bool kvobject_retain(kvobject_t *kvo)
     }
 }
 
-void kvobject_invalidate(kvobject_strong_t *kvo)
+void kvobject_invalidate(kvobject_t *kvo)
 {
     assert(kvo != NULL);
     kvo_event_trigger(kvo, kvObjEventInvalidate, 0);
     atomic_store(&(kvo->state), kvObjStateInvalid);
 }
 
-void kvobject_release(kvobject_strong_t *kvo)
+void kvobject_release(kvobject_t *kvo)
 {
     assert(kvo != NULL);
     

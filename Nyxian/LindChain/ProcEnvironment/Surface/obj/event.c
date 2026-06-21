@@ -25,7 +25,7 @@
 #import <stdlib.h>
 #import <assert.h>
 
-kern_return_t kvobject_event_register(kvobject_strong_t *kvo,
+kern_return_t kvobject_event_register(kvobject_t *kvo,
                                       kvobject_event_type_t mask,
                                       kvobject_event_handler_t handler,
                                       void *context,
@@ -86,7 +86,7 @@ kern_return_t kvobject_event_register(kvobject_strong_t *kvo,
     return KERN_SUCCESS;
 }
 
-void kvobject_event_trigger(kvobject_strong_t *kvo,
+void kvobject_event_trigger(kvobject_t *kvo,
                             kvobject_event_type_t type,
                             uint64_t value)
 {
