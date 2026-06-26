@@ -128,40 +128,12 @@ jailed: SCHEME := Nyxian
 jailed: FILE := emexDE.ipa
 jailed: clean check compile build-roothelper package-app clean
 
-rootless: SCHEME := NyxianForJB
-rootless: ARCH := iphoneos-arm64
-rootless: JB_PATH := /var/jb/
-rootless: clean check compile pseudo-sign package-deb clean
-
-roothide: SCHEME := NyxianForJB
-roothide: ARCH := iphoneos-arm64e
-roothide: JB_PATH := /
-roothide: clean check compile pseudo-sign package-deb clean
-
-rootful: SCHEME := NyxianForJB
-rootful: ARCH := iphoneos-arm
-rootful: JB_PATH := /
-rootful: clean check compile pseudo-sign package-deb clean
-
-trollstore: SCHEME := NyxianForJB
-trollstore: FILE := emexDE.tipa
-trollstore: clean check compile build-roothelper pseudo-sign package-app clean
-
 # Dependencies
 CoreCompiler/CoreCompilerSupportLibs:
 	cd LLVM-On-iOS; $(MAKE)
 	rm -rf CoreCompiler/CoreCompilerSupportLibs
 	cp -r LLVM-On-iOS/CoreCompilerSupportLibs CoreCompiler/CoreCompilerSupportLibs
 	cp -r LLVM-On-iOS/LLVM.xcframework CoreCompiler/CoreCompilerSupportLibs/LLVM.xcframework
-
-# Needed for jailbroken version for permasigned apps
-Nyxian/LindChain/JBSupport/tshelper:
-	$(MAKE) -C TrollStore pre_build
-	$(MAKE) -C TrollStore make_fastPathSign MAKECMDGOALS=
-	$(MAKE) -C TrollStore make_roothelper MAKECMDGOALS=
-	$(MAKE) -C TrollStore make_trollstore MAKECMDGOALS=
-	$(MAKE) -C TrollStore make_trollhelper_embedded MAKECMDGOALS=
-	cp TrollStore/RootHelper/.theos/obj/trollstorehelper Nyxian/LindChain/JBSupport/tshelper
 
 # Helper
 update-config:
@@ -183,9 +155,6 @@ compile: CoreCompiler/CoreCompilerSupportLibs
 		CODE_SIGNING_REQUIRED=NO \
 		CODE_SIGNING_ALLOWED=NO
 
-pseudo-sign:
-	codesign --sign - --entitlements ent/nyxianforjb.xml --force --timestamp=none build/Nyxian.xcarchive/Products/Applications/emexDEForJB.app
-
 build-roothelper:
 	git submodule update --init --recursive TrollStore
 	python3 scripts/patch_trollstore.py
@@ -195,39 +164,20 @@ build-roothelper:
 
 package-app:
 	cp -r  build/Nyxian.xcarchive/Products/Applications Payload
-	@if [ -d Payload/emexDE.app ]; then \
-		curl -L https://github.com/opa334/ldid/releases/latest/download/ldid -o Payload/emexDE.app/ldid; \
-		chmod 0755 Payload/emexDE.app/ldid; \
-		echo bundled > Payload/emexDE.app/ldid.version; \
-		chmod 0644 Payload/emexDE.app/ldid.version; \
-		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app; \
-		ldid -Ssupports/ldid.entitlements.plist Payload/emexDE.app/ldid; \
-		cp TrollStore/RootHelper/.theos/obj/trollstorehelper Payload/emexDE.app/trollstorehelper; \
-		chmod 0755 Payload/emexDE.app/trollstorehelper; \
-		ldid -STrollStore/RootHelper/entitlements.plist Payload/emexDE.app/trollstorehelper; \
-	elif [ -d Payload/emexDEForJB.app ]; then \
-		curl -L https://github.com/opa334/ldid/releases/latest/download/ldid -o Payload/emexDEForJB.app/ldid; \
-		chmod 0755 Payload/emexDEForJB.app/ldid; \
-		echo bundled > Payload/emexDEForJB.app/ldid.version; \
-		chmod 0644 Payload/emexDEForJB.app/ldid.version; \
-		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDEForJB.app; \
-		ldid -Ssupports/ldid.entitlements.plist Payload/emexDEForJB.app/ldid; \
-		cp TrollStore/RootHelper/.theos/obj/trollstorehelper Payload/emexDEForJB.app/trollstorehelper; \
-		chmod 0755 Payload/emexDEForJB.app/trollstorehelper; \
-		ldid -STrollStore/RootHelper/entitlements.plist Payload/emexDEForJB.app/trollstorehelper; \
-	else \
+	@if [ ! -d Payload/emexDE.app ]; then \
 		echo "No emexDE app bundle found in Payload"; exit 1; \
 	fi
+	curl -L https://github.com/opa334/ldid/releases/latest/download/ldid -o Payload/emexDE.app/ldid
+	chmod 0755 Payload/emexDE.app/ldid
+	echo bundled > Payload/emexDE.app/ldid.version
+	chmod 0644 Payload/emexDE.app/ldid.version
+	ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app
+	ldid -Ssupports/ldid.entitlements.plist Payload/emexDE.app/ldid
+	cp TrollStore/RootHelper/.theos/obj/trollstorehelper Payload/emexDE.app/trollstorehelper
+	chmod 0755 Payload/emexDE.app/trollstorehelper
+	ldid -STrollStore/RootHelper/entitlements.plist Payload/emexDE.app/trollstorehelper
 	-rm $(FILE)
 	zip -r $(FILE) ./Payload
-
-package-deb:
-	mkdir -p .package$(JB_PATH)
-	cp -r  build/Nyxian.xcarchive/Products/Applications .package$(JB_PATH)/Applications
-	find . -type f -name ".DS_Store" -delete
-	mkdir -p .package/DEBIAN
-	echo "Package: $(NXBUNDLE)\nName: $(NXNAME)\nVersion: $(NXVERSION)\nArchitecture: $(ARCH)\nDescription: Full fledged Xcode-like IDE for iOS\nIcon: https://raw.githubusercontent.com/ProjectNyxian/Nyxian/main/preview.png\nMaintainer: cr4zyengineer\nAuthor: cr4zyengineer\nSection: Utilities\nTag: role::hacker" > .package/DEBIAN/control
-	dpkg-deb -b --root-owner-group .package emexDE_$(NXVERSION)_$(ARCH).deb
 
 clean:
 	rm -rf Payload
@@ -238,11 +188,8 @@ clean:
 
 clean-artifacts:
 	-rm *.ipa
-	-rm *.deb
-	-rm *.tipa
 
 clean-all: clean clean-artifacts
 	rm -rf CoreCompiler/CoreCompilerSupportLibs
-	-rm Nyxian/LindChain/JBSupport/tshelper
 	cd LLVM-On-iOS; make clean; git reset --hard
 	cd TrollStore; make clean; git reset --hard

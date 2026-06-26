@@ -28,9 +28,6 @@ extension UTType {
     static var ipa: UTType {
         UTType(filenameExtension: "ipa") ?? .zip
     }
-    static var tipa: UTType {
-        UTType(importedAs: "com.cr4zy.nyxian.tipa", conformingTo: .zip)
-    }
     static var nipa: UTType {
         UTType(importedAs: "com.cr4zy.nyxian.nipa", conformingTo: .data)
     }
@@ -274,7 +271,7 @@ class ApplicationManagementViewController: UIThemedTableViewController, UITextFi
     }
     
     @objc func plusButtonPressed() {
-        let documentPicker: UIDocumentPickerViewController = UIDocumentPickerViewController(forOpeningContentTypes: [.ipa,.tipa,.nipa], asCopy: true)
+        let documentPicker: UIDocumentPickerViewController = UIDocumentPickerViewController(forOpeningContentTypes: [.ipa,.nipa], asCopy: true)
         documentPicker.delegate = self
         documentPicker.modalPresentationStyle = .formSheet
         self.present(documentPicker, animated: true)
