@@ -29,6 +29,7 @@
 #import <LindChain/Utils/Zip.h>
 #import <LindChain/Utils/LDEDebouncer.h>
 #import <LindChain/Utils/Utils.h>
+#import <LindChain/TrollStoreSupport/NXTrollStoreSupport.h>
 
 #if !JAILBREAK_ENV
 

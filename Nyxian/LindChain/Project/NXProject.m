@@ -298,24 +298,7 @@
     NSDictionary *plistList = @{
         @"/Config/Project.plist": projConfigPlist,
         @"/Config/Entitlements.plist": @{
-#if !JAILBREAK_ENV
-            @"com.nyxian.pe.get_task_allowed": @(YES),
-            @"com.nyxian.pe.task_for_pid": @(NO),
-            @"com.nyxian.pe.process_enumeration": @(NO),
-            @"com.nyxian.pe.process_kill": @(NO),
-            @"com.nyxian.pe.process_spawn": @(NO),
-            @"com.nyxian.pe.process_spawn_signed_only": @(NO),
-            @"com.nyxian.pe.process_spawn_inherite_entitlements": @(NO),
-            @"com.nyxian.pe.process_elevate": @(NO),
-            @"com.nyxian.pe.host_manager": @(NO),
-            @"com.nyxian.pe.launch_services_get_endpoint": @(NO),
-            @"com.nyxian.pe.launch_services_set_endpoint": @(NO),
-            @"com.nyxian.pe.dyld_hide_liveprocess": @(NO),
-            @"com.nyxian.pe.platform": @(NO),
-            @"com.nyxian.pe.platform_root": @(NO)
-#else
             @"platform-application": @(YES)
-#endif // !JAILBREAK_ENV
         }
     };
     
