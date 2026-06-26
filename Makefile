@@ -188,21 +188,7 @@ pseudo-sign:
 
 build-roothelper:
 	git submodule update --init --recursive TrollStore
-	python3 - <<'PY'
-from pathlib import Path
-h = Path('TrollStore/Shared/TSUtil.h')
-s = h.read_text()
-s = s.replace('@"com.opa334.TrollStore"', '@"com.cr4zy.nyxian"')
-h.write_text(s)
-if '@"com.cr4zy.nyxian"' not in s:
-    raise SystemExit('failed to patch TrollStore APP_ID')
-m = Path('TrollStore/Shared/TSUtil.m')
-s = m.read_text()
-s = s.replace('return [trollStorePath() stringByAppendingPathComponent:@"TrollStore.app"];', 'NSString *basePath = trollStorePath();\n\tNSString *emexDEPath = [basePath stringByAppendingPathComponent:@"emexDE.app"];\n\tif([[NSFileManager defaultManager] fileExistsAtPath:emexDEPath]) return emexDEPath;\n\tNSString *emexDEForJBPath = [basePath stringByAppendingPathComponent:@"emexDEForJB.app"];\n\tif([[NSFileManager defaultManager] fileExistsAtPath:emexDEForJBPath]) return emexDEForJBPath;\n\treturn [basePath stringByAppendingPathComponent:@"TrollStore.app"];')
-m.write_text(s)
-if 'emexDE.app' not in s:
-    raise SystemExit('failed to patch TrollStore app path')
-PY
+	python3 scripts/patch_trollstore.py
 	$(MAKE) -C TrollStore pre_build
 	$(MAKE) -C TrollStore make_fastPathSign MAKECMDGOALS=
 	$(MAKE) -C TrollStore make_roothelper MAKECMDGOALS=
