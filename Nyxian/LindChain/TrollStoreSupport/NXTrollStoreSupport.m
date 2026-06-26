@@ -102,6 +102,13 @@ static int NXSpawnRoot(NSString *path, NSArray *args, NSString **stdOut, NSStrin
     posix_spawnattr_destroy(&attr);
     posix_spawn_file_actions_destroy(&action);
 
+    if (stdErr) {
+        close(outErr[1]);
+    }
+    if (stdOut) {
+        close(out[1]);
+    }
+
     for (NSUInteger i = 0; i < argCount; i++) {
         free(argsC[i]);
     }
