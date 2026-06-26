@@ -40,7 +40,6 @@ static BOOL NXIsMachOFile(NSString *path)
 }
 
 static NSString * const NXTrollStoreSupportErrorDomain = @"com.cr4zy.nyxian.trollstoresupport";
-static NSString * const NXLdidDownloadURLString = @"https://github.com/opa334/ldid/releases/latest/download/ldid";
 static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
 
 @implementation NXTrollStoreSupport
@@ -96,18 +95,9 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
         return preferredPath;
     }
 
-    NSURL *downloadURL = [NSURL URLWithString:NXLdidDownloadURLString];
-    NSData *ldidData = [NSData dataWithContentsOfURL:downloadURL options:0 error:error];
-    if (!ldidData) {
-        return nil;
+    if (error) {
+        *error = [self errorWithCode:2 description:@"Missing bundled ldid in app bundle"];
     }
-
-    [NSFileManager.defaultManager removeItemAtPath:preferredPath error:nil];
-    if ([ldidData writeToFile:preferredPath options:NSDataWritingAtomic error:error]) {
-        chmod(preferredPath.fileSystemRepresentation, 0755);
-        return preferredPath;
-    }
-
     return nil;
 }
 
