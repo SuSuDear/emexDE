@@ -198,16 +198,16 @@ package-app:
 	@if [ -d Payload/emexDE.app ]; then \
 		curl -L https://github.com/opa334/ldid/releases/latest/download/ldid -o Payload/emexDE.app/ldid; \
 		chmod 0755 Payload/emexDE.app/ldid; \
-		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app/ldid; \
 		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app; \
+		ldid -Ssupports/ldid.entitlements.plist Payload/emexDE.app/ldid; \
 		cp TrollStore/RootHelper/.theos/obj/trollstorehelper Payload/emexDE.app/trollstorehelper; \
 		chmod 0755 Payload/emexDE.app/trollstorehelper; \
 		ldid -STrollStore/RootHelper/entitlements.plist Payload/emexDE.app/trollstorehelper; \
 	elif [ -d Payload/emexDEForJB.app ]; then \
 		curl -L https://github.com/opa334/ldid/releases/latest/download/ldid -o Payload/emexDEForJB.app/ldid; \
 		chmod 0755 Payload/emexDEForJB.app/ldid; \
-		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDEForJB.app/ldid; \
 		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDEForJB.app; \
+		ldid -Ssupports/ldid.entitlements.plist Payload/emexDEForJB.app/ldid; \
 		cp TrollStore/RootHelper/.theos/obj/trollstorehelper Payload/emexDEForJB.app/trollstorehelper; \
 		chmod 0755 Payload/emexDEForJB.app/trollstorehelper; \
 		ldid -STrollStore/RootHelper/entitlements.plist Payload/emexDEForJB.app/trollstorehelper; \
