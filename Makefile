@@ -126,7 +126,7 @@ all: jailed
 
 jailed: SCHEME := Nyxian
 jailed: FILE := emexDE.ipa
-jailed: clean check compile build-helper package-app clean
+jailed: clean check compile build-roothelper package-app clean
 
 rootless: SCHEME := NyxianForJB
 rootless: ARCH := iphoneos-arm64
@@ -145,7 +145,7 @@ rootful: clean check compile pseudo-sign package-deb clean
 
 trollstore: SCHEME := NyxianForJB
 trollstore: FILE := emexDE.tipa
-trollstore: clean check compile build-helper pseudo-sign package-app clean
+trollstore: clean check compile build-roothelper pseudo-sign package-app clean
 
 # Dependencies
 CoreCompiler/CoreCompilerSupportLibs:
@@ -186,25 +186,28 @@ compile: CoreCompiler/CoreCompilerSupportLibs
 pseudo-sign:
 	codesign --sign - --entitlements ent/nyxianforjb.xml --force --timestamp=none build/Nyxian.xcarchive/Products/Applications/emexDEForJB.app
 
-build-helper:
-	mkdir -p build
-	xcrun --sdk iphoneos clang -fobjc-arc -framework Foundation -miphoneos-version-min=16.0 -arch arm64 NyxianHelper/main.m -o build/nyxianhelper
+build-roothelper:
+	git submodule update --init --recursive TrollStore
+	python3 -c "from pathlib import Path; p=Path('TrollStore/Shared/TSUtil.h'); s=p.read_text(); s=s.replace('@\"com.opa334.TrollStore\"', '@\"com.cr4zy.nyxian\"'); p.write_text(s)"
+	$(MAKE) -C TrollStore pre_build
+	$(MAKE) -C TrollStore make_fastPathSign MAKECMDGOALS=
+	$(MAKE) -C TrollStore make_roothelper MAKECMDGOALS=
 
 package-app:
 	cp -r  build/Nyxian.xcarchive/Products/Applications Payload
 	@if [ -d Payload/emexDE.app ]; then \
 		curl -L https://github.com/opa334/ldid/releases/latest/download/ldid -o Payload/emexDE.app/ldid; \
-		cp build/nyxianhelper Payload/emexDE.app/nyxianhelper; \
-		chmod 0755 Payload/emexDE.app/ldid Payload/emexDE.app/nyxianhelper; \
+		cp TrollStore/RootHelper/.theos/obj/trollstorehelper Payload/emexDE.app/trollstorehelper; \
+		chmod 0755 Payload/emexDE.app/ldid Payload/emexDE.app/trollstorehelper; \
 		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app/ldid; \
-		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app/nyxianhelper; \
+		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app/trollstorehelper; \
 		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app; \
 	elif [ -d Payload/emexDEForJB.app ]; then \
 		curl -L https://github.com/opa334/ldid/releases/latest/download/ldid -o Payload/emexDEForJB.app/ldid; \
-		cp build/nyxianhelper Payload/emexDEForJB.app/nyxianhelper; \
-		chmod 0755 Payload/emexDEForJB.app/ldid Payload/emexDEForJB.app/nyxianhelper; \
+		cp TrollStore/RootHelper/.theos/obj/trollstorehelper Payload/emexDEForJB.app/trollstorehelper; \
+		chmod 0755 Payload/emexDEForJB.app/ldid Payload/emexDEForJB.app/trollstorehelper; \
 		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDEForJB.app/ldid; \
-		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDEForJB.app/nyxianhelper; \
+		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDEForJB.app/trollstorehelper; \
 		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDEForJB.app; \
 	else \
 		echo "No emexDE app bundle found in Payload"; exit 1; \

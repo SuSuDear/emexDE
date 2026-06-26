@@ -78,7 +78,7 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
 
 + (NSString *)helperPath
 {
-    return [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"nyxianhelper"];
+    return [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"trollstorehelper"];
 }
 
 + (BOOL)ldidExistsAtPath:(NSString *)path
@@ -263,24 +263,19 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
     return YES;
 }
 
-+ (BOOL)signExecutableAtPath:(NSString *)executablePath entitlementsPath:(NSString *)entitlementsPath error:(NSError **)error
++ (BOOL)installIpaAtPath:(NSString *)ipaPath error:(NSError **)error
 {
-    NSString *ldidPath = [self ensureLdidInstalledWithError:error];
-    if (!ldidPath) {
-        return NO;
-    }
-
     NSString *helperPath = [self helperPath];
     BOOL isDirectory = NO;
     if (![NSFileManager.defaultManager fileExistsAtPath:helperPath isDirectory:&isDirectory] || isDirectory) {
         if (error) {
-            *error = [self errorWithCode:13 description:@"Missing nyxianhelper in app bundle"];
+            *error = [self errorWithCode:13 description:@"Missing trollstorehelper in app bundle"];
         }
         return NO;
     }
     chmod(helperPath.fileSystemRepresentation, 0755);
 
-    NSArray<NSString *> *arguments = @[helperPath, @"sign", ldidPath, entitlementsPath, executablePath];
+    NSArray<NSString *> *arguments = @[helperPath, @"install", @"force", ipaPath];
 
     char **argv = calloc(arguments.count + 1, sizeof(char *));
     for (NSUInteger index = 0; index < arguments.count; index++) {
@@ -318,7 +313,7 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
 
     if (spawnError != 0) {
         if (error) {
-            *error = [self errorWithCode:3 description:[NSString stringWithFormat:@"Failed to spawn nyxianhelper: %s", strerror(spawnError)]];
+            *error = [self errorWithCode:3 description:[NSString stringWithFormat:@"Failed to spawn trollstorehelper: %s", strerror(spawnError)]];
         }
         return NO;
     }
@@ -326,14 +321,14 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
     int status = 0;
     if (waitpid(pid, &status, 0) == -1) {
         if (error) {
-            *error = [self errorWithCode:4 description:@"Failed to wait for nyxianhelper"];
+            *error = [self errorWithCode:4 description:@"Failed to wait for trollstorehelper"];
         }
         return NO;
     }
 
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
         if (error) {
-            *error = [self errorWithCode:5 description:[NSString stringWithFormat:@"nyxianhelper failed: %@", stderrOutput.length ? stderrOutput : @"unknown error"]];
+            *error = [self errorWithCode:5 description:[NSString stringWithFormat:@"trollstorehelper failed: %@", stderrOutput.length ? stderrOutput : @"unknown error"]];
         }
         return NO;
     }
