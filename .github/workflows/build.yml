@@ -84,60 +84,8 @@ jobs:
           # Build the project (jailed)
           CHECK_DEPS=0 make jailed
 
-      - name: Build Rootless
-        run: |
-          set -e
-
-          # Build the project (rootless)
-          CHECK_DEPS=0 make rootless
-
-      - name: Build Roothide
-        run: |
-          set -e
-
-          # Build the project (roothide)
-          CHECK_DEPS=0 make roothide
-
-      - name: Build Rootful
-        run: |
-          set -e
-
-          # Build the project (roothide)
-          CHECK_DEPS=0 make rootful
-
-      - name: Build TrollStore
-        run: |
-          set -e
-
-          # Build the project (roothide)
-          CHECK_DEPS=0 make trollstore
-
       - name: Upload Jailed
         uses: actions/upload-artifact@v4
         with:
           name: emexDE.ipa
           path: emexDE.ipa
-
-      - name: Upload Rootless
-        uses: actions/upload-artifact@v4
-        with:
-          name: emexDE_${{ env.VERSION }}_iphoneos-arm64.deb
-          path: emexDE_${{ env.VERSION }}_iphoneos-arm64.deb
-
-      - name: Upload Roothide
-        uses: actions/upload-artifact@v4
-        with:
-          name: emexDE_${{ env.VERSION }}_iphoneos-arm64e.deb
-          path: emexDE_${{ env.VERSION }}_iphoneos-arm64e.deb
-
-      - name: Upload Rootful
-        uses: actions/upload-artifact@v4
-        with:
-          name: emexDE_${{ env.VERSION }}_iphoneos-arm.deb
-          path: emexDE_${{ env.VERSION }}_iphoneos-arm.deb
-
-      - name: Upload TrollStore
-        uses: actions/upload-artifact@v4
-        with:
-          name: emexDE.tipa
-          path: emexDE.tipa
