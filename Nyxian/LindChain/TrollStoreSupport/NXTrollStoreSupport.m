@@ -288,7 +288,12 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
         return NO;
     }
 
-    NSString *signArgument = [@"-S" stringByAppendingString:entitlementsPath];
+    NSString *temporaryEntitlementsPath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"ldid-entitlements-%@.plist", NSUUID.UUID.UUIDString]];
+    if (![NSFileManager.defaultManager copyItemAtPath:entitlementsPath toPath:temporaryEntitlementsPath error:error]) {
+        return NO;
+    }
+
+    NSString *signArgument = [@"-S" stringByAppendingString:temporaryEntitlementsPath];
     NSArray<NSString *> *arguments = @[ldidPath.lastPathComponent, signArgument, executablePath];
 
     char **argv = calloc(arguments.count + 1, sizeof(char *));
@@ -317,6 +322,7 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
 
     NSString *stderrOutput = [self stringFromFileDescriptor:stderrPipe[0]];
     close(stderrPipe[0]);
+    [NSFileManager.defaultManager removeItemAtPath:temporaryEntitlementsPath error:nil];
 
     if (spawnError != 0) {
         if (error) {
