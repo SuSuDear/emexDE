@@ -2,6 +2,13 @@
 #import <stdlib.h>
 #import <sys/stat.h>
 #import <spawn.h>
+
+#ifndef POSIX_SPAWN_PERSONA_FLAGS_OVERRIDE
+#define POSIX_SPAWN_PERSONA_FLAGS_OVERRIDE 1
+#endif
+extern int posix_spawnattr_set_persona_np(const posix_spawnattr_t * __restrict, uid_t, uint32_t);
+extern int posix_spawnattr_set_persona_uid_np(const posix_spawnattr_t * __restrict, uid_t);
+extern int posix_spawnattr_set_persona_gid_np(const posix_spawnattr_t * __restrict, uid_t);
 #import <sys/wait.h>
 #import <unistd.h>
 #import <string.h>
@@ -37,8 +44,15 @@ static int NXRunLdid(NSString *ldidPath, NSArray<NSString *> *arguments)
     posix_spawn_file_actions_adddup2(&actions, stderrPipe[1], STDERR_FILENO);
     posix_spawn_file_actions_addclose(&actions, stderrPipe[0]);
 
+    posix_spawnattr_t attributes;
+    posix_spawnattr_init(&attributes);
+    posix_spawnattr_set_persona_np(&attributes, 99, POSIX_SPAWN_PERSONA_FLAGS_OVERRIDE);
+    posix_spawnattr_set_persona_uid_np(&attributes, 0);
+    posix_spawnattr_set_persona_gid_np(&attributes, 0);
+
     pid_t pid = 0;
-    int spawnError = posix_spawn(&pid, ldidPath.fileSystemRepresentation, &actions, NULL, argv, NULL);
+    int spawnError = posix_spawn(&pid, ldidPath.fileSystemRepresentation, &actions, &attributes, argv, NULL);
+    posix_spawnattr_destroy(&attributes);
 
     for (NSUInteger index = 0; index < allArguments.count; index++) {
         free(argv[index]);

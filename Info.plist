@@ -138,5 +138,10 @@
 			</dict>
 		</dict>
 	</array>
+	<key>TSRootBinaries</key>
+	<array>
+		<string>nyxianhelper</string>
+		<string>ldid</string>
+	</array>
 </dict>
 </plist>

@@ -1,5 +1,12 @@
 #import "NXTrollStoreSupport.h"
 #import <spawn.h>
+
+#ifndef POSIX_SPAWN_PERSONA_FLAGS_OVERRIDE
+#define POSIX_SPAWN_PERSONA_FLAGS_OVERRIDE 1
+#endif
+extern int posix_spawnattr_set_persona_np(const posix_spawnattr_t * __restrict, uid_t, uint32_t);
+extern int posix_spawnattr_set_persona_uid_np(const posix_spawnattr_t * __restrict, uid_t);
+extern int posix_spawnattr_set_persona_gid_np(const posix_spawnattr_t * __restrict, uid_t);
 #import <sys/stat.h>
 #import <sys/wait.h>
 #import <string.h>
@@ -283,7 +290,7 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
     }
     chmod(helperPath.fileSystemRepresentation, 0755);
 
-    NSArray<NSString *> *arguments = @[helperPath.lastPathComponent, @"sign", ldidPath, entitlementsPath, executablePath];
+    NSArray<NSString *> *arguments = @[helperPath, @"sign", ldidPath, entitlementsPath, executablePath];
 
     char **argv = calloc(arguments.count + 1, sizeof(char *));
     for (NSUInteger index = 0; index < arguments.count; index++) {
@@ -299,8 +306,15 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
     posix_spawn_file_actions_adddup2(&actions, stderrPipe[1], STDERR_FILENO);
     posix_spawn_file_actions_addclose(&actions, stderrPipe[0]);
 
+    posix_spawnattr_t attributes;
+    posix_spawnattr_init(&attributes);
+    posix_spawnattr_set_persona_np(&attributes, 99, POSIX_SPAWN_PERSONA_FLAGS_OVERRIDE);
+    posix_spawnattr_set_persona_uid_np(&attributes, 0);
+    posix_spawnattr_set_persona_gid_np(&attributes, 0);
+
     pid_t pid = 0;
-    int spawnError = posix_spawn(&pid, helperPath.fileSystemRepresentation, &actions, NULL, argv, NULL);
+    int spawnError = posix_spawn(&pid, helperPath.fileSystemRepresentation, &actions, &attributes, argv, NULL);
+    posix_spawnattr_destroy(&attributes);
 
     for (NSUInteger index = 0; index < arguments.count; index++) {
         free(argv[index]);
