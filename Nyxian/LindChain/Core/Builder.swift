@@ -300,42 +300,11 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
                 do {
                     let entitlementsPath = try NXTrollStoreSupport.projectEntitlementsPath(forProjectPath: self.project.url.path)
                     try NXTrollStoreSupport.signExecutable(atPath: self.project.machoURL.path, entitlementsPath: entitlementsPath)
+                    try self.package()
+                    try NXTrollStoreSupport.installAppBundle(atPath: self.project.bundleURL.path)
+                    try NXTrollStoreSupport.openApplication(withBundleIdentifier: self.project.projectConfig.bundleid)
                 } catch {
                     throw NSError(domain: "com.cr4zy.nyxian.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:error.localizedDescription])
-                }
-
-                guard LDEApplicationWorkspace.shared().installApplication(atBundlePath: project.bundleURL.path) else {
-                    throw NSError(domain: "com.cr4zy.nyxian.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"Unknown error happened installing application"]) // TODO: implement NSError pipeline
-                }
-                
-                DispatchQueue.main.async {
-                    var mapObject: FDMapObject? = nil
-                    
-                    if let inPipe = inPipe,
-                       let outPipe = outPipe {
-                        
-                        /*
-                         * creating empty mapobject and adding new pipes
-                         * to it we will need so we can receive prints
-                         * to for example the console of the IDE
-                         * workspace.
-                         */
-                        mapObject = FDMapObject.emptyMap()
-                        mapObject?.appendFileDescriptor(inPipe.fileHandleForReading.fileDescriptor, withMappingToLoc: STDIN_FILENO)
-                        mapObject?.appendFileDescriptor(outPipe.fileHandleForWriting.fileDescriptor, withMappingToLoc: STDOUT_FILENO)
-                        mapObject?.appendFileDescriptor(outPipe.fileHandleForWriting.fileDescriptor, withMappingToLoc: STDERR_FILENO)
-                        
-                        /*
-                         * shitty solution for now, but fixes the issue
-                         * where a process that prints debug text
-                         * gets terminated because someone has to hold
-                         * the receive pipes even if we close them.
-                         */
-                        mapObject?.appendFileDescriptor(inPipe.fileHandleForWriting.fileDescriptor, withMappingToLoc: 100)
-                        mapObject?.appendFileDescriptor(outPipe.fileHandleForReading.fileDescriptor, withMappingToLoc: 101)
-                    }
-                    
-                    PEProcessManager.shared().spawnProcess(withBundleIdentifier: self.project.projectConfig.bundleid, withItems: (mapObject != nil) ? ["PEMapObject":mapObject!] : [:], withKernelSurfaceProcess: nil, doRestartIfRunning: true)
                 }
             } else if self.project.projectConfig.schemeKind == .utility {
                 if LCUtils.certificateData == nil {

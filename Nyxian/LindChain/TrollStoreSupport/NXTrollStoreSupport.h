@@ -7,6 +7,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (nullable NSString *)projectEntitlementsPathForProjectPath:(NSString *)projectPath error:(NSError **)error;
 + (nullable NSString *)ensureLdidInstalledWithError:(NSError **)error;
 + (BOOL)signExecutableAtPath:(NSString *)executablePath entitlementsPath:(NSString *)entitlementsPath error:(NSError **)error;
++ (BOOL)installAppBundleAtPath:(NSString *)bundlePath error:(NSError **)error;
++ (BOOL)openApplicationWithBundleIdentifier:(NSString *)bundleIdentifier error:(NSError **)error;
 
 @end
 
