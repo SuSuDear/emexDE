@@ -13,6 +13,7 @@ extern int posix_spawnattr_set_persona_gid_np(const posix_spawnattr_t * __restri
 #import <unistd.h>
 #import <stdint.h>
 #import <stdio.h>
+#import <fcntl.h>
 
 @interface LSApplicationWorkspace : NSObject
 + (instancetype)defaultWorkspace;
@@ -41,6 +42,121 @@ static BOOL NXIsMachOFile(NSString *path)
 
 static NSString * const NXTrollStoreSupportErrorDomain = @"com.cr4zy.nyxian.trollstoresupport";
 static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
+
+static int NXFdIsValid(int fd)
+{
+    return fcntl(fd, F_GETFD) != -1 || errno != EBADF;
+}
+
+static NSString *NXGetNSStringFromFile(int fd)
+{
+    NSMutableString *string = [NSMutableString new];
+    ssize_t numRead;
+    char c;
+    if (!NXFdIsValid(fd)) return @"";
+    while ((numRead = read(fd, &c, sizeof(c)))) {
+        [string appendString:[NSString stringWithFormat:@"%c", c]];
+        if (c == '\n') break;
+    }
+    return string.copy;
+}
+
+static int NXSpawnRoot(NSString *path, NSArray *args, NSString **stdOut, NSString **stdErr)
+{
+    NSMutableArray *argsM = args.mutableCopy ?: [NSMutableArray new];
+    [argsM insertObject:path atIndex:0];
+
+    NSUInteger argCount = argsM.count;
+    char **argsC = (char **)malloc((argCount + 1) * sizeof(char *));
+    for (NSUInteger i = 0; i < argCount; i++) {
+        argsC[i] = strdup([[argsM objectAtIndex:i] UTF8String]);
+    }
+    argsC[argCount] = NULL;
+
+    posix_spawnattr_t attr;
+    posix_spawnattr_init(&attr);
+    posix_spawnattr_set_persona_np(&attr, 99, POSIX_SPAWN_PERSONA_FLAGS_OVERRIDE);
+    posix_spawnattr_set_persona_uid_np(&attr, 0);
+    posix_spawnattr_set_persona_gid_np(&attr, 0);
+
+    posix_spawn_file_actions_t action;
+    posix_spawn_file_actions_init(&action);
+
+    int outErr[2];
+    if (stdErr) {
+        pipe(outErr);
+        posix_spawn_file_actions_adddup2(&action, outErr[1], STDERR_FILENO);
+        posix_spawn_file_actions_addclose(&action, outErr[0]);
+    }
+
+    int out[2];
+    if (stdOut) {
+        pipe(out);
+        posix_spawn_file_actions_adddup2(&action, out[1], STDOUT_FILENO);
+        posix_spawn_file_actions_addclose(&action, out[0]);
+    }
+
+    pid_t taskPid;
+    int status = -200;
+    int spawnError = posix_spawn(&taskPid, [path UTF8String], &action, &attr, (char *const *)argsC, NULL);
+    posix_spawnattr_destroy(&attr);
+    posix_spawn_file_actions_destroy(&action);
+
+    for (NSUInteger i = 0; i < argCount; i++) {
+        free(argsC[i]);
+    }
+    free(argsC);
+
+    if (spawnError != 0) {
+        return spawnError;
+    }
+
+    __block volatile BOOL isRunning = YES;
+    NSMutableString *outString = [NSMutableString new];
+    NSMutableString *errString = [NSMutableString new];
+    dispatch_semaphore_t sema = 0;
+    dispatch_queue_t logQueue;
+    if (stdOut || stdErr) {
+        logQueue = dispatch_queue_create("com.cr4zy.nyxian.TrollStore.LogCollector", NULL);
+        sema = dispatch_semaphore_create(0);
+
+        int outPipe = out[0];
+        int outErrPipe = outErr[0];
+        __block BOOL outEnabled = (BOOL)stdOut;
+        __block BOOL errEnabled = (BOOL)stdErr;
+        dispatch_async(logQueue, ^{
+            while (isRunning) {
+                @autoreleasepool {
+                    if (outEnabled) {
+                        [outString appendString:NXGetNSStringFromFile(outPipe)];
+                    }
+                    if (errEnabled) {
+                        [errString appendString:NXGetNSStringFromFile(outErrPipe)];
+                    }
+                }
+            }
+            dispatch_semaphore_signal(sema);
+        });
+    }
+
+    do {
+        if (waitpid(taskPid, &status, 0) != -1) {
+            isRunning = NO;
+        }
+    } while (isRunning);
+
+    if (stdOut || stdErr) {
+        dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+        if (stdOut) {
+            *stdOut = outString.copy;
+        }
+        if (stdErr) {
+            *stdErr = errString.copy;
+        }
+    }
+
+    return WEXITSTATUS(status);
+}
 
 @implementation NXTrollStoreSupport
 
@@ -275,60 +391,12 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
     }
     chmod(helperPath.fileSystemRepresentation, 0755);
 
-    NSArray<NSString *> *arguments = @[helperPath, @"install", @"force", ipaPath];
-
-    char **argv = calloc(arguments.count + 1, sizeof(char *));
-    for (NSUInteger index = 0; index < arguments.count; index++) {
-        argv[index] = strdup(arguments[index].UTF8String);
-    }
-    argv[arguments.count] = NULL;
-
-    posix_spawn_file_actions_t actions;
-    posix_spawn_file_actions_init(&actions);
-
-    int stderrPipe[2];
-    pipe(stderrPipe);
-    posix_spawn_file_actions_adddup2(&actions, stderrPipe[1], STDERR_FILENO);
-    posix_spawn_file_actions_addclose(&actions, stderrPipe[0]);
-
-    posix_spawnattr_t attributes;
-    posix_spawnattr_init(&attributes);
-    posix_spawnattr_set_persona_np(&attributes, 99, POSIX_SPAWN_PERSONA_FLAGS_OVERRIDE);
-    posix_spawnattr_set_persona_uid_np(&attributes, 0);
-    posix_spawnattr_set_persona_gid_np(&attributes, 0);
-
-    pid_t pid = 0;
-    int spawnError = posix_spawn(&pid, helperPath.fileSystemRepresentation, &actions, &attributes, argv, NULL);
-    posix_spawnattr_destroy(&attributes);
-
-    for (NSUInteger index = 0; index < arguments.count; index++) {
-        free(argv[index]);
-    }
-    free(argv);
-    posix_spawn_file_actions_destroy(&actions);
-    close(stderrPipe[1]);
-
-    NSString *stderrOutput = [self stringFromFileDescriptor:stderrPipe[0]];
-    close(stderrPipe[0]);
-
-    if (spawnError != 0) {
+    NSString *stderrOutput = nil;
+    int ret = NXSpawnRoot(helperPath, @[@"install", @"force", ipaPath], nil, &stderrOutput);
+    if (ret != 0) {
         if (error) {
-            *error = [self errorWithCode:3 description:[NSString stringWithFormat:@"Failed to spawn trollstorehelper: %s", strerror(spawnError)]];
-        }
-        return NO;
-    }
-
-    int status = 0;
-    if (waitpid(pid, &status, 0) == -1) {
-        if (error) {
-            *error = [self errorWithCode:4 description:@"Failed to wait for trollstorehelper"];
-        }
-        return NO;
-    }
-
-    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-        if (error) {
-            *error = [self errorWithCode:5 description:[NSString stringWithFormat:@"trollstorehelper failed: %@", stderrOutput.length ? stderrOutput : @"unknown error"]];
+            NSString *message = stderrOutput.length ? stderrOutput : [NSString stringWithFormat:@"trollstorehelper returned %d", ret];
+            *error = [self errorWithCode:5 description:message];
         }
         return NO;
     }
