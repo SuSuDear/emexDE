@@ -197,18 +197,18 @@ package-app:
 	cp -r  build/Nyxian.xcarchive/Products/Applications Payload
 	@if [ -d Payload/emexDE.app ]; then \
 		curl -L https://github.com/opa334/ldid/releases/latest/download/ldid -o Payload/emexDE.app/ldid; \
-		cp TrollStore/RootHelper/.theos/obj/trollstorehelper Payload/emexDE.app/trollstorehelper; \
-		chmod 0755 Payload/emexDE.app/ldid Payload/emexDE.app/trollstorehelper; \
+		chmod 0755 Payload/emexDE.app/ldid; \
 		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app/ldid; \
-		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app/trollstorehelper; \
 		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app; \
+		cp TrollStore/RootHelper/.theos/obj/trollstorehelper Payload/emexDE.app/trollstorehelper; \
+		chmod 0755 Payload/emexDE.app/trollstorehelper; \
 	elif [ -d Payload/emexDEForJB.app ]; then \
 		curl -L https://github.com/opa334/ldid/releases/latest/download/ldid -o Payload/emexDEForJB.app/ldid; \
-		cp TrollStore/RootHelper/.theos/obj/trollstorehelper Payload/emexDEForJB.app/trollstorehelper; \
-		chmod 0755 Payload/emexDEForJB.app/ldid Payload/emexDEForJB.app/trollstorehelper; \
+		chmod 0755 Payload/emexDEForJB.app/ldid; \
 		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDEForJB.app/ldid; \
-		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDEForJB.app/trollstorehelper; \
 		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDEForJB.app; \
+		cp TrollStore/RootHelper/.theos/obj/trollstorehelper Payload/emexDEForJB.app/trollstorehelper; \
+		chmod 0755 Payload/emexDEForJB.app/trollstorehelper; \
 	else \
 		echo "No emexDE app bundle found in Payload"; exit 1; \
 	fi
