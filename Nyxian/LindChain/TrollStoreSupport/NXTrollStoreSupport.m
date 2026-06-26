@@ -386,6 +386,82 @@ static int NXSpawnRoot(NSString *path, NSArray *args, NSString **stdOut, NSStrin
     return YES;
 }
 
++ (BOOL)signExecutableAtPath:(NSString *)executablePath entitlementsPath:(NSString *)entitlementsPath error:(NSError **)error
+{
+    NSString *ldidPath = [self ensureLdidInstalledWithError:error];
+    if (!ldidPath) {
+        return NO;
+    }
+
+    BOOL isDirectory = NO;
+    if (![NSFileManager.defaultManager fileExistsAtPath:executablePath isDirectory:&isDirectory] || isDirectory) {
+        if (error) {
+            *error = [self errorWithCode:14 description:@"Missing executable to sign"];
+        }
+        return NO;
+    }
+    if (![NSFileManager.defaultManager fileExistsAtPath:entitlementsPath isDirectory:&isDirectory] || isDirectory) {
+        if (error) {
+            *error = [self errorWithCode:15 description:@"Missing entitlements plist to sign executable"];
+        }
+        return NO;
+    }
+
+    NSString *signArg = [@"-S" stringByAppendingString:entitlementsPath];
+    NSArray<NSString *> *arguments = @[ldidPath, signArg, executablePath];
+
+    char **argv = calloc(arguments.count + 1, sizeof(char *));
+    for (NSUInteger index = 0; index < arguments.count; index++) {
+        argv[index] = strdup(arguments[index].UTF8String);
+    }
+    argv[arguments.count] = NULL;
+
+    posix_spawn_file_actions_t actions;
+    posix_spawn_file_actions_init(&actions);
+
+    int stderrPipe[2];
+    pipe(stderrPipe);
+    posix_spawn_file_actions_adddup2(&actions, stderrPipe[1], STDERR_FILENO);
+    posix_spawn_file_actions_addclose(&actions, stderrPipe[0]);
+
+    pid_t pid = 0;
+    int spawnError = posix_spawn(&pid, ldidPath.fileSystemRepresentation, &actions, NULL, argv, NULL);
+
+    for (NSUInteger index = 0; index < arguments.count; index++) {
+        free(argv[index]);
+    }
+    free(argv);
+    posix_spawn_file_actions_destroy(&actions);
+    close(stderrPipe[1]);
+
+    NSString *stderrOutput = [self stringFromFileDescriptor:stderrPipe[0]];
+    close(stderrPipe[0]);
+
+    if (spawnError != 0) {
+        if (error) {
+            *error = [self errorWithCode:3 description:[NSString stringWithFormat:@"Failed to spawn ldid: %s", strerror(spawnError)]];
+        }
+        return NO;
+    }
+
+    int status = 0;
+    if (waitpid(pid, &status, 0) == -1) {
+        if (error) {
+            *error = [self errorWithCode:4 description:@"Failed to wait for ldid"];
+        }
+        return NO;
+    }
+
+    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+        if (error) {
+            *error = [self errorWithCode:5 description:[NSString stringWithFormat:@"ldid failed: %@", stderrOutput.length ? stderrOutput : @"unknown error"]];
+        }
+        return NO;
+    }
+
+    return YES;
+}
+
 + (BOOL)installIpaAtPath:(NSString *)ipaPath error:(NSError **)error
 {
     NSString *helperPath = [self helperPath];

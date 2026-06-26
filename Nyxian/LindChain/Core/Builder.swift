@@ -298,6 +298,8 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
         if(buildType == .RunningApp) {
             if self.project.projectConfig.schemeKind == .app {
                 do {
+                    let entitlementsPath = try NXTrollStoreSupport.projectEntitlementsPath(forProjectPath: self.project.url.path)
+                    try NXTrollStoreSupport.signExecutable(atPath: self.project.machoURL.path, entitlementsPath: entitlementsPath)
                     try self.package()
                     try NXTrollStoreSupport.installIpa(atPath: self.project.packageURL.path)
                     try NXTrollStoreSupport.openApplication(withBundleIdentifier: self.project.projectConfig.bundleid)
