@@ -45,6 +45,8 @@ jobs:
 
       - name: Install Theos
         if: steps.cache-theos.outputs.cache-hit != 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -e
 
