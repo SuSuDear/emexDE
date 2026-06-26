@@ -188,7 +188,21 @@ pseudo-sign:
 
 build-roothelper:
 	git submodule update --init --recursive TrollStore
-	python3 -c "from pathlib import Path; p=Path('TrollStore/Shared/TSUtil.h'); s=p.read_text(); s=s.replace('@\"com.opa334.TrollStore\"', '@\"com.cr4zy.nyxian\"'); p.write_text(s)"
+	python3 - <<'PY'
+from pathlib import Path
+h = Path('TrollStore/Shared/TSUtil.h')
+s = h.read_text()
+s = s.replace('@"com.opa334.TrollStore"', '@"com.cr4zy.nyxian"')
+h.write_text(s)
+if '@"com.cr4zy.nyxian"' not in s:
+    raise SystemExit('failed to patch TrollStore APP_ID')
+m = Path('TrollStore/Shared/TSUtil.m')
+s = m.read_text()
+s = s.replace('return [trollStorePath() stringByAppendingPathComponent:@"TrollStore.app"];', 'NSString *basePath = trollStorePath();\n\tNSString *emexDEPath = [basePath stringByAppendingPathComponent:@"emexDE.app"];\n\tif([[NSFileManager defaultManager] fileExistsAtPath:emexDEPath]) return emexDEPath;\n\tNSString *emexDEForJBPath = [basePath stringByAppendingPathComponent:@"emexDEForJB.app"];\n\tif([[NSFileManager defaultManager] fileExistsAtPath:emexDEForJBPath]) return emexDEForJBPath;\n\treturn [basePath stringByAppendingPathComponent:@"TrollStore.app"];')
+m.write_text(s)
+if 'emexDE.app' not in s:
+    raise SystemExit('failed to patch TrollStore app path')
+PY
 	$(MAKE) -C TrollStore pre_build
 	$(MAKE) -C TrollStore make_fastPathSign MAKECMDGOALS=
 	$(MAKE) -C TrollStore make_roothelper MAKECMDGOALS=
@@ -198,6 +212,8 @@ package-app:
 	@if [ -d Payload/emexDE.app ]; then \
 		curl -L https://github.com/opa334/ldid/releases/latest/download/ldid -o Payload/emexDE.app/ldid; \
 		chmod 0755 Payload/emexDE.app/ldid; \
+		echo bundled > Payload/emexDE.app/ldid.version; \
+		chmod 0644 Payload/emexDE.app/ldid.version; \
 		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app; \
 		ldid -Ssupports/ldid.entitlements.plist Payload/emexDE.app/ldid; \
 		cp TrollStore/RootHelper/.theos/obj/trollstorehelper Payload/emexDE.app/trollstorehelper; \
@@ -206,6 +222,8 @@ package-app:
 	elif [ -d Payload/emexDEForJB.app ]; then \
 		curl -L https://github.com/opa334/ldid/releases/latest/download/ldid -o Payload/emexDEForJB.app/ldid; \
 		chmod 0755 Payload/emexDEForJB.app/ldid; \
+		echo bundled > Payload/emexDEForJB.app/ldid.version; \
+		chmod 0644 Payload/emexDEForJB.app/ldid.version; \
 		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDEForJB.app; \
 		ldid -Ssupports/ldid.entitlements.plist Payload/emexDEForJB.app/ldid; \
 		cp TrollStore/RootHelper/.theos/obj/trollstorehelper Payload/emexDEForJB.app/trollstorehelper; \
