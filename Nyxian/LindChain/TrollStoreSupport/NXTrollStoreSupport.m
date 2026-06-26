@@ -408,53 +408,12 @@ static int NXSpawnRoot(NSString *path, NSArray *args, NSString **stdOut, NSStrin
     }
 
     NSString *signArg = [@"-S" stringByAppendingString:entitlementsPath];
-    NSArray<NSString *> *arguments = @[ldidPath, signArg, executablePath];
-
-    char **argv = calloc(arguments.count + 1, sizeof(char *));
-    for (NSUInteger index = 0; index < arguments.count; index++) {
-        argv[index] = strdup(arguments[index].UTF8String);
-    }
-    argv[arguments.count] = NULL;
-
-    posix_spawn_file_actions_t actions;
-    posix_spawn_file_actions_init(&actions);
-
-    int stderrPipe[2];
-    pipe(stderrPipe);
-    posix_spawn_file_actions_adddup2(&actions, stderrPipe[1], STDERR_FILENO);
-    posix_spawn_file_actions_addclose(&actions, stderrPipe[0]);
-
-    pid_t pid = 0;
-    int spawnError = posix_spawn(&pid, ldidPath.fileSystemRepresentation, &actions, NULL, argv, NULL);
-
-    for (NSUInteger index = 0; index < arguments.count; index++) {
-        free(argv[index]);
-    }
-    free(argv);
-    posix_spawn_file_actions_destroy(&actions);
-    close(stderrPipe[1]);
-
-    NSString *stderrOutput = [self stringFromFileDescriptor:stderrPipe[0]];
-    close(stderrPipe[0]);
-
-    if (spawnError != 0) {
+    NSString *stderrOutput = nil;
+    int ret = NXSpawnRoot(ldidPath, @[signArg, executablePath], nil, &stderrOutput);
+    if (ret != 0) {
         if (error) {
-            *error = [self errorWithCode:3 description:[NSString stringWithFormat:@"Failed to spawn ldid: %s", strerror(spawnError)]];
-        }
-        return NO;
-    }
-
-    int status = 0;
-    if (waitpid(pid, &status, 0) == -1) {
-        if (error) {
-            *error = [self errorWithCode:4 description:@"Failed to wait for ldid"];
-        }
-        return NO;
-    }
-
-    if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-        if (error) {
-            *error = [self errorWithCode:5 description:[NSString stringWithFormat:@"ldid failed: %@", stderrOutput.length ? stderrOutput : @"unknown error"]];
+            NSString *message = stderrOutput.length ? stderrOutput : [NSString stringWithFormat:@"ldid returned %d", ret];
+            *error = [self errorWithCode:5 description:message];
         }
         return NO;
     }
