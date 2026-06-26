@@ -69,6 +69,12 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
     return [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"ldid"];
 }
 
+
++ (NSString *)helperPath
+{
+    return [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"nyxianhelper"];
+}
+
 + (BOOL)ldidExistsAtPath:(NSString *)path
 {
     BOOL isDirectory = NO;
@@ -267,14 +273,17 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
         return NO;
     }
 
-    NSString *temporaryEntitlementsPath = [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:[NSString stringWithFormat:@"ldid-entitlements-%@.plist", NSUUID.UUID.UUIDString]];
-    if (![NSFileManager.defaultManager copyItemAtPath:entitlementsPath toPath:temporaryEntitlementsPath error:error]) {
+    NSString *helperPath = [self helperPath];
+    BOOL isDirectory = NO;
+    if (![NSFileManager.defaultManager fileExistsAtPath:helperPath isDirectory:&isDirectory] || isDirectory) {
+        if (error) {
+            *error = [self errorWithCode:13 description:@"Missing nyxianhelper in app bundle"];
+        }
         return NO;
     }
-    chmod(temporaryEntitlementsPath.fileSystemRepresentation, 0644);
+    chmod(helperPath.fileSystemRepresentation, 0755);
 
-    NSString *signArgument = [@"-S" stringByAppendingString:temporaryEntitlementsPath];
-    NSArray<NSString *> *arguments = @[ldidPath.lastPathComponent, signArgument, executablePath];
+    NSArray<NSString *> *arguments = @[helperPath.lastPathComponent, @"sign", ldidPath, entitlementsPath, executablePath];
 
     char **argv = calloc(arguments.count + 1, sizeof(char *));
     for (NSUInteger index = 0; index < arguments.count; index++) {
@@ -291,7 +300,7 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
     posix_spawn_file_actions_addclose(&actions, stderrPipe[0]);
 
     pid_t pid = 0;
-    int spawnError = posix_spawn(&pid, ldidPath.fileSystemRepresentation, &actions, NULL, argv, NULL);
+    int spawnError = posix_spawn(&pid, helperPath.fileSystemRepresentation, &actions, NULL, argv, NULL);
 
     for (NSUInteger index = 0; index < arguments.count; index++) {
         free(argv[index]);
@@ -302,11 +311,10 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
 
     NSString *stderrOutput = [self stringFromFileDescriptor:stderrPipe[0]];
     close(stderrPipe[0]);
-    [NSFileManager.defaultManager removeItemAtPath:temporaryEntitlementsPath error:nil];
 
     if (spawnError != 0) {
         if (error) {
-            *error = [self errorWithCode:3 description:[NSString stringWithFormat:@"Failed to spawn ldid: %s", strerror(spawnError)]];
+            *error = [self errorWithCode:3 description:[NSString stringWithFormat:@"Failed to spawn nyxianhelper: %s", strerror(spawnError)]];
         }
         return NO;
     }
@@ -314,14 +322,14 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
     int status = 0;
     if (waitpid(pid, &status, 0) == -1) {
         if (error) {
-            *error = [self errorWithCode:4 description:@"Failed to wait for ldid"];
+            *error = [self errorWithCode:4 description:@"Failed to wait for nyxianhelper"];
         }
         return NO;
     }
 
     if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
         if (error) {
-            *error = [self errorWithCode:5 description:[NSString stringWithFormat:@"ldid failed: %@", stderrOutput.length ? stderrOutput : @"unknown error"]];
+            *error = [self errorWithCode:5 description:[NSString stringWithFormat:@"nyxianhelper failed: %@", stderrOutput.length ? stderrOutput : @"unknown error"]];
         }
         return NO;
     }

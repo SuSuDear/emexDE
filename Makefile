@@ -126,7 +126,7 @@ all: jailed
 
 jailed: SCHEME := Nyxian
 jailed: FILE := emexDE.ipa
-jailed: clean check compile package-app clean
+jailed: clean check compile build-helper package-app clean
 
 rootless: SCHEME := NyxianForJB
 rootless: ARCH := iphoneos-arm64
@@ -145,7 +145,7 @@ rootful: clean check compile pseudo-sign package-deb clean
 
 trollstore: SCHEME := NyxianForJB
 trollstore: FILE := emexDE.tipa
-trollstore: clean check compile pseudo-sign package-app clean
+trollstore: clean check compile build-helper pseudo-sign package-app clean
 
 # Dependencies
 CoreCompiler/CoreCompilerSupportLibs:
@@ -186,11 +186,21 @@ compile: CoreCompiler/CoreCompilerSupportLibs
 pseudo-sign:
 	codesign --sign - --entitlements ent/nyxianforjb.xml --force --timestamp=none build/Nyxian.xcarchive/Products/Applications/emexDEForJB.app
 
+build-helper:
+	mkdir -p build
+	xcrun --sdk iphoneos clang -fobjc-arc -framework Foundation -miphoneos-version-min=16.0 -arch arm64 NyxianHelper/main.m -o build/nyxianhelper
+
 package-app:
 	cp -r  build/Nyxian.xcarchive/Products/Applications Payload
 	@if [ -d Payload/emexDE.app ]; then \
+		cp build/nyxianhelper Payload/emexDE.app/nyxianhelper; \
+		chmod 0755 Payload/emexDE.app/nyxianhelper; \
+		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app/nyxianhelper; \
 		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app; \
 	elif [ -d Payload/emexDEForJB.app ]; then \
+		cp build/nyxianhelper Payload/emexDEForJB.app/nyxianhelper; \
+		chmod 0755 Payload/emexDEForJB.app/nyxianhelper; \
+		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDEForJB.app/nyxianhelper; \
 		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDEForJB.app; \
 	else \
 		echo "No emexDE app bundle found in Payload"; exit 1; \
