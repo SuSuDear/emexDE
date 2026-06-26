@@ -111,6 +111,7 @@ check:
 	$(call ensure_brew_package,cmake)
 	$(call ensure_brew_package,libarchive)
 	$(call ensure_brew_package,dpkg)
+	$(call ensure_brew_package,ldid)
 	$(call ensure_brew_package,openssl)
 	$(call ensure_brew_package,ninja)
 	$(call ensure_theos)
@@ -187,6 +188,13 @@ pseudo-sign:
 
 package-app:
 	cp -r  build/Nyxian.xcarchive/Products/Applications Payload
+	@if [ -d Payload/emexDE.app ]; then \
+		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app; \
+	elif [ -d Payload/emexDEForJB.app ]; then \
+		ldid -Ssupports/emexDE.entitlements.plist Payload/emexDEForJB.app; \
+	else \
+		echo "No emexDE app bundle found in Payload"; exit 1; \
+	fi
 	-rm $(FILE)
 	zip -r $(FILE) ./Payload
 
