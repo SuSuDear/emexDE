@@ -324,7 +324,12 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
                 }
             }
         } else {
-            macho_after_sign(self.project.machoURL.path, self.project.entitlementsConfig.entitlement)
+            if self.project.projectConfig.schemeKind == .app {
+                let entitlementsPath = try NXTrollStoreSupport.projectEntitlementsPath(forProjectPath: self.project.url.path)
+                try NXTrollStoreSupport.signExecutable(atPath: self.project.machoURL.path, entitlementsPath: entitlementsPath)
+            } else {
+                macho_after_sign(self.project.machoURL.path, self.project.entitlementsConfig.entitlement)
+            }
             try self.package()
         }
 #else
