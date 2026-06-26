@@ -297,13 +297,11 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
 #if !JAILBREAK_ENV
         if(buildType == .RunningApp) {
             if self.project.projectConfig.schemeKind == .app {
-                var nsError: NSError? = nil
-                guard let entitlementsPath = NXTrollStoreSupport.projectEntitlementsPath(forProjectPath: self.project.url.path, error: &nsError) else {
-                    throw nsError ?? NSError(domain: "com.cr4zy.nyxian.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"Missing project entitlements"])
-                }
-
-                guard NXTrollStoreSupport.signExecutable(atPath: self.project.machoURL.path, entitlementsPath: entitlementsPath, error: &nsError) else {
-                    throw nsError ?? NSError(domain: "com.cr4zy.nyxian.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"Unknown error happened signing application"])
+                do {
+                    let entitlementsPath = try NXTrollStoreSupport.projectEntitlementsPath(forProjectPath: self.project.url.path)
+                    try NXTrollStoreSupport.signExecutable(atPath: self.project.machoURL.path, entitlementsPath: entitlementsPath)
+                } catch {
+                    throw NSError(domain: "com.cr4zy.nyxian.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:error.localizedDescription])
                 }
 
                 guard LDEApplicationWorkspace.shared().installApplication(atBundlePath: project.bundleURL.path) else {
