@@ -1,0 +1,52 @@
+name: Build LLVM Support
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  build-llvm-support:
+    name: Build LLVM Support Libraries
+    runs-on: macos-26
+    timeout-minutes: 1200
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build LLVM Support
+        run: |
+          set -euo pipefail
+          cd LLVM-On-iOS
+          make
+
+      - name: Package LLVM Support
+        run: |
+          set -euo pipefail
+          cd LLVM-On-iOS
+          test -d CoreCompilerSupportLibs
+          test -d LLVM.xcframework
+          tar -czf ../CoreCompilerSupportLibs.tar.gz CoreCompilerSupportLibs LLVM.xcframework
+          cd ..
+          shasum -a 256 CoreCompilerSupportLibs.tar.gz > CoreCompilerSupportLibs.tar.gz.sha256
+          split -b 1900m CoreCompilerSupportLibs.tar.gz CoreCompilerSupportLibs.tar.gz.part-
+
+      - name: Publish Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release delete llvm-support -y --cleanup-tag || true
+          gh release create llvm-support \
+            CoreCompilerSupportLibs.tar.gz.part-* \
+            CoreCompilerSupportLibs.tar.gz.sha256 \
+            --title "LLVM Support Libraries" \
+            --notes "Prebuilt LLVM support libraries for GitHub Actions builds. Re-run this workflow after LLVM-On-iOS changes."

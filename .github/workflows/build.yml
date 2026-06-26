@@ -58,6 +58,24 @@ jobs:
           echo "THEOS=~/theos" >> $GITHUB_ENV
           echo "PATH=$HOME/theos/bin:$PATH" >> $GITHUB_ENV
 
+      - name: Download LLVM Support
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p llvm-support-release
+          gh release download llvm-support \
+            --pattern 'CoreCompilerSupportLibs.tar.gz.part-*' \
+            --pattern 'CoreCompilerSupportLibs.tar.gz.sha256' \
+            --dir llvm-support-release
+          cat llvm-support-release/CoreCompilerSupportLibs.tar.gz.part-* > CoreCompilerSupportLibs.tar.gz
+          shasum -a 256 -c llvm-support-release/CoreCompilerSupportLibs.tar.gz.sha256
+          tar -xzf CoreCompilerSupportLibs.tar.gz
+          rm -rf CoreCompiler/CoreCompilerSupportLibs
+          mkdir -p CoreCompiler/CoreCompilerSupportLibs
+          cp -R CoreCompilerSupportLibs/. CoreCompiler/CoreCompilerSupportLibs/
+          cp -R LLVM.xcframework CoreCompiler/CoreCompilerSupportLibs/LLVM.xcframework
+
       - name: Build Jailed
         timeout-minutes: 1200
         run: |
