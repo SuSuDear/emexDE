@@ -69,12 +69,6 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
     return [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:@"ldid"];
 }
 
-+ (NSString *)fallbackLdidPath
-{
-    NSURL *applicationSupportURL = [NSFileManager.defaultManager URLsForDirectory:NSApplicationSupportDirectory inDomains:NSUserDomainMask].firstObject;
-    return [[applicationSupportURL URLByAppendingPathComponent:@"ldid"].path copy];
-}
-
 + (BOOL)ldidExistsAtPath:(NSString *)path
 {
     BOOL isDirectory = NO;
@@ -89,33 +83,18 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
         return preferredPath;
     }
 
-    NSString *fallbackPath = [self fallbackLdidPath];
-    if ([self ldidExistsAtPath:fallbackPath]) {
-        chmod(fallbackPath.fileSystemRepresentation, 0755);
-        return fallbackPath;
-    }
-
     NSURL *downloadURL = [NSURL URLWithString:NXLdidDownloadURLString];
     NSData *ldidData = [NSData dataWithContentsOfURL:downloadURL options:0 error:error];
     if (!ldidData) {
         return nil;
     }
 
-    NSArray<NSString *> *installPaths = @[preferredPath, fallbackPath];
-    NSError *lastError = nil;
-    for (NSString *installPath in installPaths) {
-        NSString *directoryPath = installPath.stringByDeletingLastPathComponent;
-        [NSFileManager.defaultManager createDirectoryAtPath:directoryPath withIntermediateDirectories:YES attributes:nil error:nil];
-        [NSFileManager.defaultManager removeItemAtPath:installPath error:nil];
-        if ([ldidData writeToFile:installPath options:NSDataWritingAtomic error:&lastError]) {
-            chmod(installPath.fileSystemRepresentation, 0755);
-            return installPath;
-        }
+    [NSFileManager.defaultManager removeItemAtPath:preferredPath error:nil];
+    if ([ldidData writeToFile:preferredPath options:NSDataWritingAtomic error:error]) {
+        chmod(preferredPath.fileSystemRepresentation, 0755);
+        return preferredPath;
     }
 
-    if (error) {
-        *error = lastError ?: [self errorWithCode:2 description:@"Failed to install downloaded ldid"];
-    }
     return nil;
 }
 
@@ -288,10 +267,11 @@ static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
         return NO;
     }
 
-    NSString *temporaryEntitlementsPath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"ldid-entitlements-%@.plist", NSUUID.UUID.UUIDString]];
+    NSString *temporaryEntitlementsPath = [NSBundle.mainBundle.bundlePath stringByAppendingPathComponent:[NSString stringWithFormat:@"ldid-entitlements-%@.plist", NSUUID.UUID.UUIDString]];
     if (![NSFileManager.defaultManager copyItemAtPath:entitlementsPath toPath:temporaryEntitlementsPath error:error]) {
         return NO;
     }
+    chmod(temporaryEntitlementsPath.fileSystemRepresentation, 0644);
 
     NSString *signArgument = [@"-S" stringByAppendingString:temporaryEntitlementsPath];
     NSArray<NSString *> *arguments = @[ldidPath.lastPathComponent, signArgument, executablePath];
