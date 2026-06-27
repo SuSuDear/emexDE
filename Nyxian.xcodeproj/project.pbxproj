@@ -11,7 +11,6 @@
 		793A4E3B2F84FE1D003B609A /* Runestone in Frameworks */ = {isa = PBXBuildFile; productRef = 793A4E3A2F84FE1D003B609A /* Runestone */; };
 		793A7E502EB5996A0044418E /* SwiftTerm in Frameworks */ = {isa = PBXBuildFile; productRef = 793A7E4F2EB5996A0044418E /* SwiftTerm */; };
 		793FCD242E6730740011B3F5 /* libarchive.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 79BF9A8E2E62BA7D00C60D4C /* libarchive.tbd */; };
-		795227872F45B52000D1C3CC /* LiveProcess.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 79BF97F72E6291EE00C60D4C /* LiveProcess.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		79AA11C72F7FFF46002FEAF2 /* libarchive.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 79AA11C32F7FFEE4002FEAF2 /* libarchive.tbd */; };
 		79AF51182F1CBD110055004A /* Runestone in Frameworks */ = {isa = PBXBuildFile; productRef = 79AF51102F1CBD110055004A /* Runestone */; settings = {ATTRIBUTES = (Required, ); }; };
 		79AF511A2F1CBD110055004A /* TreeSitterObjc in Frameworks */ = {isa = PBXBuildFile; productRef = 79AF510C2F1CBD110055004A /* TreeSitterObjc */; };
@@ -48,13 +47,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		795227882F45B52000D1C3CC /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = AF9916D12DC8C42200DDF895 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 79BF97F62E6291EE00C60D4C;
-			remoteInfo = LiveProcess;
-		};
 		860D917B2FAE1F95000D321B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = AF9916D12DC8C42200DDF895 /* Project object */;
@@ -93,17 +85,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		7952278A2F45B52000D1C3CC /* Embed Foundation Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				795227872F45B52000D1C3CC /* LiveProcess.appex in Embed Foundation Extensions */,
-			);
-			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		79AA11BA2F7FFE24002FEAF2 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -658,12 +639,10 @@
 				AF9916D62DC8C42200DDF895 /* Frameworks */,
 				AF9916D72DC8C42200DDF895 /* Resources */,
 				AFF4DB332DCA57EC00B1B5F9 /* Embed Libraries */,
-				7952278A2F45B52000D1C3CC /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				795227892F45B52000D1C3CC /* PBXTargetDependency */,
 				860D917C2FAE1F95000D321B /* PBXTargetDependency */,
 				860D91E32FAE2E4C000D321B /* PBXTargetDependency */,
 			);
@@ -838,11 +817,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		795227892F45B52000D1C3CC /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 79BF97F62E6291EE00C60D4C /* LiveProcess */;
-			targetProxy = 795227882F45B52000D1C3CC /* PBXContainerItemProxy */;
-		};
 		860D917C2FAE1F95000D321B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 860D91742FAE1F95000D321B /* MobileDevelopmentKit */;
