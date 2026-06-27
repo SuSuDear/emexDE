@@ -1,0 +1,182 @@
+name: Build Theos Runtime
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'supports/theos-runtime.tar.gz'
+      - '.github/workflows/theos-runtime.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: theos-runtime-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package-theos-runtime:
+    name: Patch and Upload Theos Runtime
+    runs-on: macos-26
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          brew install ldid
+
+      - name: Extract runtime
+        run: |
+          set -euo pipefail
+          rm -rf work
+          mkdir -p work
+          tar -xzf supports/theos-runtime.tar.gz -C work
+          test -d work/theos-runtime
+
+          # Keep this runtime small; SDKs are provided separately by the host/toolchain.
+          rm -rf work/theos-runtime/theos/sdks work/theos-runtime/theos/SDKs
+          find work/theos-runtime -iname '*.sdk' -prune -exec rm -rf {} +
+
+          if [ ! -f work/theos-runtime/lib/libperl.dylib ]; then
+            libperl=$(find work/theos-runtime/perl5 -name libperl.dylib -print -quit || true)
+            if [ -n "$libperl" ]; then
+              cp "$libperl" work/theos-runtime/lib/libperl.dylib
+              chmod 0755 work/theos-runtime/lib/libperl.dylib
+            fi
+          fi
+
+      - name: Patch Mach-O install names
+        run: |
+          set -euo pipefail
+          R="$PWD/work/theos-runtime"
+
+          patch_one() {
+            local f="$1"
+            local mode="$2"
+            if ! file "$f" | grep -q 'Mach-O'; then
+              return 0
+            fi
+
+            if [ "$mode" = "bin" ]; then
+              install_name_tool -add_rpath '@loader_path/../lib' "$f" 2>/dev/null || true
+            else
+              install_name_tool -add_rpath '@loader_path' "$f" 2>/dev/null || true
+              install_name_tool -id "@rpath/$(basename "$f")" "$f" 2>/dev/null || true
+            fi
+
+            otool -L "$f" | awk 'NR>1 {print $1}' | while read -r dep; do
+              [ -n "$dep" ] || continue
+              case "$dep" in
+                /usr/lib/libSystem.B.dylib|/usr/lib/libc++.1.dylib|/usr/lib/libobjc.A.dylib|/usr/lib/libbz2.1.0.dylib|/System/Library/*)
+                  continue ;;
+              esac
+
+              base="$(basename "$dep")"
+              [ -f "$R/lib/$base" ] || continue
+
+              if [ "$mode" = "bin" ]; then
+                new="@loader_path/../lib/$base"
+              else
+                new="@loader_path/$base"
+              fi
+
+              case "$dep" in
+                @rpath/*|@loader_path/*|/var/*|/private/var/*|/usr/local/*)
+                  install_name_tool -change "$dep" "$new" "$f" 2>/dev/null || true ;;
+              esac
+            done
+          }
+
+          find "$R/bin" -type f | while read -r f; do
+            patch_one "$f" bin
+          done
+
+          find "$R/lib" -type f | while read -r f; do
+            patch_one "$f" lib
+          done
+
+      - name: Sign Mach-O files
+        run: |
+          set -euo pipefail
+          R="$PWD/work/theos-runtime"
+          cat > work/tool-entitlements.plist <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>platform-application</key>
+            <true/>
+            <key>com.apple.private.security.no-container</key>
+            <true/>
+            <key>com.apple.private.security.storage.AppDataContainers</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
+
+          find "$R/bin" "$R/lib" -type f | while read -r f; do
+            if file "$f" | grep -q 'Mach-O'; then
+              chmod 0755 "$f"
+              ldid -Swork/tool-entitlements.plist "$f"
+            fi
+          done
+
+      - name: Validate runtime layout
+        run: |
+          set -euo pipefail
+          R="$PWD/work/theos-runtime"
+          test -x "$R/bin/perl"
+          test -x "$R/bin/make"
+          test -x "$R/bin/dpkg-deb"
+          test -x "$R/bin/ldid"
+          test -f "$R/lib/libperl.dylib"
+          test ! -d "$R/theos/sdks"
+          test ! -d "$R/theos/SDKs"
+          if find "$R" -iname '*.sdk' -print -quit | grep -q .; then
+            echo 'SDK must not be bundled in the Theos runtime' >&2
+            exit 1
+          fi
+
+          for f in "$R/bin/perl" "$R/bin/make" "$R/bin/dpkg-deb" "$R/bin/ldid"; do
+            echo "===== $f ====="
+            otool -L "$f"
+            if otool -L "$f" | grep -E '/var/|/private/var/|@loader_path/.jbroot'; then
+              echo "unexpected non-portable dependency in $f" >&2
+              exit 1
+            fi
+          done
+
+      - name: Create packaged runtime
+        run: |
+          set -euo pipefail
+          cd work
+          tar -czf ../theos-runtime.tar.gz theos-runtime
+          shasum -a 256 ../theos-runtime.tar.gz > ../theos-runtime.tar.gz.sha256
+          du -sh ../theos-runtime.tar.gz
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: theos-runtime
+          path: |
+            theos-runtime.tar.gz
+            theos-runtime.tar.gz.sha256
+
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag='theos-runtime'
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" theos-runtime.tar.gz theos-runtime.tar.gz.sha256 --clobber
+          else
+            gh release create "$tag" theos-runtime.tar.gz theos-runtime.tar.gz.sha256 \
+              --title 'Theos Runtime' \
+              --notes 'Patched Theos runtime without bundled SDKs.'
+          fi
