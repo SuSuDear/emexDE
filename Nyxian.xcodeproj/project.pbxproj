@@ -139,7 +139,6 @@
 		79AA11BC2F7FFE24002FEAF2 /* nxtool */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = nxtool; sourceTree = BUILT_PRODUCTS_DIR; };
 		79AA11C32F7FFEE4002FEAF2 /* libarchive.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libarchive.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.0.sdk/usr/lib/libarchive.tbd; sourceTree = DEVELOPER_DIR; };
 		79AA11C42F7FFEFF002FEAF2 /* libarchive.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libarchive.tbd; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/usr/lib/libarchive.tbd; sourceTree = DEVELOPER_DIR; };
-		79BF97F72E6291EE00C60D4C /* LiveProcess.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LiveProcess.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		79BF9A8E2E62BA7D00C60D4C /* libarchive.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libarchive.tbd; path = usr/lib/libarchive.tbd; sourceTree = SDKROOT; };
 		860D91752FAE1F95000D321B /* MobileDevelopmentKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MobileDevelopmentKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		86DCC25A2FA5209600973169 /* CoreCompiler.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreCompiler.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -181,72 +180,6 @@
 				LindChain/Utils/Zip.m,
 			);
 			target = 79AA11BB2F7FFE24002FEAF2 /* nxtool */;
-		};
-		79BF983D2E62930600C60D4C /* Exceptions for "LiveProcess" folder in "LiveProcess" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				LindChain/ServiceKit/Service.m,
-				LindChain/Services/applicationmgmtd/LDEApplicationObject.m,
-				LindChain/Services/applicationmgmtd/LDEApplicationWorkspaceInternal.m,
-				LindChain/Services/containerd/PEContainerService.m,
-				main.m,
-				ResecureDecoder.m,
-			);
-			target = 79BF97F62E6291EE00C60D4C /* LiveProcess */;
-		};
-		79BF98402E62931E00C60D4C /* Exceptions for "LiveProcess" folder in "SuCode" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				LindChain/Services/applicationmgmtd/LDEApplicationObject.m,
-				LindChain/Services/applicationmgmtd/LDEApplicationWorkspace.m,
-				LindChain/Services/containerd/PEContainer.m,
-			);
-			target = AF9916D82DC8C42200DDF895 /* SuCode */;
-		};
-		79BF9A972E62BB6900C60D4C /* Exceptions for "Nyxian" folder in "LiveProcess" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				LindChain/Debugger/Utils.c,
-				LindChain/litehook/litehook.c,
-				LindChain/LiveContainer/LCBootstrap.m,
-				LindChain/LiveContainer/LCMachOUtils.m,
-				LindChain/LiveContainer/Tweaks/Dead10ccFix.m,
-				LindChain/LiveContainer/Tweaks/Dyld.m,
-				"LindChain/LiveContainer/Tweaks/NSFileManager+GuestHooks.m",
-				LindChain/LiveContainer/Tweaks/NSUserDefaults.m,
-				LindChain/LiveContainer/Tweaks/SecItem.m,
-				"LindChain/LiveContainer/Tweaks/UIKit+GuestHooksInit.m",
-				LindChain/LiveContainer/utils.m,
-				LindChain/LiveContainer/ZSign/Utils.mm,
-				LindChain/Private/mach/fileport.m,
-				LindChain/ProcEnvironment/application.m,
-				LindChain/ProcEnvironment/attrstrnilfix.m,
-				LindChain/ProcEnvironment/cred.c,
-				LindChain/ProcEnvironment/environment.m,
-				LindChain/ProcEnvironment/ioctl.c,
-				LindChain/ProcEnvironment/kbdportal.m,
-				LindChain/ProcEnvironment/libproc.m,
-				LindChain/ProcEnvironment/Object/ArchiveObject.m,
-				LindChain/ProcEnvironment/Object/FDMapObject.m,
-				LindChain/ProcEnvironment/Object/FDObject.m,
-				LindChain/ProcEnvironment/Object/PEMachPort.m,
-				LindChain/ProcEnvironment/Object/PEObject.m,
-				LindChain/ProcEnvironment/panic.m,
-				LindChain/ProcEnvironment/posix_spawn.m,
-				LindChain/ProcEnvironment/proxy.m,
-				LindChain/ProcEnvironment/Surface/extra/relax.c,
-				LindChain/ProcEnvironment/syscall.c,
-				LindChain/ProcEnvironment/Syscall/mach_syscall_client.c,
-				LindChain/ProcEnvironment/sysctl.c,
-				LindChain/ProcEnvironment/tfp.c,
-				LindChain/ProcEnvironment/Utils/fd.c,
-				LindChain/ProcEnvironment/Utils/ktfp.c,
-				LindChain/ProcEnvironment/vfork.c,
-				LindChain/Utils/CFTools.c,
-				LindChain/Utils/Swizzle.m,
-				LindChain/Utils/Zip.m,
-			);
-			target = 79BF97F62E6291EE00C60D4C /* LiveProcess */;
 		};
 		860D91822FAE1F95000D321B /* Exceptions for "MobileDevelopmentKit" folder in "MobileDevelopmentKit" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -366,15 +299,6 @@
 /* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		798692F02E627A3B00390D7E /* LiveProcess */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				79BF98402E62931E00C60D4C /* Exceptions for "LiveProcess" folder in "SuCode" target */,
-				79BF983D2E62930600C60D4C /* Exceptions for "LiveProcess" folder in "LiveProcess" target */,
-			);
-			path = LiveProcess;
-			sourceTree = "<group>";
-		};
 		79AA11BD2F7FFE24002FEAF2 /* nxtool */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = nxtool;
@@ -403,7 +327,6 @@
 				798BBD332F1D265200CBB23F /* Exceptions for "Nyxian" folder in "SuCode" target */,
 				AFF4DBDB2DCA5DEA00B1B5F9 /* Exceptions for "Nyxian" folder in "Embed Libraries" phase from "SuCode" target */,
 				7960686E2F3F357400CE34D7 /* Exceptions for "Nyxian" folder in "Embed Frameworks" phase from legacy target */,
-				79BF9A972E62BB6900C60D4C /* Exceptions for "Nyxian" folder in "LiveProcess" target */,
 				79AA11C62F7FFF12002FEAF2 /* Exceptions for "Nyxian" folder in "nxtool" target */,
 			);
 			path = Nyxian;
@@ -435,14 +358,6 @@
 				79B708BE2F731590000F38E7 /* TreeSitterCPP in Frameworks */,
 				79AF511D2F1CBD110055004A /* TreeSitterXML in Frameworks */,
 				79AF511E2F1CBD110055004A /* SwiftTerm in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		79BF97F42E6291EE00C60D4C /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				79BF9A8F2E62BA8700C60D4C /* libarchive.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -509,12 +424,10 @@
 				79277DC02EE8752800F18B30 /* Config.xcconfig */,
 				AF99171F2DC8EA3C00DDF895 /* Shared */,
 				AF9916DB2DC8C42200DDF895 /* Nyxian */,
-				798692F02E627A3B00390D7E /* LiveProcess */,
 				79AA11BD2F7FFE24002FEAF2 /* nxtool */,
 				86DCC25B2FA5209600973169 /* CoreCompiler */,
 				860D91762FAE1F95000D321B /* MobileDevelopmentKit */,
 				7944B5662DEC74FC00834134 /* Frameworks */,
-				79BF97F72E6291EE00C60D4C /* LiveProcess.appex */,
 				7944B5652DEC74EA00834134 /* SuCode.app */,
 				79AA11BC2F7FFE24002FEAF2 /* nxtool */,
 				86DCC25A2FA5209600973169 /* CoreCompiler.framework */,
@@ -563,25 +476,6 @@
 			productName = nxtool;
 			productReference = 79AA11BC2F7FFE24002FEAF2 /* nxtool */;
 			productType = "com.apple.product-type.tool";
-		};
-		79BF97F62E6291EE00C60D4C /* LiveProcess */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 79BF98062E6291EE00C60D4C /* Build configuration list for PBXNativeTarget "LiveProcess" */;
-			buildPhases = (
-				79BF97F32E6291EE00C60D4C /* Sources */,
-				79BF97F42E6291EE00C60D4C /* Frameworks */,
-				79BF97F52E6291EE00C60D4C /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = LiveProcess;
-			packageProductDependencies = (
-			);
-			productName = LiveProcess;
-			productReference = 79BF97F72E6291EE00C60D4C /* LiveProcess.appex */;
-			productType = "com.apple.product-type.app-extension";
 		};
 		860D91742FAE1F95000D321B /* MobileDevelopmentKit */ = {
 			isa = PBXNativeTarget;
@@ -682,9 +576,6 @@
 					79AA11BB2F7FFE24002FEAF2 = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
-					79BF97F62E6291EE00C60D4C = {
-						CreatedOnToolsVersion = 16.4;
-					};
 					860D91742FAE1F95000D321B = {
 						CreatedOnToolsVersion = 26.4.1;
 						LastSwiftMigration = 2650;
@@ -723,7 +614,6 @@
 			projectRoot = "";
 			targets = (
 				AF9916D82DC8C42200DDF895 /* SuCode */,
-				79BF97F62E6291EE00C60D4C /* LiveProcess */,
 				860D91742FAE1F95000D321B /* MobileDevelopmentKit */,
 				86DCC2592FA5209600973169 /* CoreCompiler */,
 				79AA11BB2F7FFE24002FEAF2 /* nxtool */,
@@ -737,13 +627,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				79AF51222F1CBD110055004A /* Shared in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		79BF97F52E6291EE00C60D4C /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -780,13 +663,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		79AF51162F1CBD110055004A /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		79BF97F32E6291EE00C60D4C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1105,94 +981,6 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "Nyxian/bridge-jb.h";
 				SWIFT_OBJC_INTERFACE_HEADER_NAME = "SuCode-Swift.h";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		79BF98072E6291EE00C60D4C /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 79277DC02EE8752800F18B30 /* Config.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "$(NYXIAN_LIVEPROCESS_CODE_SIGN_ENTITLEMENTS)";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = "$(BUILD_NUMBER)";
-				DEAD_CODE_STRIPPING = NO;
-				GCC_OPTIMIZATION_LEVEL = s;
-				GENERATE_INFOPLIST_FILE = YES;
-				HEADER_SEARCH_PATHS = (
-					Nyxian/,
-					LiveProcess/,
-				);
-				INFOPLIST_FILE = LiveProcess/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = LiveProcess;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_UIMainStoryboardFile = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = "$(VERSION)";
-				OTHER_CFLAGS = "-DCLIENT_ENV";
-				OTHER_LDFLAGS = (
-					"-Wl,-U,_OBJC_CLASS_$_FBSSceneParameters",
-					"-Wl,-U,_OBJC_CLASS_$_LSApplicationWorkspace",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "$(NYXIAN_LIVEPROCESS_PRODUCT_BUNDLE_IDENTIFIER)";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		79BF98082E6291EE00C60D4C /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 79277DC02EE8752800F18B30 /* Config.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "$(NYXIAN_LIVEPROCESS_CODE_SIGN_ENTITLEMENTS)";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = "$(BUILD_NUMBER)";
-				DEAD_CODE_STRIPPING = NO;
-				GCC_OPTIMIZATION_LEVEL = s;
-				GENERATE_INFOPLIST_FILE = YES;
-				HEADER_SEARCH_PATHS = (
-					Nyxian/,
-					LiveProcess/,
-				);
-				INFOPLIST_FILE = LiveProcess/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = LiveProcess;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_UIMainStoryboardFile = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = "$(VERSION)";
-				OTHER_CFLAGS = "-DCLIENT_ENV";
-				OTHER_LDFLAGS = (
-					"-Wl,-U,_OBJC_CLASS_$_FBSSceneParameters",
-					"-Wl,-U,_OBJC_CLASS_$_LSApplicationWorkspace",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = "$(NYXIAN_LIVEPROCESS_PRODUCT_BUNDLE_IDENTIFIER)";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SKIP_INSTALL = YES;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -1518,7 +1306,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					Nyxian/,
-					LiveProcess/,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SuCode;
@@ -1641,7 +1428,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					Nyxian/,
-					LiveProcess/,
 				);
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SuCode;
@@ -1749,15 +1535,6 @@
 			buildConfigurations = (
 				79AA11C12F7FFE24002FEAF2 /* Debug */,
 				79AA11C22F7FFE24002FEAF2 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		79BF98062E6291EE00C60D4C /* Build configuration list for PBXNativeTarget "LiveProcess" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				79BF98072E6291EE00C60D4C /* Debug */,
-				79BF98082E6291EE00C60D4C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
