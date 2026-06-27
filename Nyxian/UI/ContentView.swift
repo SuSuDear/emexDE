@@ -275,7 +275,9 @@ import UIKit
             return nil
         }
 
-        let resourcesURL = project.resourcesURL
+        guard let resourcesURL = project.resourcesURL else {
+            return nil
+        }
         let fileManager = FileManager.default
 
         for iconFile in iconFiles.reversed() {
@@ -359,8 +361,12 @@ import UIKit
     }
 
     private func saveIcon(_ image: UIImage, for project: NXProject) throws {
+        guard let resourcesURL = project.resourcesURL else {
+            throw NSError(domain: "com.susu.code.projectIcon", code: 5, userInfo: [NSLocalizedDescriptionKey: "Resources folder is not available"])
+        }
+
         let fileManager = FileManager.default
-        try fileManager.createDirectory(at: project.resourcesURL, withIntermediateDirectories: true)
+        try fileManager.createDirectory(at: resourcesURL, withIntermediateDirectories: true)
 
         guard let square = squareImage(from: image) else {
             throw NSError(domain: "com.susu.code.projectIcon", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid image"])
@@ -376,7 +382,7 @@ import UIKit
             guard let data = resizedPNGData(from: square, size: size) else {
                 throw NSError(domain: "com.susu.code.projectIcon", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to resize image"])
             }
-            try data.write(to: project.resourcesURL.appendingPathComponent(fileName), options: .atomic)
+            try data.write(to: resourcesURL.appendingPathComponent(fileName), options: .atomic)
         }
 
         let plistURL = project.url.appendingPathComponent("Config/Project.plist")
