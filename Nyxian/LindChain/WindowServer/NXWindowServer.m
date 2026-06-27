@@ -20,7 +20,6 @@
 */
 
 #import <LindChain/WindowServer/NXWindowServer.h>
-#import <LindChain/ProcEnvironment/Process/PEProcessManager.h>
 #import <LindChain/WindowServer/NXKeyboardPortal.h>
 
 @interface NXWindowLayerView : UIView

@@ -58,7 +58,7 @@
 #define SYS_pectl       760         /* utility for many proc environment operations */
 #define SYS_kbdctl      761
 
-#define SYS_N 26
+#define SYS_N 22
 
 typedef struct {
     const char *name;
