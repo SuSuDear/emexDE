@@ -39,7 +39,7 @@
 #import <LindChain/LiveContainer/ZSign/zsigner.h>
 #import <LindChain/ProcEnvironment/Surface/trust.h>
 
-#if !TROLLSTORE_ENV
+#if !TROLLSTORE_ENV && __has_include(<LindChain/Services/applicationmgmtd/LDEApplicationWorkspace.h>) && __has_include(<LindChain/Services/containerd/PEContainer.h>)
 
 /* Daemon Interfaces Headers */
 #import <LindChain/Services/applicationmgmtd/LDEApplicationWorkspace.h>
