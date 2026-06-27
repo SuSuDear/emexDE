@@ -23,24 +23,26 @@ import Foundation
 import SwiftUI
 import UIKit
 
-@objc class ContentViewController: UIThemedTableViewController, UIDocumentPickerDelegate, UIAdaptivePresentationControllerDelegate {
+@objc class ContentViewController: UIThemedTableViewController, UIDocumentPickerDelegate, UIAdaptivePresentationControllerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     var sessionIndex: IndexPath? = nil
     var projectsList: [String:[NXProject]] = [:]
-    
+    private var iconPickerProject: NXProject? = nil
+    private var iconPickerIndexPath: IndexPath? = nil
+
     @objc init() {
         RevertUI()
         super.init(style: .insetGrouped)
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         self.tableView.register(ProjectTableCell.self, forCellReuseIdentifier: ProjectTableCell.reuseIdentifier)
-        
+
         self.title = "Projects"
 
         let createItem = UIBarButtonItem(
@@ -55,9 +57,9 @@ import UIKit
             action: #selector(presentImportPicker)
         )
         self.navigationItem.setRightBarButtonItems([createItem, importItem], animated: false)
-        
+
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
-        
+
         let rawProjectsList = NXProject.listProjects(at: NXBootstrap.shared().rootURL.appendingPathComponent("Projects")) as! [String:[NXProject]]
         let filtered = rawProjectsList.filter { !$0.value.isEmpty }
 
@@ -68,7 +70,7 @@ import UIKit
         }
 
         self.projectsList = Dictionary(uniqueKeysWithValues: sorted)
-        
+
         self.tableView.reloadData()
     }
 
@@ -86,7 +88,7 @@ import UIKit
                 }
             }
         )
-        
+
         if #available(iOS 16.4, *) {
             _ = view.presentationBackground(Color(uiColor: currentTheme!.backgroundColor))
         }
@@ -107,7 +109,7 @@ import UIKit
         documentPicker.modalPresentationStyle = .formSheet
         self.present(documentPicker, animated: true)
     }
-    
+
     func addProject(_ project: NXProject) {
         let key = {
             switch project.projectConfig.schemeKind {
@@ -116,20 +118,20 @@ import UIKit
             default: return "unknown"
             }
         }()
-        
+
         let oldSections = projectsList.keys.sorted { sortKeys($0, $1) }
         let oldSectionForKey = oldSections.firstIndex(of: key)
-        
+
         if var list = self.projectsList[key] {
             list.append(project)
             self.projectsList[key] = list
         } else {
             self.projectsList[key] = [project]
         }
-        
+
         let newSections = updateSections()
         let newSectionForKey = newSections.firstIndex(of: key)
-        
+
         tableView.performBatchUpdates({
             if let oldIndex = oldSectionForKey, let newIndex = newSectionForKey {
                 if oldIndex != newIndex {
@@ -139,7 +141,7 @@ import UIKit
             } else if let newIndex = newSectionForKey {
                 tableView.insertSections(IndexSet(integer: newIndex), with: .fade)
             }
-            
+
             if let newIndex = newSectionForKey, let count = self.projectsList[key]?.count {
                 let rowIndex = count - 1
                 tableView.insertRows(at: [IndexPath(row: rowIndex, section: newIndex)], with: .automatic)
@@ -160,29 +162,29 @@ import UIKit
             default: return "unknown"
             }
         }()
-        
+
         guard var list = self.projectsList[key] else { return }
-        
+
         let oldSections = projectsList.keys.sorted { sortKeys($0, $1) }
         let oldSectionForKey = oldSections.firstIndex(of: key)
         let oldRow = list.firstIndex { $0.url == project.url }
-        
+
         list.removeAll { $0.url == project.url }
-        
+
         if list.isEmpty {
             self.projectsList.removeValue(forKey: key)
         } else {
             self.projectsList[key] = list
         }
-        
+
         let newSections = updateSections()
         let newSectionForKey = newSections.firstIndex(of: key)
-        
+
         tableView.performBatchUpdates({
             if let oldIndex = oldSectionForKey, let oldRow = oldRow {
                 tableView.deleteRows(at: [IndexPath(row: oldRow, section: oldIndex)], with: .automatic)
             }
-            
+
             if let oldIndex = oldSectionForKey, let newIndex = newSectionForKey, oldIndex != newIndex {
                 tableView.deleteSections(IndexSet(integer: oldIndex), with: .fade)
                 tableView.insertSections(IndexSet(integer: newIndex), with: .fade)
@@ -212,7 +214,7 @@ import UIKit
         if keyB == "unknown" { return true }
         return keyA < keyB
     }
-    
+
     private func createProject(from optionsModel: ProjectTemplateOptionsModel) -> Bool {
         let name = optionsModel.productName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty else {
@@ -221,7 +223,7 @@ import UIKit
         }
 
         optionsModel.saveOrganizationIdentifier()
-        
+
         guard let project = NXProject.createProject(
             at: NXBootstrap.shared().rootURL.appendingPathComponent("Projects"),
             withName: name,
@@ -238,10 +240,10 @@ import UIKit
         addProject(project)
         return true
     }
-    
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
+
         if let indexPath = sessionIndex {
             let keys = Array(self.projectsList.keys).sorted()
             let key = keys[indexPath.section]
@@ -252,46 +254,217 @@ import UIKit
             sessionIndex = nil
         }
     }
-    
+
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         let keys = Array(self.projectsList.keys).sorted()
         let key = keys[section]
         let sectionProjects = self.projectsList[key] ?? []
         return "\(key.capitalized) (\(sectionProjects.count))"
     }
-    
+
+    private func defaultIcon(for project: NXProject) -> UIImage? {
+        return project.projectConfig.schemeKind == .app ? UIImage(named: "DefaultIcon") : UIImage(named: "UtilityIcon")
+    }
+
+    private func configuredPrimaryIcon(for project: NXProject) -> UIImage? {
+        guard project.projectConfig.schemeKind == .app,
+              let icons = project.projectConfig.infoDictionary["CFBundleIcons"] as? [String: Any],
+              let primaryIcon = icons["CFBundlePrimaryIcon"] as? [String: Any],
+              let iconFiles = primaryIcon["CFBundleIconFiles"] as? [String],
+              !iconFiles.isEmpty else {
+            return nil
+        }
+
+        let resourcesURL = project.resourcesURL
+        let fileManager = FileManager.default
+
+        for iconFile in iconFiles.reversed() {
+            let baseName = (iconFile as NSString).deletingPathExtension
+            let ext = (iconFile as NSString).pathExtension
+            let candidates: [String]
+
+            if ext.isEmpty {
+                candidates = [
+                    "\(baseName)@3x.png",
+                    "\(baseName)@2x.png",
+                    "\(baseName).png",
+                    "\(baseName)@3x.jpg",
+                    "\(baseName)@2x.jpg",
+                    "\(baseName).jpg",
+                    "\(baseName)@3x.jpeg",
+                    "\(baseName)@2x.jpeg",
+                    "\(baseName).jpeg"
+                ]
+            } else {
+                candidates = [
+                    "\(baseName)@3x.\(ext)",
+                    "\(baseName)@2x.\(ext)",
+                    iconFile
+                ]
+            }
+
+            for candidate in candidates {
+                let path = resourcesURL.appendingPathComponent(candidate).path
+                if fileManager.fileExists(atPath: path), let image = UIImage(contentsOfFile: path) {
+                    return image
+                }
+            }
+        }
+
+        return nil
+    }
+
+    private func projectIcon(for project: NXProject) -> UIImage? {
+        return configuredPrimaryIcon(for: project) ?? defaultIcon(for: project)
+    }
+
+    private func canPickIcon(for project: NXProject) -> Bool {
+        return project.projectConfig.schemeKind == .app && configuredPrimaryIcon(for: project) == nil
+    }
+
+    private func presentIconPicker(for project: NXProject, at indexPath: IndexPath) {
+        guard canPickIcon(for: project) else { return }
+        guard UIImagePickerController.isSourceTypeAvailable(.photoLibrary) else {
+            NotificationServer.NotifyUser(level: .error, notification: "Photo Library is not available")
+            return
+        }
+
+        iconPickerProject = project
+        iconPickerIndexPath = indexPath
+
+        let picker = UIImagePickerController()
+        picker.sourceType = .photoLibrary
+        picker.mediaTypes = ["public.image"]
+        picker.allowsEditing = true
+        picker.delegate = self
+        present(picker, animated: true)
+    }
+
+    private func squareImage(from image: UIImage) -> UIImage? {
+        guard let cgImage = image.cgImage else { return nil }
+        let width = CGFloat(cgImage.width)
+        let height = CGFloat(cgImage.height)
+        let side = min(width, height)
+        let rect = CGRect(x: (width - side) / 2, y: (height - side) / 2, width: side, height: side)
+        guard let cropped = cgImage.cropping(to: rect) else { return nil }
+        return UIImage(cgImage: cropped, scale: image.scale, orientation: image.imageOrientation)
+    }
+
+    private func resizedPNGData(from image: UIImage, size: CGSize) -> Data? {
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let resized = renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: size))
+        }
+        return resized.pngData()
+    }
+
+    private func saveIcon(_ image: UIImage, for project: NXProject) throws {
+        let fileManager = FileManager.default
+        try fileManager.createDirectory(at: project.resourcesURL, withIntermediateDirectories: true)
+
+        guard let square = squareImage(from: image) else {
+            throw NSError(domain: "com.susu.code.projectIcon", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid image"])
+        }
+
+        let files: [(String, CGSize)] = [
+            ("AppIcon60x60.png", CGSize(width: 60, height: 60)),
+            ("AppIcon60x60@2x.png", CGSize(width: 120, height: 120)),
+            ("AppIcon60x60@3x.png", CGSize(width: 180, height: 180))
+        ]
+
+        for (fileName, size) in files {
+            guard let data = resizedPNGData(from: square, size: size) else {
+                throw NSError(domain: "com.susu.code.projectIcon", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to resize image"])
+            }
+            try data.write(to: project.resourcesURL.appendingPathComponent(fileName), options: .atomic)
+        }
+
+        let plistURL = project.url.appendingPathComponent("Config/Project.plist")
+        let plistData = try Data(contentsOf: plistURL)
+        guard var plist = try PropertyListSerialization.propertyList(from: plistData, options: [], format: nil) as? [String: Any] else {
+            throw NSError(domain: "com.susu.code.projectIcon", code: 3, userInfo: [NSLocalizedDescriptionKey: "Invalid Project.plist"])
+        }
+
+        var bundleInfo = plist["NXBundleInfo"] as? [String: Any] ?? [:]
+        bundleInfo["CFBundleIcons"] = [
+            "CFBundlePrimaryIcon": [
+                "CFBundleIconFiles": ["AppIcon60x60"],
+                "CFBundleIconName": "AppIcon"
+            ]
+        ]
+        plist["NXBundleInfo"] = bundleInfo
+
+        let outputData = try PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0)
+        try outputData.write(to: plistURL, options: .atomic)
+        _ = project.reload()
+    }
+
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true)
+        iconPickerProject = nil
+        iconPickerIndexPath = nil
+    }
+
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        guard let project = iconPickerProject else {
+            picker.dismiss(animated: true)
+            return
+        }
+
+        let image = (info[.editedImage] as? UIImage) ?? (info[.originalImage] as? UIImage)
+        do {
+            guard let image = image else {
+                throw NSError(domain: "com.susu.code.projectIcon", code: 4, userInfo: [NSLocalizedDescriptionKey: "No image selected"])
+            }
+            try saveIcon(image, for: project)
+            if let indexPath = iconPickerIndexPath {
+                tableView.reloadRows(at: [indexPath], with: .automatic)
+            } else {
+                tableView.reloadData()
+            }
+        } catch {
+            NotificationServer.NotifyUser(level: .error, notification: error.localizedDescription)
+        }
+
+        picker.dismiss(animated: true)
+        iconPickerProject = nil
+        iconPickerIndexPath = nil
+    }
+
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let keys = Array(self.projectsList.keys).sorted()
         let key = keys[section]
         let sectionProjects = self.projectsList[key] ?? []
         return sectionProjects.count
     }
-    
+
     override func numberOfSections(in tableView: UITableView) -> Int {
         return self.projectsList.count
     }
-    
+
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let keys = Array(self.projectsList.keys).sorted()
         let key = keys[indexPath.section]
         let sectionProjects = self.projectsList[key] ?? []
         let project: NXProject = sectionProjects[indexPath.row];
         let cell: ProjectTableCell = self.tableView.dequeueReusableCell(withIdentifier: ProjectTableCell.reuseIdentifier) as! ProjectTableCell
-        cell.configure(displayName: project.projectConfig.displayName, bundleIdentifier: project.projectConfig.bundleid, appIcon: (project.projectConfig.schemeKind == .app) ? UIImage(named: "DefaultIcon") : UIImage(named: "UtilityIcon"), showArrow: UIDevice.current.userInterfaceIdiom != .pad)
+        cell.configure(displayName: project.projectConfig.displayName, bundleIdentifier: project.projectConfig.bundleid, appIcon: projectIcon(for: project), showArrow: UIDevice.current.userInterfaceIdiom != .pad, iconTapAction: canPickIcon(for: project) ? { [weak self] in
+            self?.presentIconPicker(for: project, at: indexPath)
+        } : nil)
         return cell
     }
-    
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        
+
         sessionIndex = indexPath
-        
+
         let keys = Array(self.projectsList.keys).sorted()
         let key = keys[indexPath.section]
         let sectionProjects = self.projectsList[key] ?? []
-        
+
         let selectedProject: NXProject = sectionProjects[indexPath.row]
-        
+
         if UIDevice.current.userInterfaceIdiom == .pad {
             let padFileVC: MainSplitViewController = MainSplitViewController(project: selectedProject)
             padFileVC.modalPresentationStyle = .fullScreen
@@ -301,30 +474,30 @@ import UIKit
             self.navigationController?.pushViewController(fileVC, animated: true)
         }
     }
-    
+
     override func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
             let export: UIAction = UIAction(title: "Export", image: UIImage(systemName: "square.and.arrow.up.fill")) { [weak self] _ in
                 DispatchQueue.global().async {
                     guard let self = self else { return }
-                    
+
                     let keys = Array(self.projectsList.keys).sorted()
                     let key = keys[indexPath.section]
                     let sectionProjects = self.projectsList[key] ?? []
                     let project: NXProject = sectionProjects[indexPath.row]
-                    
+
                     let zipPath: String = "\(NSTemporaryDirectory())/\(project.projectConfig.displayName!).zip"
                     zipDirectoryAtPath(project.url.path, zipPath, true)
                     share(url: URL(fileURLWithPath: zipPath), remove: true)
                 }
             }
-            
+
             let item: UIAction = UIAction(title: "Remove", image: UIImage(systemName: "trash.fill"), attributes: .destructive) { _ in
                 let keys = Array(self.projectsList.keys).sorted()
                 let key = keys[indexPath.section]
                 let sectionProjects = self.projectsList[key] ?? []
                 let project = sectionProjects[indexPath.row]
-                
+
                 self.presentConfirmationAlert(
                     title: "Warning",
                     message: "Are you sure you want to remove \"\(project.projectConfig.displayName!)\"?",
@@ -335,17 +508,17 @@ import UIKit
                     removeProject(project)
                 }
             }
-            
+
             return UIMenu(children: [export, item])
         }
     }
-    
+
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         do {
             guard let selectedURL = urls.first else { return }
 
             let extractFirst = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("Proj")
-            
+
             if FileManager.default.fileExists(atPath: extractFirst.path) {
                 try FileManager.default.removeItem(at: extractFirst)
             }
@@ -385,7 +558,7 @@ import UIKit
             NotificationServer.NotifyUser(level: .error, notification: error.localizedDescription)
         }
     }
-    
+
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         let keys = Array(self.projectsList.keys).sorted()
         let key = keys[indexPath.section]
@@ -474,7 +647,7 @@ final class ProjectTemplateOptionsModel: ObservableObject {
         }
         return appLanguages
     }
-    
+
     var interfaceDisabledIDs: Set<String> {
         selectedLanguageID == "ObjC" ? ["SwiftUI"] : []
     }
@@ -549,12 +722,12 @@ final class ProjectTemplateOptionsModel: ObservableObject {
 
 struct ProjectTemplateOptionsView: View {
     @ObservedObject var model: ProjectTemplateOptionsModel
-    
+
     private var textColor: Color { Color(uiColor: currentTheme!.textColor) }
     private var hairlineColor: Color { Color(uiColor: currentTheme!.gutterHairlineColor) }
     private var groupBackground: Color { textColor.opacity(0.05) }
     private var secondaryTextColor: Color { textColor.opacity(0.6) }
-    
+
     var body: some View {
         VStack(spacing: 12) {
             VStack(spacing: 0) {
@@ -575,7 +748,7 @@ struct ProjectTemplateOptionsView: View {
             }
             .background(groupBackground)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            
+
             VStack(spacing: 8) {
                 if model.showsAppOptions {
                     ProjectTemplatePickerRow(
@@ -588,7 +761,7 @@ struct ProjectTemplateOptionsView: View {
                         )
                     )
                 }
-                
+
                 ProjectTemplatePickerRow(
                     title: "Language:",
                     options: model.languageOptions,
@@ -604,14 +777,14 @@ struct ProjectTemplateOptionsView: View {
         .padding(.bottom, 6)
         .fixedSize(horizontal: false, vertical: true)
     }
-    
+
     private var themedDivider: some View {
         Rectangle()
             .fill(hairlineColor)
             .frame(height: 1 / UIScreen.main.scale)
             .padding(.leading, 12)
     }
-    
+
     private var generatedIdentifierRow: some View {
         VStack(alignment: .leading, spacing: 3) {
             Text("Bundle Identifier")
@@ -627,7 +800,7 @@ struct ProjectTemplateOptionsView: View {
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-    
+
     private func templateTextField(label: String,
                                    placeholder: String,
                                    text: Binding<String>,
