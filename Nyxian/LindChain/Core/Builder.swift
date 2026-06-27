@@ -221,11 +221,11 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
     func headsup(buildType: Builder.BuildType) throws {
         let type = project.projectConfig.schemeKind
         if(type != .app && type != .utility) {
-            throw NSError(domain: "com.cr4zy.nyxian.builder.headsup", code: 1, userInfo: [NSLocalizedDescriptionKey:"Project type \(type) is unknown."])
+            throw NSError(domain: "com.susu.code.builder.headsup", code: 1, userInfo: [NSLocalizedDescriptionKey:"Project type \(type) is unknown."])
         }
 
         guard let osVersionNeeded: MDKOSVersion = MDKOSVersion(versionString: project.projectConfig.deploymentTarget) else {
-            throw NSError(domain: "com.cr4zy.nyxian.builder.headsup", code: 1, userInfo: [NSLocalizedDescriptionKey:"Target \"\(self.project.projectConfig.displayName ?? "Unknown") (\(self.project.projectConfig.bundleid ?? "Unknown"))\" cannot be build, host version cannot be compared. Version \(project.projectConfig.deploymentTarget!) is not valid."])
+            throw NSError(domain: "com.susu.code.builder.headsup", code: 1, userInfo: [NSLocalizedDescriptionKey:"Target \"\(self.project.projectConfig.displayName ?? "Unknown") (\(self.project.projectConfig.bundleid ?? "Unknown"))\" cannot be build, host version cannot be compared. Version \(project.projectConfig.deploymentTarget!) is not valid."])
         }
 
 
@@ -234,13 +234,13 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
         let minimumOSVersion: MDKOSVersion = MDKOSVersion(versionString: NXOSVersionSupportedBuildVersions.first)!
         let maximumOSVersion: MDKOSVersion = MDKOSVersion(versionString: NXOSVersionSupportedBuildVersions.last)!
         if osVersionNeeded < minimumOSVersion || osVersionNeeded > maximumOSVersion {
-            throw NSError(domain: "com.cr4zy.nyxian.builder.headsup", code: 1, userInfo: [NSLocalizedDescriptionKey:"Target \"\(self.project.projectConfig.displayName ?? "Unknown") (\(self.project.projectConfig.bundleid ?? "Unknown"))\" declares deployment target \(osVersionNeeded) which is not supported by this version of emexDE. This version of emexDE supports \(minimumOSVersion) up to \(maximumOSVersion)."])
+            throw NSError(domain: "com.susu.code.builder.headsup", code: 1, userInfo: [NSLocalizedDescriptionKey:"Target \"\(self.project.projectConfig.displayName ?? "Unknown") (\(self.project.projectConfig.bundleid ?? "Unknown"))\" declares deployment target \(osVersionNeeded) which is not supported by this version of emexDE. This version of SuCode supports \(minimumOSVersion) up to \(maximumOSVersion)."])
         }
 
         // Project requirement check
         if osVersionNeeded > MDKOSVersion.host,
            buildType == .Run {
-            throw NSError(domain: "com.cr4zy.nyxian.builder.headsup", code: 1, userInfo: [NSLocalizedDescriptionKey:"Target \"\(self.project.projectConfig.displayName ?? "Unknown") (\(self.project.projectConfig.bundleid ?? "Unknown"))\" declares deployment target \(osVersionNeeded) which doesn't support the host version \(MDKOSVersion.host). Please update your idevice."])
+            throw NSError(domain: "com.susu.code.builder.headsup", code: 1, userInfo: [NSLocalizedDescriptionKey:"Target \"\(self.project.projectConfig.displayName ?? "Unknown") (\(self.project.projectConfig.bundleid ?? "Unknown"))\" declares deployment target \(osVersionNeeded) which doesn't support the host version \(MDKOSVersion.host). Please update your idevice."])
         }
     }
 
@@ -276,13 +276,13 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
 
     func executeRunner() throws {
         if !self.phaseRunner.runPhases() {
-            throw NSError(domain: "com.cr4zy.nyxian.builder.runner", code: 1, userInfo: [NSLocalizedDescriptionKey:"Failed to run project."])
+            throw NSError(domain: "com.susu.code.builder.runner", code: 1, userInfo: [NSLocalizedDescriptionKey:"Failed to run project."])
         }
 
         do {
             try self.argsString.write(to: self.project.cacheURL.appendingPathComponent("args.txt"), atomically: false, encoding: .utf8)
         } catch {
-            throw NSError(domain: "com.cr4zy.nyxian.builder.runner", code: 1, userInfo: [NSLocalizedDescriptionKey:error.localizedDescription])
+            throw NSError(domain: "com.susu.code.builder.runner", code: 1, userInfo: [NSLocalizedDescriptionKey:error.localizedDescription])
         }
     }
 
@@ -304,11 +304,11 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
                     try NXTrollStoreSupport.installIpa(atPath: self.project.packageURL.path)
                     try NXTrollStoreSupport.openApplication(withBundleIdentifier: self.project.projectConfig.bundleid)
                 } catch {
-                    throw NSError(domain: "com.cr4zy.nyxian.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:error.localizedDescription])
+                    throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:error.localizedDescription])
                 }
             } else if self.project.projectConfig.schemeKind == .utility {
                 if LCUtils.certificateData == nil {
-                    throw NSError(domain: "com.cr4zy.nyxian.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"No code signature present to perform signing, import code signature in Settings > Certificate. Note that the code signature must be the same code signature used to sign Nyxian."])
+                    throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"No code signature present to perform signing, import code signature in Settings > Certificate. Note that the code signature must be the same code signature used to sign SuCode."])
                 }
 
                 MachOObject.signBinary(atPath: self.project.machoURL.path)
@@ -320,7 +320,7 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
                         NXWindowServer.shared().openWindow(with: TerminalSession, withCompletion: nil)
                     }
                 } else {
-                    throw NSError(domain: "com.cr4zy.nyxian.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"Failed to fastpath install utility"])
+                    throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"Failed to fastpath install utility"])
                 }
             }
         } else {
@@ -341,7 +341,7 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
             // installing app
             var output: NSString?
             if shell(["\(Bundle.main.bundlePath)/tshelper","install",self.project.packageURL.path], 0, nil, &output) != 0 {
-                throw NSError(domain: "com.cr4zy.nyxian.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:output ?? "Unknown error happened installing application"])
+                throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:output ?? "Unknown error happened installing application"])
             }
 
             BKSTerminateApplicationForReasonAndReportWithDescription(self.project.projectConfig.bundleid! as CFString, 0, 0, "reinstalled application" as CFString)
@@ -364,7 +364,7 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
                 }
 
                 if !success {
-                    throw NSError(domain: "com.cr4zy.nyxian.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"Failed to open application"])
+                    throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"Failed to open application"])
                 }
             } else {
                 while(!LSApplicationWorkspace.default().openApplication(withBundleID: self.project.projectConfig.bundleid)) {
@@ -382,7 +382,7 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
            self.project.projectConfig.schemeKind == .app {
             // pseudo signing executable
             if !ZSigner.adhocSignMachO(atPath: self.project.machoURL!.path, bundleId: self.project.projectConfig.bundleid!, entitlementData: try Data(contentsOf: URL(fileURLWithPath: entitlementsPath))) {
-                throw NSError(domain: "com.cr4zy.nyxian.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"Unknown error happened pseudo signing application with entitlements"])
+                throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"Unknown error happened pseudo signing application with entitlements"])
             }
         }
 #endif // JAILBREAK_ENV

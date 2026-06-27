@@ -24,7 +24,7 @@
 #import <LindChain/Utils/Zip.h>
 #import <LindChain/Downloader/fdownload.h>
 #import <LindChain/ProcEnvironment/Surface/extra/relax.h>
-#import <emexDE-Swift.h>
+#import <SuCode-Swift.h>
 #import <MobileDevelopmentKit/MDKThreadPool.h>
 
 @interface NXBootstrap ()
@@ -60,7 +60,7 @@
 #if !JAILBREAK_ENV
         _rootURL = [NSURL fileURLWithPath:[[@"/private" stringByAppendingPathComponent:NSHomeDirectory()] stringByAppendingPathComponent:@"/Documents"]];
 #else
-        _rootURL = [NSURL fileURLWithPath:[[@"/private" stringByAppendingPathComponent:NSHomeDirectory()] stringByAppendingPathComponent:@"/Documents/com.cr4zy.nyxian.root"]];
+        _rootURL = [NSURL fileURLWithPath:[[@"/private" stringByAppendingPathComponent:NSHomeDirectory()] stringByAppendingPathComponent:@"/Documents/com.susu.code.root"]];
 #endif /* !JAILBREAK_ENV */
     });
     return _rootURL;

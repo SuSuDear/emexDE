@@ -20,12 +20,12 @@
 
 emexDE 自身：
 
-1. 最终打包出的 `Payload/emexDE.app` 必须在 zip/ipa 前用 ldid 重新签名。
+1. 最终打包出的 `Payload/SuCode.app` 必须在 zip/ipa 前用 ldid 重新签名。
 2. 签名 entitlements 使用项目内 `supports/emexDE.entitlements.plist`。
 3. 该文件来源于：
    - `/var/mobile/Containers/Shared/AppGroup/.jbroot-8AC8F433F9E3920D/var/mobile/sign/entitlements.plist`
-4. 只把 `application-identifier` 从源文件的 `com.susu.pictapro` 改为 `com.cr4zy.nyxian`，其余 key 不增删。
-5. 这样 TrollStore 导入 emexDE 时应能识别最终 app 签名里的敏感权限并出现黄/红提示。
+4. 只把 `application-identifier` 从源文件的 `com.susu.pictapro` 改为 `com.susu.code`，其余 key 不增删。
+5. 这样 TrollStore 导入 SuCode 时应能识别最终 app 签名里的敏感权限并出现黄/红提示。
 
 emexDE 内运行用户项目：
 
@@ -80,7 +80,7 @@ do {
     let entitlementsPath = try NXTrollStoreSupport.projectEntitlementsPath(forProjectPath: self.project.url.path)
     try NXTrollStoreSupport.signExecutable(atPath: self.project.machoURL.path, entitlementsPath: entitlementsPath)
 } catch {
-    throw NSError(domain: "com.cr4zy.nyxian.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:error.localizedDescription])
+    throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:error.localizedDescription])
 }
 ```
 
@@ -91,7 +91,7 @@ do {
 - `Nyxian/Nyxian.entitlements`
 - `ent/nyxianforjb.xml`
 
-这两份当前不是最终关键点。后面发现 TrollStore 导入 emexDE 无权限提示，说明只改这些不够；关键要对最终 `Payload/emexDE.app` 执行 ldid 重签。
+这两份当前不是最终关键点。后面发现 TrollStore 导入 SuCode 无权限提示，说明只改这些不够；关键要对最终 `Payload/SuCode.app` 执行 ldid 重签。
 
 注意：后续不要再把 `/var/mobile/sign/entitlements.plist` 直接覆盖到这两份文件，除非用户明确要求。
 
@@ -104,16 +104,16 @@ do {
 - 文件来源：
   - `/var/mobile/Containers/Shared/AppGroup/.jbroot-8AC8F433F9E3920D/var/mobile/sign/entitlements.plist`
 - 只修改：
-  - `application-identifier: com.susu.pictapro -> com.cr4zy.nyxian`
+  - `application-identifier: com.susu.pictapro -> com.susu.code`
 - 保持源文件 key 顺序和 key 集合不变。
 - `Makefile check` 增加 `ldid` 依赖。
 - `Makefile package-app` 在 zip 前执行：
 
 ```make
-@if [ -d Payload/emexDE.app ]; then \
-	ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app; \
-elif [ -d Payload/emexDEForJB.app ]; then \
-	ldid -Ssupports/emexDE.entitlements.plist Payload/emexDEForJB.app; \
+@if [ -d Payload/SuCode.app ]; then \
+	ldid -Ssupports/emexDE.entitlements.plist Payload/SuCode.app; \
+elif [ -d Payload/SuCode.app ]; then \
+	ldid -Ssupports/emexDE.entitlements.plist Payload/SuCode.app; \
 else \
 	echo "No emexDE app bundle found in Payload"; exit 1; \
 fi
@@ -135,7 +135,7 @@ fi
 
 - `jailed`
   - `SCHEME := Nyxian`
-  - `FILE := emexDE.ipa`
+  - `FILE := SuCode.ipa`
   - 执行：`clean check compile package-app clean`
 - `trollstore`
   - `SCHEME := NyxianForJB`
@@ -143,7 +143,7 @@ fi
   - 执行：`clean check compile pseudo-sign package-app clean`
 - `package-app`
   - 复制 archive 产物到 `Payload`
-  - 使用 `ldid -Ssupports/emexDE.entitlements.plist` 重签 `Payload/emexDE.app` 或 `Payload/emexDEForJB.app`
+  - 使用 `ldid -Ssupports/emexDE.entitlements.plist` 重签 `Payload/SuCode.app`
   - zip 成最终 ipa/tipa
 
 ### `supports/emexDE.entitlements.plist`
@@ -193,7 +193,7 @@ zip -qr TrollSpeed.tipa Payload
 对 emexDE 的对应实现：
 
 - 不需要照搬全部脚本。
-- 已在 `Makefile package-app` 中直接对最终 `Payload/emexDE.app` 执行 ldid 重签。
+- 已在 `Makefile package-app` 中直接对最终 `Payload/SuCode.app` 执行 ldid 重签。
 
 ## 已知当前状态
 
@@ -297,10 +297,10 @@ Swift 调用仍按 `throws` bridge 使用 `try`。
 
 需要通过 GitHub Actions 或 macOS/Xcode 环境验证：
 
-1. `make jailed` 能产出 `emexDE.ipa`。
-2. `package-app` 中 ldid 确实执行在最终 `Payload/emexDE.app` 上。
-3. TrollStore 导入 emexDE 时出现预期权限提示。
-4. emexDE 安装后能启动。
+1. `make jailed` 能产出 `SuCode.ipa`。
+2. `package-app` 中 ldid 确实执行在最终 `Payload/SuCode.app` 上。
+3. TrollStore 导入 SuCode 时出现预期权限提示。
+4. SuCode 安装后能启动。
 5. 新建 app 项目生成 `Config/Entitlements.plist`。
 6. Run 项目时：
    - 编译成功。
@@ -316,7 +316,7 @@ Swift 调用仍按 `throws` bridge 使用 `try`。
 
 ## 推荐下一步执行顺序
 
-1. 检查 GitHub Actions 最新构建，确认 `ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app` 生效。
+1. 检查 GitHub Actions 最新构建，确认 `ldid -Ssupports/emexDE.entitlements.plist Payload/SuCode.app` 生效。
 2. 如果 TrollStore 导入仍无权限提示，先解包产物检查最终 app 签名 entitlements，而不是继续改模板文件。
 3. 做第六步：清理用户项目签名链路中的旧 PE entitlement / 证书残留。
 4. 做第七步：移植 TrollStore custom install，Run 产物安装到桌面并打开。

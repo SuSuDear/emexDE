@@ -89,5 +89,5 @@ jobs:
       - name: Upload Jailed
         uses: actions/upload-artifact@v4
         with:
-          name: emexDE.ipa
-          path: emexDE.ipa
+          name: SuCode.ipa
+          path: SuCode.ipa

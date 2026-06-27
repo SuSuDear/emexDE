@@ -40,7 +40,7 @@ static BOOL NXIsMachOFile(NSString *path)
     return magic == 0xfeedfacf || magic == 0xcffaedfe || magic == 0xcafebabe || magic == 0xbebafeca;
 }
 
-static NSString * const NXTrollStoreSupportErrorDomain = @"com.cr4zy.nyxian.trollstoresupport";
+static NSString * const NXTrollStoreSupportErrorDomain = @"com.susu.code.trollstoresupport";
 static NSString * const NXTrollStoreMarkerName = @"_TrollStore";
 
 static int NXFdIsValid(int fd)
@@ -124,7 +124,7 @@ static int NXSpawnRoot(NSString *path, NSArray *args, NSString **stdOut, NSStrin
     dispatch_semaphore_t sema = 0;
     dispatch_queue_t logQueue;
     if (stdOut || stdErr) {
-        logQueue = dispatch_queue_create("com.cr4zy.nyxian.TrollStore.LogCollector", NULL);
+        logQueue = dispatch_queue_create("com.susu.code.TrollStore.LogCollector", NULL);
         sema = dispatch_semaphore_create(0);
 
         int outPipe = out[0];

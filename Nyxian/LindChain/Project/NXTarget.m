@@ -22,7 +22,7 @@
 #import <LindChain/Project/NXTarget.h>
 #import <LindChain/Project/NXUser.h>
 #import <NXBootstrap.h>
-#import <emexDE-Swift.h>
+#import <SuCode-Swift.h>
 
 @implementation NXTarget
 

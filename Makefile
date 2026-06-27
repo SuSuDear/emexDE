@@ -1,9 +1,9 @@
 .DEFAULT_GOAL := all
 
 # Configuration
-NXNAME := Nyxian
+NXNAME := SuCode
 NXVERSION := $(shell awk -F= '/^VERSION/ {gsub(/[ \t]/,"",$$2); print $$2}' Config.xcconfig)
-NXBUNDLE := com.cr4zy.nyxian
+NXBUNDLE := com.susu.code
 
 # Helper
 comma := ,
@@ -125,7 +125,7 @@ endif
 all: jailed
 
 jailed: SCHEME := Nyxian
-jailed: FILE := emexDE.ipa
+jailed: FILE := SuCode.ipa
 jailed: clean check compile build-roothelper package-app clean
 
 # Dependencies
@@ -149,7 +149,7 @@ compile: CoreCompiler/CoreCompilerSupportLibs
 		-scheme $(SCHEME) \
 		-configuration Release \
 		-destination 'generic/platform=iOS' \
-		-archivePath build/Nyxian.xcarchive \
+		-archivePath build/SuCode.xcarchive \
 		archive \
 		CODE_SIGN_IDENTITY="" \
 		CODE_SIGNING_REQUIRED=NO \
@@ -163,19 +163,19 @@ build-roothelper:
 	$(MAKE) -C TrollStore make_roothelper MAKECMDGOALS=
 
 package-app:
-	cp -r  build/Nyxian.xcarchive/Products/Applications Payload
-	@if [ ! -d Payload/emexDE.app ]; then \
-		echo "No emexDE app bundle found in Payload"; exit 1; \
+	cp -r  build/SuCode.xcarchive/Products/Applications Payload
+	@if [ ! -d Payload/SuCode.app ]; then \
+		echo "No SuCode app bundle found in Payload"; exit 1; \
 	fi
-	curl -L https://github.com/opa334/ldid/releases/latest/download/ldid -o Payload/emexDE.app/ldid
-	chmod 0755 Payload/emexDE.app/ldid
-	echo bundled > Payload/emexDE.app/ldid.version
-	chmod 0644 Payload/emexDE.app/ldid.version
-	ldid -Ssupports/emexDE.entitlements.plist Payload/emexDE.app
-	ldid -Ssupports/ldid.entitlements.plist Payload/emexDE.app/ldid
-	cp TrollStore/RootHelper/.theos/obj/trollstorehelper Payload/emexDE.app/trollstorehelper
-	chmod 0755 Payload/emexDE.app/trollstorehelper
-	ldid -STrollStore/RootHelper/entitlements.plist Payload/emexDE.app/trollstorehelper
+	curl -L https://github.com/opa334/ldid/releases/latest/download/ldid -o Payload/SuCode.app/ldid
+	chmod 0755 Payload/SuCode.app/ldid
+	echo bundled > Payload/SuCode.app/ldid.version
+	chmod 0644 Payload/SuCode.app/ldid.version
+	ldid -Ssupports/emexDE.entitlements.plist Payload/SuCode.app
+	ldid -Ssupports/ldid.entitlements.plist Payload/SuCode.app/ldid
+	cp TrollStore/RootHelper/.theos/obj/trollstorehelper Payload/SuCode.app/trollstorehelper
+	chmod 0755 Payload/SuCode.app/trollstorehelper
+	ldid -STrollStore/RootHelper/entitlements.plist Payload/SuCode.app/trollstorehelper
 	-rm $(FILE)
 	zip -r $(FILE) ./Payload
 

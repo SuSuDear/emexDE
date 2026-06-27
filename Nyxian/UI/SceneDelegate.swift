@@ -32,7 +32,7 @@ struct UIOnboardingHelper {
     }
     
     static func setUpSecondTitleLine() -> NSMutableAttributedString {
-        .init(string: Bundle.main.displayName ?? "emexDE", attributes: [
+        .init(string: Bundle.main.displayName ?? "SuCode", attributes: [
             .foregroundColor: UIColor { trait in
                 trait.userInterfaceStyle == .dark
                 ? UIColor(red: 0.85, green: 0.74, blue: 0.93, alpha: 1.0)

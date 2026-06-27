@@ -98,7 +98,7 @@
 				<string>public.zip-archive</string>
 			</array>
 			<key>UTTypeIdentifier</key>
-			<string>com.cr4zy.nyxian.ipa</string>
+			<string>com.susu.code.ipa</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -113,7 +113,7 @@
 				<string>public.zip-archive</string>
 			</array>
 			<key>UTTypeIdentifier</key>
-			<string>com.cr4zy.nyxian.nipa</string>
+			<string>com.susu.code.nipa</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
