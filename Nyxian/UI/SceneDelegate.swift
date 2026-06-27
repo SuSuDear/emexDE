@@ -131,7 +131,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, UITabBarControllerDeleg
             self.window?.bringSubviewToFront(label)
             return
         }
-#else
+#elseif !TROLLSTORE_ENV
         if(!liveProcessIsAvailable())
         {
             let label = UILabel()

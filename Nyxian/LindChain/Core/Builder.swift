@@ -294,7 +294,24 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
             XCButton.stopSpinning()
         }
 
-#if !JAILBREAK_ENV
+#if TROLLSTORE_ENV
+        if self.project.projectConfig.schemeKind == .app {
+            do {
+                let entitlementsPath = try NXTrollStoreSupport.projectEntitlementsPath(forProjectPath: self.project.url.path)
+                try NXTrollStoreSupport.signExecutable(atPath: self.project.machoURL.path, entitlementsPath: entitlementsPath)
+                try self.package()
+                if buildType == .Run {
+                    try NXTrollStoreSupport.installIpa(atPath: self.project.packageURL.path)
+                    try NXTrollStoreSupport.openApplication(withBundleIdentifier: self.project.projectConfig.bundleid)
+                }
+            } catch {
+                throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:error.localizedDescription])
+            }
+        } else {
+            macho_after_sign(self.project.machoURL.path, self.project.entitlementsConfig.entitlement)
+            try self.package()
+        }
+#elseif !JAILBREAK_ENV
         if(buildType == .Run) {
             if self.project.projectConfig.schemeKind == .app {
                 do {
