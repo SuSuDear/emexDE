@@ -324,6 +324,9 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
                     throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:error.localizedDescription])
                 }
             } else if self.project.projectConfig.schemeKind == .utility {
+#if TROLLSTORE_ENV
+                throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"Running utility projects is not supported in TrollStore builds."])
+#else
                 if LCUtils.certificateData == nil {
                     throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"No code signature present to perform signing, import code signature in Settings > Certificate. Note that the code signature must be the same code signature used to sign SuCode."])
                 }
@@ -339,6 +342,7 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
                 } else {
                     throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"Failed to fastpath install utility"])
                 }
+#endif /* TROLLSTORE_ENV */
             }
         } else {
             if self.project.projectConfig.schemeKind == .app {
