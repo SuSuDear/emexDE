@@ -21,6 +21,7 @@
 
 #import <LindChain/ProcEnvironment/Process/PEProcess.h>
 #import <LindChain/ProcEnvironment/Process/PEProcessManager.h>
+#import <LindChain/WindowServer/NXWindowServer.h>
 #import <LindChain/ProcEnvironment/Utils/klog.h>
 
 #if !JAILBREAK_ENV
@@ -49,9 +50,9 @@
     {
         return nil;
     }
-    
+
     self = [super init];
-    
+
     self.executablePath = items[@"PEExecutablePath"];
     if(self.executablePath == nil)
     {
@@ -59,16 +60,16 @@
     }
     /* FIXME: before it was a isExecutableFileAtPath check, but since installd broke the permissions at install time we can forget that lol */
     if(![[PEContainer shared] isReadableFileAtPath:self.executablePath]) return nil;
-    
+
     self.wid = (id_t)-1;
-    
+
     NSString *potentialBundlePath = [self.executablePath stringByDeletingLastPathComponent];
     NSBundle *bundle = [NSBundle bundleWithURL:[NSURL fileURLWithPath:potentialBundlePath]];
     if(bundle == nil)
     {
         return nil;
     }
-    
+
     self.bundleIdentifier = bundle.bundleIdentifier;
     NSString *localizedDisplayName = [bundle objectForInfoDictionaryKey:@"CFBundleDisplayName"];
     if(!localizedDisplayName)
@@ -76,16 +77,16 @@
         localizedDisplayName = [bundle objectForInfoDictionaryKey:@"CFBundleName"];
     }
     self.displayName = localizedDisplayName ?: [self.executablePath lastPathComponent];
-    
+
     __weak typeof(self) weakSelf = self;
-    
+
     /* spawning process */
     self.process = PESpawnFBProcess(items);
     if(self.process == nil)
     {
         return nil;
     }
-    
+
     [self.process addObserver:self];
     if(!self.process.running)
     {
@@ -97,7 +98,7 @@
         [manager _removeProcess:self.process];
         return nil;
     }
-    
+
     ksurface_proc_t *child = proc_fork(proc, self.pid, [self.executablePath UTF8String]);
     if(child == NULL)
     {
@@ -108,6 +109,11 @@
     {
         self.proc = child;
     }
+
+    return self;
+}
+
+#endif /* !JAILBREAK_ENV */
 
 - (void)sendSignal:(int)signal
 {
@@ -121,7 +127,7 @@
     {
         return;
     }
-    
+
     /*
      * for some reason apple doesnt support SIGTSTP on iOS
      * (maybe we just use it wrong lol)
@@ -130,7 +136,7 @@
     {
         signal = SIGSTOP;
     }
-    
+
     if(signal == SIGSTOP)
     {
         _isSuspended = YES;
@@ -139,21 +145,21 @@
     {
         _isSuspended = NO;
     }
-    
+
     [self.process.nsExtension _kill:signal];
-    
+
     if(signal == SIGSTOP)
     {
         kvo_wrlock(_proc);
         _proc->bsd.kp_proc.p_stat = SSTOP;
-        
+
         goto report_signal;
     }
     else if(signal == SIGCONT)
     {
         kvo_wrlock(_proc);
         _proc->bsd.kp_proc.p_stat = SRUN;
-        
+
     report_signal:
         kvo_unlock(_proc);
         proc_state_change(_proc, W_STOPCODE(signal));
@@ -188,16 +194,16 @@
         }
     }
 #endif /* !JAILBREAK_ENV */
-    
+
     if(self.exitingCallback) self.exitingCallback();
-    
+
     dispatch_async(dispatch_get_main_queue(), ^{
         if(self.wid != -1)
         {
             [[NXWindowServer shared] closeWindowWithIdentifier:self.wid withCompletion:nil];
         }
     });
-    
+
     [[PEProcessManager shared] unregisterProcessWithProcessIdentifier:self.pid];
 }
 
