@@ -321,7 +321,7 @@ import UIKit
     }
 
     private func canPickIcon(for project: NXProject) -> Bool {
-        return project.projectConfig.schemeKind == .app && configuredPrimaryIcon(for: project) == nil
+        return project.projectConfig.schemeKind == .app
     }
 
     private func presentIconPicker(for project: NXProject, at indexPath: IndexPath) {
