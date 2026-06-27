@@ -23,7 +23,9 @@
 #import <LindChain/ProcEnvironment/Surface/surface.h>
 #import <LindChain/ProcEnvironment/Object/PEMachPort.h>
 #import <LindChain/ProcEnvironment/Syscall/mach_syscall_server.h>
+#if !TROLLSTORE_ENV
 #import <LindChain/ProcEnvironment/Server/Server.h>
+#endif
 #import <objc/runtime.h>
 #import <LindChain/ProcEnvironment/environment.h>
 #import <LindChain/ProcEnvironment/Process/PELaunchServiceRegistry.h>
@@ -134,7 +136,9 @@ FBProcess *PESpawnFBProcess(NSDictionary *items)
     /* insert required items */
     NSMutableDictionary *mutableItems = [items mutableCopy];
     mutableItems[@"PESyscallPort"] = [PEMachPort portWithPortName:syscall_server_get_port(ksurface->sys_server)];
+#if !TROLLSTORE_ENV
     mutableItems[@"PEEndpoint"] = [Server getTicket];   /* MARK: deprecated and soon replaced with the syscall server entirely */
+#endif
     
     NSExtensionItem *item = [NSExtensionItem new];
     item.userInfo = mutableItems;
