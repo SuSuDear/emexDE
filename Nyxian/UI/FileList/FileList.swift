@@ -293,11 +293,13 @@ import UniformTypeIdentifiers
         // Project Roots Menu in case its the root of the project obviously
         if !self.isSublink, UIDevice.current.userInterfaceIdiom != .pad, let project = self.project {
             var projectMenuElements: [UIMenuElement] = []
-            projectMenuElements.append(UIAction(title: "Run", image: UIImage(systemName: "play.fill"), handler: { [weak self] _ in
-                guard let self = self else { return }
-                buildProjectWithArgumentUI(targetViewController: self, project: project, buildType: .Run)
-            }))
             if project.projectConfig.schemeKind == .app {
+                projectMenuElements.append(UIAction(title: "Run", image: UIImage(systemName: "play.fill"), handler: { [weak self] _ in
+                    guard let self = self else { return }
+                    buildProjectWithArgumentUI(targetViewController: self, project: project, buildType: .Run)
+                }))
+            }
+            if project.projectConfig.schemeKind == .app || project.projectConfig.schemeKind == .utility {
                 projectMenuElements.append(UIAction(title: "Export", image: UIImage(systemName: "archivebox.fill"), handler: { [weak self] _ in
                     guard let self = self else { return }
                     buildProjectWithArgumentUI(targetViewController: self, project: project, buildType: .InstallPackagedApp)

@@ -308,6 +308,9 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
                 throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:error.localizedDescription])
             }
         } else {
+            if buildType == .Run {
+                throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"Running utility projects is not supported. Use Export instead."])
+            }
             macho_after_sign(self.project.machoURL.path, self.project.entitlementsConfig.entitlement)
             try self.package()
         }
