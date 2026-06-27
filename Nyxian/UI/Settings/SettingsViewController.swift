@@ -37,9 +37,9 @@ class SettingsViewController: UIThemedTableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 #if DEBUG
-        return 4
-#else
         return 3
+#else
+        return 2
 #endif // DEBUG
     }
 
@@ -67,15 +67,6 @@ class SettingsViewController: UIThemedTableViewController {
             cell.imageView?.image = UIImage(systemName: "ant.fill")
             cell.textLabel?.text = "Kernel Log"
             break
-        case 3:
-            cell.imageView?.image = UIImage(systemName: "person.3.fill")
-            cell.textLabel?.text = "Credits"
-            break
-#else
-        case 2:
-            cell.imageView?.image = UIImage(systemName: "person.3.fill")
-            cell.textLabel?.text = "Credits"
-            break
 #endif // DEBUG
         default:
             break
@@ -99,11 +90,6 @@ class SettingsViewController: UIThemedTableViewController {
 #if DEBUG
             case 2:
                 return KernelLogViewController()
-            case 3:
-                return CreditsViewController(style: .insetGrouped)
-#else
-            case 2:
-                return CreditsViewController(style: .insetGrouped)
 #endif // DEBUG
             default:
                 return nil
