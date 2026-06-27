@@ -48,7 +48,9 @@
     {
         self.bundlePath = [[bundle bundleURL] path];
         self.executablePath = [[bundle executableURL] path];
-        self.containerPath = [[[LDEApplicationWorkspaceInternal shared] applicationContainerForBundleID:bundle.bundleIdentifier] path];
+        NSString *documentsDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+        NSString *uuid = [[[bundle bundleURL] URLByDeletingLastPathComponent] lastPathComponent];
+        self.containerPath = [[documentsDir stringByAppendingPathComponent:@"Data/Application"] stringByAppendingPathComponent:uuid];
     }
     
     ISBundleIcon *bundleIcon = [[PrivClass(ISBundleIcon) alloc] initWithBundleURL:bundle.bundleURL type:nil];

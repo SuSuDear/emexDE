@@ -22,12 +22,8 @@
 #ifndef LDEAPPLICATIONWORKSPACEPROTOCOL_H
 #define LDEAPPLICATIONWORKSPACEPROTOCOL_H
 
-#import <LindChain/Services/applicationmgmtd/LDEApplicationObject.h>
-
 @protocol LDEApplicationWorkspaceProtocol <NSObject>
 
-- (void)applicationWasInstalled:(LDEApplicationObject*)app;
-- (void)applicationWithBundleIdentifierWasUninstalled:(NSString*)bundleIdentifier;
 
 @end
 

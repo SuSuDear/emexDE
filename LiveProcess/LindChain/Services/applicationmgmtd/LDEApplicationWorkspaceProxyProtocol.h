@@ -23,17 +23,14 @@
 #define LDEAPPLICATIONWORKSPACEPROXYPROTOCOL_H
 
 #import <Foundation/Foundation.h>
-#import <LindChain/ProcEnvironment/Object/ArchiveObject.h>
+#import <LindChain/ProcEnvironment/Object/FDObject.h>
+
+@class LDEApplicationObject;
 
 @protocol LDEApplicationWorkspaceProxyProtocol
 
 - (void)ping;
-- (void)installApplicationWithArchiveObject:(ArchiveObject*)archiveObject withReply:(void (^)(BOOL))reply;
-- (void)deleteApplicationWithBundleID:(NSString*)bundleID withReply:(void (^)(BOOL))reply;
-- (void)applicationInstalledWithBundleID:(NSString*)bundleID withReply:(void (^)(BOOL))reply;
 - (void)applicationObjectForBundleID:(NSString*)bundleID withReply:(void (^)(LDEApplicationObject*))reply;
-- (void)applicationContainerForBundleID:(NSString*)bundleID withReply:(void (^)(NSURL*))reply;
-- (void)clearContainerForBundleID:(NSString*)bundleID withReply:(void (^)(BOOL))reply;
 - (void)fastpathUtility:(FDObject*)object withName:(NSString*)name withReply:(void (^)(NSString*,BOOL))reply;
 - (void)applicationObjectForExecutablePath:(NSString*)executablePath withReply:(void (^)(LDEApplicationObject*))reply;
 - (void)utilityHomePathWithReply:(void (^)(NSString*))reply;

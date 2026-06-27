@@ -20,29 +20,14 @@
 */
 
 #import "LDEApplicationWorkspace.h"
-#import <LindChain/Private/FoundationPrivate.h>
 #import <LindChain/ProcEnvironment/Server/Server.h>
-#import <LindChain/ProcEnvironment/Object/ArchiveObject.h>
-#import <LindChain/Utils/Zip.h>
 #import <LindChain/ProcEnvironment/Process/PELaunchServiceRegistry.h>
-#import <emexDE-Swift.h>
-
-@interface LDEApplicationWorkspace ()
-
-@property (nonatomic,strong) NSMutableArray<LDEApplicationObject*> *apps;
-
-@end
 
 @implementation LDEApplicationWorkspace
 
 - (instancetype)init
 {
-    self = [super init];
-    if(self)
-    {
-        _apps = [[NSMutableArray alloc] init];
-    }
-    return self;
+    return [super init];
 }
 
 + (instancetype)shared
@@ -88,124 +73,6 @@
     [_connection.remoteObjectProxy ping];
 }
 
-- (BOOL)installApplicationAtBundlePath:(NSString*)bundlePath
-{
-    [self connect];
-    
-    __block BOOL result = NO;
-    ArchiveObject *archiveObject = [ArchiveObject objectForDirectoryAtPath:bundlePath];
-    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-    
-    id proxy = [_connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
-        /* semaphores remember the signal, it doesnt have to catch them in time */
-        dispatch_semaphore_signal(sema);
-    }];
-    
-    if(proxy == NULL)
-    {
-        /* semaphores remember the signal, it doesnt have to catch them in time */
-        dispatch_semaphore_signal(sema);
-    }
-    else
-    {
-        [proxy installApplicationWithArchiveObject:archiveObject withReply:^(BOOL replyResult){
-            result = replyResult;
-            dispatch_semaphore_signal(sema);
-        }];
-    }
-    
-    dispatch_semaphore_wait(sema, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)));
-    return result;
-}
-
-- (BOOL)installApplicationAtPackagePath:(NSString*)packagePath
-{
-    [self connect];
-    
-    __block BOOL result = NO;
-    ArchiveObject *archiveObject = [ArchiveObject objectForFileAtPath:packagePath];
-    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-    
-    id proxy = [_connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
-        /* semaphores remember the signal, it doesnt have to catch them in time */
-        dispatch_semaphore_signal(sema);
-    }];
-    
-    if(proxy == NULL)
-    {
-        /* semaphores remember the signal, it doesnt have to catch them in time */
-        dispatch_semaphore_signal(sema);
-    }
-    else
-    {
-        [proxy installApplicationWithArchiveObject:archiveObject withReply:^(BOOL replyResult){
-            result = replyResult;
-            dispatch_semaphore_signal(sema);
-        }];
-    }
-    
-    dispatch_semaphore_wait(sema, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)));
-    return result;
-}
-
-- (BOOL)deleteApplicationWithBundleID:(NSString *)bundleID
-{
-    [self connect];
-    
-    __block BOOL result = NO;
-    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-    
-    id proxy = [_connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
-        /* semaphores remember the signal, it doesnt have to catch them in time */
-        dispatch_semaphore_signal(sema);
-    }];
-    
-    if(proxy == NULL)
-    {
-        /* semaphores remember the signal, it doesnt have to catch them in time */
-        dispatch_semaphore_signal(sema);
-    }
-    else
-    {
-        [proxy deleteApplicationWithBundleID:bundleID withReply:^(BOOL replyResult){
-            result = replyResult;
-            dispatch_semaphore_signal(sema);
-        }];
-    }
-    
-    dispatch_semaphore_wait(sema, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)));
-    return result;
-}
-
-- (BOOL)applicationInstalledWithBundleID:(NSString *)bundleID
-{
-    [self connect];
-    
-    __block BOOL result = NO;
-    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-    
-    id proxy = [_connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
-        /* semaphores remember the signal, it doesnt have to catch them in time */
-        dispatch_semaphore_signal(sema);
-    }];
-    
-    if(proxy == NULL)
-    {
-        /* semaphores remember the signal, it doesnt have to catch them in time */
-        dispatch_semaphore_signal(sema);
-    }
-    else
-    {
-        [proxy applicationInstalledWithBundleID:bundleID withReply:^(BOOL replyResult){
-            result = replyResult;
-            dispatch_semaphore_signal(sema);
-        }];
-    }
-    
-    dispatch_semaphore_wait(sema, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)));
-    return result;
-}
-
 - (LDEApplicationObject*)applicationObjectForBundleID:(NSString*)bundleID
 {
     [self connect];
@@ -226,42 +93,6 @@
     else
     {
         [_connection.remoteObjectProxy applicationObjectForBundleID:bundleID withReply:^(LDEApplicationObject *replyResult){
-            result = replyResult;
-            dispatch_semaphore_signal(sema);
-        }];
-    }
-    
-    dispatch_semaphore_wait(sema, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)));
-    return result;
-}
-
-- (NSArray<LDEApplicationObject*>*)allApplicationObjects
-{
-    [self connect];
-    
-    return _apps;
-}
-
-- (BOOL)clearContainerForBundleID:(NSString *)bundleID
-{
-    [self connect];
-    
-    __block BOOL result = NO;
-    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-    
-    id proxy = [_connection remoteObjectProxyWithErrorHandler:^(NSError *error) {
-        /* semaphores remember the signal, it doesnt have to catch them in time */
-        dispatch_semaphore_signal(sema);
-    }];
-    
-    if(proxy == NULL)
-    {
-        /* semaphores remember the signal, it doesnt have to catch them in time */
-        dispatch_semaphore_signal(sema);
-    }
-    else
-    {
-        [_connection.remoteObjectProxy clearContainerForBundleID:bundleID withReply:^(BOOL replyResult){
             result = replyResult;
             dispatch_semaphore_signal(sema);
         }];
@@ -356,14 +187,6 @@
     
     dispatch_semaphore_wait(sema, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)));
     return utilityHomePath;
-}
-
-- (void)applicationWasInstalled:(LDEApplicationObject*)app
-{
-}
-
-- (void)applicationWithBundleIdentifierWasUninstalled:(NSString*)bundleIdentifier
-{
 }
 
 @end

@@ -35,13 +35,7 @@
 + (instancetype)shared;
 
 - (void)ping;
-- (BOOL)installApplicationAtBundlePath:(NSString*)bundlePath;
-- (BOOL)installApplicationAtPackagePath:(NSString*)packagePath;
-- (BOOL)deleteApplicationWithBundleID:(NSString*)bundleID;
-- (BOOL)applicationInstalledWithBundleID:(NSString*)bundleID;
 - (LDEApplicationObject*)applicationObjectForBundleID:(NSString*)bundleID;
-- (NSArray<LDEApplicationObject*>*)allApplicationObjects;
-- (BOOL)clearContainerForBundleID:(NSString*)bundleID;
 - (NSString*)fastpathUtility:(NSString*)utilityPath;
 - (LDEApplicationObject*)applicationObjectForExecutablePath:(NSString*)executablePath;
 - (NSString*)utilityHomePath;

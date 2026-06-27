@@ -212,119 +212,6 @@
     return YES;
 }
 
-- (BOOL)installApplicationWithPayloadPath:(NSString*)payloadPath
-{
-    /* finding installable application bundle in the path */
-    NSBundle *bundle = nil;
-    NSArray<NSString *> *contents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:payloadPath error:nil];
-    
-    for(NSString *item in contents)
-    {
-        if([[item pathExtension] isEqualToString:@"app"])
-        {
-            NSString *fullPath = [payloadPath stringByAppendingPathComponent:item];
-            bundle = [NSBundle bundleWithPath:fullPath];
-            break;
-        }
-    }
-    
-    /* bundle validation */
-    if(!bundle)
-    {
-        return NO;
-    }
-    
-    /* next bundle validation */
-    if(![self doWeTrustThatBundle:bundle])
-    {
-        return NO;
-    }
-    
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    
-    /* reinstall if such a app is already installed  */
-    NSURL *installURL = nil;
-    NSBundle *previousApplication = [self applicationBundleForBundleID:[bundle bundleIdentifier]];
-    if(previousApplication)
-    {
-        /* need reinstallation */
-        installURL = previousApplication.bundleURL;
-        [fileManager removeItemAtURL:installURL error:nil];
-        previousApplication = nil;
-    }
-    else
-    {
-        /* need new installation */
-        installURL = [[self.applicationsURL URLByAppendingPathComponent:[[NSUUID UUID] UUIDString]] URLByAppendingPathComponent:[bundle.bundleURL lastPathComponent]];
-    }
-    
-    /* install it at location */
-    if(![fileManager createDirectoryAtURL:[installURL URLByDeletingLastPathComponent] withIntermediateDirectories:YES attributes:nil error:nil] ||
-       ![fileManager moveItemAtURL:bundle.bundleURL toURL:installURL error:nil])
-    {
-        return NO;
-    }
-    
-    /* getting new bundle */
-    bundle = [NSBundle bundleWithURL:installURL];
-    
-    /* checking weither bundle is valid */
-    if(bundle == nil)
-    {
-        return NO;
-    }
-    
-    /* notifying listeners about it */
-    [self.bundles setObject:bundle forKey:bundle.bundleIdentifier];
-    LDEApplicationObject *object = [[LDEApplicationObject alloc] initWithNSBundle:bundle];
-    if(object != nil)
-    {
-        for(NSXPCConnection *client in [[ServiceServer sharedService] clients])
-        {
-            [client.remoteObjectProxy applicationWasInstalled:object];
-        }
-    }
-    
-    return YES;
-}
-
-- (BOOL)deleteApplicationWithBundleID:(NSString *)bundleID
-{
-    NSBundle *previousApplication = [self applicationBundleForBundleID:bundleID];
-    
-    if(previousApplication == nil)
-    {
-        return NO;
-    }
-    
-    LDEApplicationObject *appObject = [[LDEApplicationObject alloc] initWithNSBundle:previousApplication];
-    
-    if(appObject == nil)
-    {
-        return NO;
-    }
-    
-    [[NSFileManager defaultManager] removeItemAtURL:[[previousApplication bundleURL] URLByDeletingLastPathComponent] error:nil];
-    [[NSFileManager defaultManager] removeItemAtPath:[appObject containerPath] error:nil];
-    [self.bundles removeObjectForKey:bundleID];
-    
-    for(NSXPCConnection *client in [[ServiceServer sharedService] clients])
-    {
-        [client.remoteObjectProxy applicationWithBundleIdentifierWasUninstalled:appObject.bundleIdentifier];
-    }
-    
-    return YES;
-}
-
-- (BOOL)applicationInstalledWithBundleID:(NSString*)bundleID
-{
-    __block BOOL result = NO;
-    dispatch_sync(self.workspaceQueue, ^{
-        result = [self.bundles objectForKey:bundleID] ? YES : NO;
-    });
-    return result;
-}
-
 - (NSBundle*)applicationBundleForBundleID:(NSString *)bundleID
 {
     __block NSBundle *result = nil;
@@ -332,71 +219,6 @@
         result = [self.bundles objectForKey:bundleID];
     });
     return result;
-}
-
-- (NSURL*)applicationContainerForBundleID:(NSString *)bundleID
-{
-    /* gathering bundle */
-    NSBundle *bundle = [self applicationBundleForBundleID:bundleID];
-    if(bundle == nil)
-    {
-        return nil;
-    }
-    
-    /* checking against container  */
-    NSString *uuid = [[bundle.bundleURL URLByDeletingLastPathComponent] lastPathComponent];
-    
-    if(uuid == nil)
-    {
-        return nil;
-    }
-    
-    NSURL *containerURL = [self.containersURL URLByAppendingPathComponent:uuid];
-    
-    /* creating if it doesnt exist */
-    BOOL isDirectory = NO;
-    if(![[NSFileManager defaultManager] fileExistsAtPath:[containerURL path] isDirectory:&isDirectory])
-create_container:
-    {
-        NSError *error = nil;
-        [[NSFileManager defaultManager] createDirectoryAtURL:containerURL withIntermediateDirectories:YES attributes:nil error:&error];
-        
-        if(error != nil)
-        {
-            return nil;
-        }
-        
-        /* bootstrapping data container */
-        NSArray *dirList = @[@"Library/Caches", @"Documents", @"SystemData", @"Tmp"];
-        for(NSString *dir in dirList)
-        {
-            [[NSFileManager defaultManager] createDirectoryAtURL:[containerURL URLByAppendingPathComponent:dir] withIntermediateDirectories:YES attributes:nil error:&error];
-            
-            if(error != nil)
-            {
-                [[NSFileManager defaultManager] removeItemAtURL:containerURL error:nil];
-                return nil;
-            }
-        }
-    }
-    else
-    {
-        /* it shall only be a directory */
-        if(!isDirectory)
-        {
-            [[NSFileManager defaultManager] removeItemAtURL:containerURL error:nil];
-            goto create_container;
-        }
-    }
-    
-    return containerURL;
-}
-
-- (BOOL)clearContainerForBundleID:(NSString*)bundleID
-{
-    NSURL *containerURL = [self applicationContainerForBundleID:bundleID];
-    [[NSFileManager defaultManager] removeItemAtURL:containerURL error:nil];
-    return YES;
 }
 
 @end
@@ -457,51 +279,6 @@ create_home:
     reply(homePath);
 }
 
-- (void)applicationInstalledWithBundleID:(NSString *)bundleID
-                               withReply:(void (^)(BOOL))reply {
-    reply([[LDEApplicationWorkspaceInternal shared] applicationInstalledWithBundleID:bundleID]);
-}
-
-- (void)deleteApplicationWithBundleID:(NSString *)bundleID
-                            withReply:(void (^)(BOOL))reply {
-    reply([[LDEApplicationWorkspaceInternal shared] deleteApplicationWithBundleID:bundleID]);
-}
-
-- (void)installApplicationWithArchiveObject:(ArchiveObject*)archiveObject
-                                  withReply:(void (^)(BOOL))reply {
-    /* validate object*/
-    if(archiveObject == NULL)
-    {
-        reply(NO);
-        return;
-    }
-    
-    /* running installation on background queue */
-    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
-        NSFileManager *fileManager = [NSFileManager defaultManager];
-        NSString *tempBundle = nil;
-        BOOL didInstall = NO;
-        
-        @try {
-            tempBundle = [archiveObject extractArchive];
-            if(tempBundle != NULL)
-            {
-                didInstall = [[LDEApplicationWorkspaceInternal shared]
-                              installApplicationWithPayloadPath:tempBundle];
-            }
-        } @catch (NSException *exception) {
-            NSLog(@"[installd] Exception during install: %@", exception);
-            didInstall = NO;
-        } @finally {
-            if(tempBundle != NULL)
-            {
-                [fileManager removeItemAtPath:tempBundle error:nil];
-            }
-            reply(didInstall);
-        }
-    });
-}
-
 - (void)applicationObjectForBundleID:(NSString *)bundleID
                            withReply:(void (^)(LDEApplicationObject *))reply
 {
@@ -514,18 +291,6 @@ create_home:
     }
     
     reply([[LDEApplicationObject alloc] initWithNSBundle:bundle]);
-}
-
-- (void)applicationContainerForBundleID:(NSString*)bundleID
-                              withReply:(void (^)(NSURL*))reply
-{
-    reply([[LDEApplicationWorkspaceInternal shared] applicationContainerForBundleID:bundleID]);
-}
-
-- (void)clearContainerForBundleID:(NSString *)bundleID
-                        withReply:(void (^)(BOOL))reply
-{
-    reply([[LDEApplicationWorkspaceInternal shared] clearContainerForBundleID:bundleID]);
 }
 
 - (void)fastpathUtility:(FDObject*)object
@@ -574,20 +339,6 @@ create_home:
 
 + (Protocol *)observerProtocol { 
     return @protocol(LDEApplicationWorkspaceProtocol);
-}
-
-- (void)clientDidConnectWithConnection:(NSXPCConnection*)client
-{
-    id<LDEApplicationWorkspaceProtocol> clientObject = client.remoteObjectProxy;
-    LDEApplicationWorkspaceInternal *workspace = [LDEApplicationWorkspaceInternal shared];
-    for(NSString *bundleID in workspace.bundles)
-    {
-        NSBundle *bundle = workspace.bundles[bundleID];
-        if(bundle)
-        {
-            [clientObject applicationWasInstalled:[[LDEApplicationObject alloc] initWithNSBundle:bundle]];
-        }
-    }
 }
 
 @end
