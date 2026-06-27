@@ -360,16 +360,10 @@
 
 - (void)applicationWasInstalled:(LDEApplicationObject*)app
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [[ApplicationManagementViewController shared] applicationWasInstalled:app];
-    });
 }
 
 - (void)applicationWithBundleIdentifierWasUninstalled:(NSString*)bundleIdentifier
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [[ApplicationManagementViewController shared] applicationWithBundleIdentifierWasUninstalled:bundleIdentifier];
-    });
 }
 
 @end
