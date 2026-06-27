@@ -31,17 +31,13 @@ static NXWindowServerPresentationState const NXWindowServerPresentationStateDefa
 static NXWindowServerPresentationState const NXWindowServerPresentationStateFullScreen = 1;
 static NXWindowServerPresentationState const NXWindowServerPresentationStateOutOfMyWay = 2;
 
-@interface NXWindowServer : UIWindow <UIGestureRecognizerDelegate,NXWindowDelegate>
+@interface NXWindowServer : UIWindow <NXWindowDelegate>
 
 @property (nonatomic, readonly) NXWindowServerPresentationState presentationState;
 @property (nonatomic, weak, readonly) NXWindow *fullScreenWindow;
 
 @property (nonatomic, strong,readonly) NSMutableDictionary<NSNumber*,NXWindow*> *windows;
 @property (nonatomic, strong) NSMutableArray<NSNumber *> *windowOrder;
-
-@property (nonatomic, strong) UIView *appSwitcherView;
-@property (nonatomic, strong) NSLayoutConstraint *appSwitcherTopConstraint;
-@property (nonatomic, strong) UIImpactFeedbackGenerator *impactGenerator;
 
 - (instancetype)initWithWindowScene:(UIWindowScene *)windowScene;
 + (instancetype)sharedWithWindowScene:(UIWindowScene*)windowScene;
@@ -57,8 +53,6 @@ static NXWindowServerPresentationState const NXWindowServerPresentationStateOutO
 - (void)unfocusFocusedWindow;
 - (void)windowsGetOutOfMyWay;
 - (void)windowsGetInMyWay;
-
-- (void)showAppSwitcherExternal;
 
 - (void)registerKeyboardPortalWithFileDescriptor:(int)fd windowIdentifier:(id_t)wid;
 - (void)unregisterKeyboardPortalWithWindowIdentifier:(id_t)wid;

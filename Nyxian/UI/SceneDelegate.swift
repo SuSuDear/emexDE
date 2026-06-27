@@ -158,19 +158,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, UITabBarControllerDeleg
         contentNavigationController.tabBarItem = UITabBarItem(title: "Projects", image: UIImage(systemName: "square.grid.2x2.fill"), tag: 0)
         settingsNavigationController.tabBarItem = UITabBarItem(title: "Settings", image: UIImage(systemName: "gear"), tag: 1)
         
-        var viewControllers: [UIViewController] = [contentNavigationController, settingsNavigationController]
-        
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            if #available(iOS 26.0, *) {
-                let fakeViewController: UIViewController = UIViewController()
-                fakeViewController.tabBarItem = UITabBarItem(tabBarSystemItem: .search, tag: 2)
-                fakeViewController.tabBarItem.title = "Switcher"
-                fakeViewController.tabBarItem.image = UIImage(systemName: "iphone.app.switcher")
-                viewControllers.append(fakeViewController)
-            }
-        }
-        
-        themedTabViewController.viewControllers = viewControllers
+        themedTabViewController.viewControllers = [contentNavigationController, settingsNavigationController]
         themedTabViewController.delegate = self
         
         self.window?.rootViewController = themedTabViewController
@@ -197,10 +185,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, UITabBarControllerDeleg
     
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
         if tabBarController.selectedViewController === viewController && Builder.builds {
-            return false
-        }
-        if viewController.tabBarItem.tag == 2 {
-            self.window?.showAppSwitcherExternal()
             return false
         }
         return true
