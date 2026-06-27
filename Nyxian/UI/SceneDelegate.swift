@@ -24,7 +24,7 @@ import UIOnboarding
 
 struct UIOnboardingHelper {
     static func setUpIcon() -> UIImage {
-        return Bundle.main.appIcon ?? .init(named: "IconPreviewDefaultOld")!
+        return Bundle.main.appIcon ?? .init(named: "IconPreviewDefault")!
     }
     
     static func setUpFirstTitleLine() -> NSMutableAttributedString {

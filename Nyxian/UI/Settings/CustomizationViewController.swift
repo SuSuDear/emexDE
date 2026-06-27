@@ -29,9 +29,7 @@ class CustomizationViewController: UIThemedTableViewController {
         UIApplication.shared.alternateIconName ?? "Default"
     }
     
-    var icons: [String] = (["Default"] + Bundle.main.alternateIconNames).sorted {
-        $0.localizedStandardCompare($1) == .orderedAscending
-    }
+    var icons: [String] = ["Default", "Drawn"]
     
     var themePreviewCell: ThemePickerPreviewCell?
     
@@ -164,13 +162,7 @@ int main(void)
             cell = UITableViewCell(style: .default, reuseIdentifier: nil)
             let iconName = icons[indexPath.row]
             
-            if let image = UIImage(named: {
-                if #available(iOS 18.0, *) {
-                    return "IconPreview\(iconName)"
-                } else {
-                    return "IconPreview\(iconName)Old"
-                }
-            }()) {
+            if let image = UIImage(named: "IconPreview\(iconName)") {
                 let customImageView = UIImageView(image: image)
                 
                 if #available(iOS 26.0, *)
