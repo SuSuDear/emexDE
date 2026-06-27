@@ -24,18 +24,14 @@
 
 #import <Foundation/Foundation.h>
 #import <LindChain/ServiceKit/Service.h>
-#import "LDEApplicationObject.h"
 #import "LDEApplicationWorkspaceProxyProtocol.h"
 //#import "MIBundle.h"
 
 @interface LDEApplicationWorkspaceInternal : NSObject
 
-@property (atomic,readwrite) NSMutableDictionary<NSString*,NSBundle*> *bundles;
-
 - (instancetype)init;
 + (LDEApplicationWorkspaceInternal*)shared;
 
-- (NSBundle*)applicationBundleForBundleID:(NSString*)bundleID;
 - (BOOL)doWeTrustThatBundle:(NSBundle*)bundle;
 
 @end

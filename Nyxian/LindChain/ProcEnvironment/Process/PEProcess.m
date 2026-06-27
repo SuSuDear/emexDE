@@ -21,12 +21,9 @@
 
 #import <LindChain/ProcEnvironment/Process/PEProcess.h>
 #import <LindChain/ProcEnvironment/Process/PEProcessManager.h>
-#import <LindChain/WindowServer/NXWindowServer.h>
-#import <LindChain/WindowServer/Session/NXWindowSessionApplication.h>
 #import <LindChain/ProcEnvironment/Utils/klog.h>
 
 #if !JAILBREAK_ENV
-#import <LindChain/Services/applicationmgmtd/LDEApplicationWorkspace.h>
 #import <LindChain/Services/containerd/PEContainer.h>
 #import <LindChain/ProcEnvironment/Process/PEExtension.h>
 #import <LindChain/ProcEnvironment/Syscall/mach_syscall_client.h>
@@ -47,7 +44,6 @@
 
 - (instancetype)initWithItems:(NSDictionary*)items
      withKernelSurfaceProcess:(ksurface_proc_t*)proc
-                  withSession:(NXWindowSessionApplication*)session
 {
     if(!proc_count())
     {
@@ -55,8 +51,6 @@
     }
     
     self = [super init];
-    
-    self.session = session;
     
     self.executablePath = items[@"PEExecutablePath"];
     if(self.executablePath == nil)
@@ -68,10 +62,20 @@
     
     self.wid = (id_t)-1;
     
-    LDEApplicationObject *applicationObject = [[LDEApplicationWorkspace shared] applicationObjectForExecutablePath:self.executablePath];
+    NSString *potentialBundlePath = [self.executablePath stringByDeletingLastPathComponent];
+    NSBundle *bundle = [NSBundle bundleWithURL:[NSURL fileURLWithPath:potentialBundlePath]];
+    if(bundle == nil)
+    {
+        return nil;
+    }
     
-    self.bundleIdentifier = applicationObject ? applicationObject.bundleIdentifier : nil;
-    self.displayName = applicationObject ? applicationObject.localizedName : [self.executablePath lastPathComponent];
+    self.bundleIdentifier = bundle.bundleIdentifier;
+    NSString *localizedDisplayName = [bundle objectForInfoDictionaryKey:@"CFBundleDisplayName"];
+    if(!localizedDisplayName)
+    {
+        localizedDisplayName = [bundle objectForInfoDictionaryKey:@"CFBundleName"];
+    }
+    self.displayName = localizedDisplayName ?: [self.executablePath lastPathComponent];
     
     __weak typeof(self) weakSelf = self;
     
@@ -104,74 +108,6 @@
     {
         self.proc = child;
     }
-    
-    /* do not initilize when there is no window server */
-    NXWindowServer *windowServer = [NXWindowServer shared];
-    if(windowServer == nil)
-    {
-        /* no window server, no window */
-        return self;
-    }
-    
-    NSString *sceneID = [NSString stringWithFormat:@"sceneID:%@-%@", @"LiveProcess", self.process.identifier];
-    
-    FBSMutableSceneDefinition *definition = [PrivClass(FBSMutableSceneDefinition) definition];
-    definition.identity = [PrivClass(FBSSceneIdentity) identityForIdentifier:sceneID];
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        __strong typeof(weakSelf) innerSelf = weakSelf;
-        if(innerSelf == nil) return;
-        
-        @try {
-            if(!innerSelf.process.rbsHandle || !innerSelf.process.identity)
-            {
-                @throw [NSException exceptionWithName:@"InvalidProcessIdentity" reason:@"Process handle or identity is nil" userInfo:nil];
-            }
-            definition.clientIdentity = [PrivClass(FBSSceneClientIdentity) identityForProcessIdentity:innerSelf.process.identity];
-        } @catch (NSException *exception) {
-            klog_log("LDEProcess", "failed to create client identity for pid %d: %s", innerSelf.pid, [exception.reason UTF8String]);
-            [innerSelf terminate];
-            return;
-        }
-        
-        definition.specification = [UIApplicationSceneSpecification specification];
-        FBSMutableSceneParameters *parameters = [PrivClass(FBSMutableSceneParameters) parametersForSpecification:definition.specification];
-        
-        UIMutableApplicationSceneSettings *settings = [UIMutableApplicationSceneSettings new];
-        settings.canShowAlerts = YES;
-        settings.cornerRadiusConfiguration = [[PrivClass(BSCornerRadiusConfiguration) alloc] initWithTopLeft:0 bottomLeft:0 bottomRight:0 topRight:0];
-        settings.displayConfiguration = UIScreen.mainScreen.displayConfiguration;
-        settings.foreground = NO;
-        
-        settings.deviceOrientation = UIDevice.currentDevice.orientation;
-        settings.interfaceOrientation = windowServer.windowScene.interfaceOrientation;
-        
-        settings.frame = (innerSelf.session == nil) ? CGRectMake(50, 94, 300, 400) : innerSelf.session.startWindowRect;
-        
-        //settings.interruptionPolicy = 2; // reconnect
-        settings.level = 1;
-        settings.persistenceIdentifier = NSUUID.UUID.UUIDString;
-        
-        // it seems some apps don't honor these settings so we don't cover the top of the app
-        settings.peripheryInsets = UIEdgeInsetsZero;
-        settings.safeAreaInsetsPortrait = UIEdgeInsetsZero;
-        
-        settings.statusBarDisabled = YES;
-        parameters.settings = settings;
-        
-        UIMutableApplicationSceneClientSettings *clientSettings = [UIMutableApplicationSceneClientSettings new];
-        clientSettings.interfaceOrientation = UIInterfaceOrientationPortrait;
-        clientSettings.statusBarStyle = 0;
-        parameters.clientSettings = clientSettings;
-        
-        innerSelf.scene = [[PrivClass(FBSceneManager) sharedInstance] createSceneWithDefinition:definition initialParameters:parameters];
-        innerSelf.scene.delegate = innerSelf;
-    });
-    
-    return self;
-}
-
-#endif /* !JAILBREAK_ENV */
 
 - (void)sendSignal:(int)signal
 {
@@ -238,32 +174,6 @@
     _exitingCallback = callback;
 }
 
-- (void)scene:(FBScene *)arg1 didCompleteUpdateWithContext:(FBSceneUpdateContext *)arg2 error:(NSError *)arg3
-{
-    dispatch_once(&_notifyWindowManagerOnce, ^{
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if(self.session == nil)
-            {
-                __block NXWindowSessionApplication *session = [[NXWindowSessionApplication alloc] initWithProcess:self];
-                [[NXWindowServer shared] openWindowWithSession:session withCompletion:^(BOOL windowOpened){
-                    if(windowOpened)
-                    {
-                        self.wid = session.windowIdentifier;
-                    }
-                }];
-            }
-            else
-            {
-                if([self.session injectProcess:self])
-                {
-                    self.wid = self.session.windowIdentifier;
-                    [self.session activateWindow];
-                }
-            }
-        });
-    });
-}
-        
 - (void)processDidExit:(FBProcess *)arg1
 {
 #if !JAILBREAK_ENV
@@ -285,16 +195,6 @@
         if(self.wid != -1)
         {
             [[NXWindowServer shared] closeWindowWithIdentifier:self.wid withCompletion:nil];
-        }
-        else if(self.session && self.session.windowIdentifier != -1)
-        {
-            [[NXWindowServer shared] closeWindowWithIdentifier:self.session.windowIdentifier withCompletion:nil];
-        }
-        
-        if(self.scene != nil)
-        {
-            [[PrivClass(FBSceneManager) sharedInstance] destroyScene:self.scene withTransitionContext:nil];
-            self.scene.delegate = nil;
         }
     });
     

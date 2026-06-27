@@ -27,7 +27,6 @@
 #import <LindChain/LiveContainer/LCUtils.h>
 #import <LindChain/ProcEnvironment/Surface/permit.h>
 #import <LindChain/ProcEnvironment/Surface/entitlement.h>
-#import <LindChain/WindowServer/Session/NXWindowSessionApplication.h>
 #import <LindChain/ProcEnvironment/Utils/klog.h>
 #import <LindChain/ProcEnvironment/Surface/proc/list.h>
 #import <LindChain/ProcEnvironment/Surface/proc/proc.h>

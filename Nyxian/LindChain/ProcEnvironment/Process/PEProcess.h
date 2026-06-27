@@ -25,21 +25,16 @@
 #import <Foundation/Foundation.h>
 #import <LindChain/Private/FoundationPrivate.h>
 #import <LindChain/Private/UIKitPrivate.h>
-#import <LindChain/WindowServer/NXWindowServer.h>
 #import <LindChain/ProcEnvironment/Object/FDMapObject.h>
 #import <LindChain/ProcEnvironment/Surface/proc/proc.h>
 
-@class NXWindowSessionApplication;
-
-@interface PEProcess : NSObject <FBProcessObserver,FBProcessManagerObserver,FBSceneDelegate>
+@interface PEProcess : NSObject <FBProcessObserver,FBProcessManagerObserver>
 
 #if !JAILBREAK_ENV
 @property (nonatomic) ksurface_proc_t *proc;
 #endif /* !JAILBREAK_ENV */
 
-@property (nonatomic,weak) NXWindowSessionApplication *session;
 @property (nonatomic,strong) FBProcess *process;
-@property (nonatomic,strong) FBScene *scene;
 @property (nonatomic,strong) UIImage *snapshot;
 
 // Process properties
@@ -58,7 +53,7 @@
 @property (nonatomic, copy) void (^exitingCallback)(void);
 
 #if !JAILBREAK_ENV
-- (instancetype)initWithItems:(NSDictionary*)items withKernelSurfaceProcess:(ksurface_proc_t*)proc withSession:(NXWindowSessionApplication*)session;
+- (instancetype)initWithItems:(NSDictionary*)items withKernelSurfaceProcess:(ksurface_proc_t*)proc;
 #endif /* !JAILBREAK_ENV */
 
 - (void)sendSignal:(int)signal;

@@ -45,7 +45,6 @@
 
 /* Multitask Headers */
 #import <LindChain/WindowServer/NXWindowServer.h>
-#import <LindChain/WindowServer/Session/NXWindowSessionApplication.h>
 #import <LindChain/WindowServer/Session/NXWindowSessionTerminal.h>
 #import <LindChain/ProcEnvironment/Process/PELaunchServiceRegistry.h>
 #import <LindChain/ProcEnvironment/Process/PEProcessManager.h>

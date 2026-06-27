@@ -23,11 +23,9 @@
 #define LDEAPPLICATIONWORKSPACEPROXY_H
 
 #import <Foundation/Foundation.h>
-#import <LindChain/Services/applicationmgmtd/LDEApplicationWorkspaceProtocol.h>
-#import "LDEApplicationObject.h"
 #import "LDEApplicationWorkspaceProxyProtocol.h"
 
-@interface LDEApplicationWorkspace : NSObject <LDEApplicationWorkspaceProtocol>
+@interface LDEApplicationWorkspace : NSObject
 
 @property (nonatomic,strong) NSXPCConnection *connection;
 
@@ -35,9 +33,7 @@
 + (instancetype)shared;
 
 - (void)ping;
-- (LDEApplicationObject*)applicationObjectForBundleID:(NSString*)bundleID;
 - (NSString*)fastpathUtility:(NSString*)utilityPath;
-- (LDEApplicationObject*)applicationObjectForExecutablePath:(NSString*)executablePath;
 - (NSString*)utilityHomePath;
 
 @end

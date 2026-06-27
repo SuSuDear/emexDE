@@ -20,7 +20,6 @@
 */
 
 #import "LDEApplicationObject.h"
-#import "LDEApplicationWorkspaceInternal.h"
 #import "ISIcon.h"
 #import <LindChain/Private/UIKitPrivate.h>
 
@@ -43,15 +42,8 @@
         localizedDisplayName = [bundle objectForInfoDictionaryKey:@"CFBundleName"];
     }
     self.localizedName = NSLocalizedStringFromTableInBundle(localizedDisplayName, @"InfoPlist", bundle, localizedDisplayName);
-    self.isLaunchAllowed = [[LDEApplicationWorkspaceInternal shared] doWeTrustThatBundle:bundle];
-    if(self.isLaunchAllowed)
-    {
-        self.bundlePath = [[bundle bundleURL] path];
-        self.executablePath = [[bundle executableURL] path];
-        NSString *documentsDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
-        NSString *uuid = [[[bundle bundleURL] URLByDeletingLastPathComponent] lastPathComponent];
-        self.containerPath = [[documentsDir stringByAppendingPathComponent:@"Data/Application"] stringByAppendingPathComponent:uuid];
-    }
+    self.bundlePath = [[bundle bundleURL] path];
+    self.executablePath = [[bundle executableURL] path];
     
     ISBundleIcon *bundleIcon = [[PrivClass(ISBundleIcon) alloc] initWithBundleURL:bundle.bundleURL type:nil];
     if(bundleIcon)
@@ -86,9 +78,7 @@
     [coder encodeObject:self.bundlePath forKey:@"bundlePath"];
     [coder encodeObject:self.executablePath forKey:@"executablePath"];
     [coder encodeObject:self.localizedName forKey:@"localizedName"];
-    [coder encodeObject:self.containerPath forKey:@"containerPath"];
     [coder encodeObject:self.icon forKey:@"icon"];
-    [coder encodeObject:@(self.isLaunchAllowed) forKey:@"isLaunchAllowed"];
 }
 
 - (nullable instancetype)initWithCoder:(nonnull NSCoder *)coder
@@ -99,9 +89,7 @@
         _bundlePath = [coder decodeObjectOfClass:[NSString class] forKey:@"bundlePath"];
         _executablePath = [coder decodeObjectOfClass:[NSString class] forKey:@"executablePath"];
         _localizedName = [coder decodeObjectOfClass:[NSString class] forKey:@"localizedName"];
-        _containerPath = [coder decodeObjectOfClass:[NSString class] forKey:@"containerPath"];
         _icon = [coder decodeObjectOfClass:[UIImage class] forKey:@"icon"];
-        _isLaunchAllowed = [[coder decodeObjectOfClass:[NSNumber class] forKey:@"isLaunchAllowed"] boolValue];
     }
     return self;
 }

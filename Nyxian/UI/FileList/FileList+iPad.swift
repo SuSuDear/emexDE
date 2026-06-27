@@ -56,11 +56,6 @@ class MainSplitViewController: UISplitViewController, UISplitViewControllerDeleg
             self.displayModeButtonVisibility = .never
         }
         
-        if #available(iOS 16.0, *),
-           self.project.projectConfig.schemeKind == .app
-        {
-            NXWindowSessionApplication.bringSessionToFront(withBundleIdentifier: self.project.projectConfig.bundleid)
-        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -94,7 +89,7 @@ class MainSplitViewController: UISplitViewController, UISplitViewControllerDeleg
                 masterVC.navigationItem.leftBarButtonItem?.isEnabled = false
                 self.detailVC?.logView?.clearConsole()
                 
-                buildProjectWithArgumentUI(targetViewController: detailVC, project: detailVC.project, buildType: .RunningApp, outPipe: self.detailVC?.logView?.pipe, inPipe: self.detailVC?.logView?.stdinPipe) { [weak self] in
+                buildProjectWithArgumentUI(targetViewController: detailVC, project: detailVC.project, buildType: .Run, outPipe: self.detailVC?.logView?.pipe, inPipe: self.detailVC?.logView?.stdinPipe) { [weak self] in
                     guard let self = self else { return }
                     masterVC.navigationItem.leftBarButtonItem?.isEnabled = true
                     os_unfair_lock_unlock(&self.lock)

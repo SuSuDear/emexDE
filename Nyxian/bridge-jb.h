@@ -29,7 +29,6 @@
 #import <LindChain/ProcEnvironment/Surface/extra/relax.h>
 #import <LindChain/ProcEnvironment/Process/PEProcessManager.h>
 #import <LindChain/WindowServer/NXWindowServer.h>
-#import <LindChain/WindowServer/Session/NXWindowSessionApplication.h>
 #import <LindChain/Synpush/Synpush.h>
 #import <LindChain/Downloader/fdownload.h>
 #import <LindChain/Core/LDEFilesFinder.h>

@@ -295,7 +295,7 @@ import UniformTypeIdentifiers
             var projectMenuElements: [UIMenuElement] = []
             projectMenuElements.append(UIAction(title: "Run", image: UIImage(systemName: "play.fill"), handler: { [weak self] _ in
                 guard let self = self else { return }
-                buildProjectWithArgumentUI(targetViewController: self, project: project, buildType: .RunningApp)
+                buildProjectWithArgumentUI(targetViewController: self, project: project, buildType: .Run)
             }))
             if project.projectConfig.schemeKind == .app {
                 projectMenuElements.append(UIAction(title: "Export", image: UIImage(systemName: "archivebox.fill"), handler: { [weak self] _ in

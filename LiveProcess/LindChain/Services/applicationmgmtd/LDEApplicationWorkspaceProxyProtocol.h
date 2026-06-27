@@ -25,14 +25,10 @@
 #import <Foundation/Foundation.h>
 #import <LindChain/ProcEnvironment/Object/FDObject.h>
 
-@class LDEApplicationObject;
-
 @protocol LDEApplicationWorkspaceProxyProtocol
 
 - (void)ping;
-- (void)applicationObjectForBundleID:(NSString*)bundleID withReply:(void (^)(LDEApplicationObject*))reply;
 - (void)fastpathUtility:(FDObject*)object withName:(NSString*)name withReply:(void (^)(NSString*,BOOL))reply;
-- (void)applicationObjectForExecutablePath:(NSString*)executablePath withReply:(void (^)(LDEApplicationObject*))reply;
 - (void)utilityHomePathWithReply:(void (^)(NSString*))reply;
 
 @end

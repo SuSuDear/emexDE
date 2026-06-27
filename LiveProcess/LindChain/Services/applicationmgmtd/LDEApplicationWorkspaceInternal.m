@@ -25,16 +25,12 @@
 #import <LindChain/Utils/Zip.h>
 #import <Security/Security.h>
 #import <LindChain/ProcEnvironment/Object/FDMapObject.h>
-#import <LindChain/Services/applicationmgmtd/LDEApplicationWorkspaceProtocol.h>
 #import <LindChain/LiveContainer/LCMachOUtils.h>
 
 @interface LDEApplicationWorkspaceInternal ()
 
-@property (nonatomic,strong) NSURL *applicationsURL;
-@property (nonatomic,strong) NSURL *containersURL;
 @property (nonatomic,strong) NSURL *binaryURL;
 @property (nonatomic,strong) NSURL *homeURL;
-@property (nonatomic, strong) dispatch_queue_t workspaceQueue;
 
 @end
 
@@ -46,25 +42,11 @@
     
     // Setting up paths
     NSString *documentsDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
-    self.applicationsURL = [NSURL fileURLWithPath:[documentsDir stringByAppendingPathComponent:@"Bundle/Application"]];
-    self.containersURL   = [NSURL fileURLWithPath:[documentsDir stringByAppendingPathComponent:@"Data/Application"]];
     self.binaryURL   = [NSURL fileURLWithPath:[documentsDir stringByAppendingPathComponent:@"usr/bin"]];
     self.homeURL = [NSURL fileURLWithPath:[documentsDir stringByAppendingPathComponent:@"var/mobile"]];
     
     // Creating paths if they dont exist
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    if(![fileManager fileExistsAtPath:self.applicationsURL.path])
-        [fileManager createDirectoryAtURL:self.applicationsURL
-              withIntermediateDirectories:YES
-                               attributes:nil
-                                    error:nil];
-    
-    if(![fileManager fileExistsAtPath:self.containersURL.path])
-        [fileManager createDirectoryAtURL:self.containersURL
-              withIntermediateDirectories:YES
-                               attributes:nil
-                                    error:nil];
-    
     if(![fileManager fileExistsAtPath:self.binaryURL.path])
         [fileManager createDirectoryAtURL:self.binaryURL
               withIntermediateDirectories:YES
@@ -76,31 +58,6 @@
               withIntermediateDirectories:YES
                                attributes:nil
                                     error:nil];
-    
-    // Enumerating all app bundles
-    NSArray<NSURL*> *uuidURLs = [fileManager contentsOfDirectoryAtURL:self.applicationsURL includingPropertiesForKeys:nil options:0 error:nil];
-    self.bundles = [[NSMutableDictionary alloc] init];
-    for(NSURL *uuidURL in uuidURLs)
-    {
-        NSArray<NSString *> *contents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[uuidURL path] error:nil];
-
-        for(NSString *item in contents)
-        {
-            if([[item pathExtension] isEqualToString:@"app"])
-            {
-                NSString *fullPath = [[uuidURL path] stringByAppendingPathComponent:item];
-                NSBundle *bundle = [NSBundle bundleWithPath:fullPath];
-                [self.bundles setObject:bundle forKey:bundle.bundleIdentifier];
-            }
-            else
-            {
-                /* what the user cant manage the user cant manage */
-                [[NSFileManager defaultManager] removeItemAtURL:uuidURL error:nil];
-            }
-        }
-    }
-    
-    self.workspaceQueue = dispatch_queue_create("com.cr4zy.installd.workspace", DISPATCH_QUEUE_SERIAL);
     
     return self;
 }
@@ -212,15 +169,6 @@
     return YES;
 }
 
-- (NSBundle*)applicationBundleForBundleID:(NSString *)bundleID
-{
-    __block NSBundle *result = nil;
-    dispatch_sync(self.workspaceQueue, ^{
-        result = [self.bundles objectForKey:bundleID];
-    });
-    return result;
-}
-
 @end
 
 @implementation LDEApplicationWorkspaceProxy
@@ -279,23 +227,9 @@ create_home:
     reply(homePath);
 }
 
-- (void)applicationObjectForBundleID:(NSString *)bundleID
-                           withReply:(void (^)(LDEApplicationObject *))reply
-{
-    NSBundle *bundle = [[LDEApplicationWorkspaceInternal shared] applicationBundleForBundleID:bundleID];
-    
-    if(!bundle)
-    {
-        reply(nil);
-        return;
-    }
-    
-    reply([[LDEApplicationObject alloc] initWithNSBundle:bundle]);
-}
-
 - (void)fastpathUtility:(FDObject*)object
                withName:(NSString*)name
-              withReply:(void (^)(NSString*,BOOL))reply;
+              withReply:(void (^)(NSString*,BOOL))reply
 {
     // Write out
     NSString *fastPath = [[[[LDEApplicationWorkspaceInternal shared] binaryURL] path] stringByAppendingPathComponent:name];
@@ -312,21 +246,6 @@ create_home:
     reply(fastPath, cs_valid);
 }
 
-- (void)applicationObjectForExecutablePath:(NSString*)executablePath
-                                 withReply:(void (^)(LDEApplicationObject*))reply
-{
-    NSString *potentialBundlePath = [executablePath stringByDeletingLastPathComponent];
-    NSBundle *bundle = [NSBundle bundleWithURL:[NSURL fileURLWithPath:potentialBundlePath]];
-    if(bundle == nil)
-    {
-        reply(nil);
-        return;
-    }
-    
-    LDEApplicationObject *application = [[LDEApplicationObject alloc] initWithNSBundle:bundle];
-    reply(application);
-}
-
 + (NSString*)servcieIdentifier
 {
     return @"com.cr4zy.installd";
@@ -335,10 +254,6 @@ create_home:
 + (Protocol*)serviceProtocol
 {
     return @protocol(LDEApplicationWorkspaceProxyProtocol);
-}
-
-+ (Protocol *)observerProtocol { 
-    return @protocol(LDEApplicationWorkspaceProtocol);
 }
 
 @end
