@@ -160,6 +160,10 @@
 				LindChain/LiveContainer/Tweaks/NSUserDefaults.m,
 				LindChain/LiveContainer/Tweaks/SecItem.m,
 				"LindChain/LiveContainer/Tweaks/UIKit+GuestHooksInit.m",
+				LindChain/ProcEnvironment/Process/PEProcess.m,
+				LindChain/ProcEnvironment/Server/ServerSession.m,
+				LindChain/ProcEnvironment/Surface/proc/fork.m,
+				LindChain/ProcEnvironment/Surface/sys/compat/pectl.m,
 				LindChain/ProcEnvironment/application.m,
 				LindChain/ProcEnvironment/cred.c,
 				LindChain/ProcEnvironment/ioctl.c,
@@ -171,6 +175,7 @@
 				LindChain/ProcEnvironment/sysctl.c,
 				LindChain/ProcEnvironment/tfp.c,
 				LindChain/ProcEnvironment/vfork.c,
+				LindChain/WindowServer/Session/NXWindowSessionTerminal.m,
 			);
 			target = AF9916D82DC8C42200DDF895 /* SuCode */;
 		};

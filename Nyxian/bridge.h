@@ -39,6 +39,8 @@
 #import <LindChain/LiveContainer/ZSign/zsigner.h>
 #import <LindChain/ProcEnvironment/Surface/trust.h>
 
+#if !TROLLSTORE_ENV
+
 /* Daemon Interfaces Headers */
 #import <LindChain/Services/applicationmgmtd/LDEApplicationWorkspace.h>
 #import <LindChain/Services/containerd/PEContainer.h>
@@ -55,6 +57,8 @@
 #import <LindChain/ProcEnvironment/Object/MachOObject.h>
 
 bool liveProcessIsAvailable(void);
+
+#endif /* !TROLLSTORE_ENV */
 
 #endif /* !JAILBREAK_ENV */
 
