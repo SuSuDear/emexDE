@@ -177,7 +177,7 @@ class CodeEditorViewController: UIViewController, NXDocumentDelegate {
         }
         
         self.textView.lineHeightMultiplier = 1.3
-        self.textView.keyboardType = .asciiCapable
+        self.textView.keyboardType = .default
         self.textView.smartQuotesType = .no
         self.textView.smartDashesType = .no
         self.textView.smartInsertDeleteType = .no
