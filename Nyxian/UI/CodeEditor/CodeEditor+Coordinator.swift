@@ -75,6 +75,7 @@ class Coordinator: NSObject, TextViewDelegate {
         if(!textView.text.isEmpty) {
             self.parent?.document?.updateChangeCount(.done)
         }
+        self.parent?.scrollSelectionAboveKeyboardIfNeeded()
         guard self.parent?.synpushServer != nil else { return }
         if !self.isInvalidated {
             self.isInvalidated = true
@@ -103,6 +104,7 @@ class Coordinator: NSObject, TextViewDelegate {
     var isAutoIndenting = false
     
     func textViewDidChangeSelection(_ textView: TextView) {
+        self.parent?.scrollSelectionAboveKeyboardIfNeeded()
         if self.isInvalidated {
             self.debounce?.debounce()
         }

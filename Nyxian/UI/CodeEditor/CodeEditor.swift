@@ -326,6 +326,33 @@ class CodeEditorViewController: UIViewController, NXDocumentDelegate {
         if flash { self.flashLine(rect: rect) }
     }
 
+    func scrollSelectionAboveKeyboardIfNeeded() {
+        guard textView.isFirstResponder else { return }
+        guard textView.adjustedContentInset.bottom > 0 else { return }
+        guard let range = textView.selectedTextRange else { return }
+
+        DispatchQueue.main.async {
+            let caretRect = self.textView.firstRect(for: range)
+            guard !caretRect.isNull, !caretRect.isEmpty else { return }
+
+            let inset = self.textView.adjustedContentInset
+            let visibleRect = CGRect(
+                x: self.textView.contentOffset.x + inset.left,
+                y: self.textView.contentOffset.y + inset.top,
+                width: self.textView.bounds.width - inset.left - inset.right,
+                height: self.textView.bounds.height - inset.top - inset.bottom
+            ).insetBy(dx: 0, dy: 8)
+
+            guard !visibleRect.contains(caretRect) else { return }
+
+            let targetOffsetY = caretRect.midY - (visibleRect.height * 0.65)
+            let maxOffsetY = max(self.textView.contentSize.height + inset.bottom - self.textView.bounds.height, 0)
+            let clampedOffsetY = max(min(targetOffsetY, maxOffsetY), -inset.top)
+
+            self.textView.setContentOffset(CGPoint(x: self.textView.contentOffset.x, y: clampedOffsetY), animated: true)
+        }
+    }
+
     private func flashLine(rect: CGRect) {
         let fullWidthRect = CGRect(x: 0, y: rect.origin.y, width: textView.bounds.width, height: rect.height)
 
