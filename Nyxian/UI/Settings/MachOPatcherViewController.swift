@@ -1,4 +1,3 @@
-#if !TROLLSTORE_ENV
 /*
  SPDX-License-Identifier: AGPL-3.0-or-later
 
@@ -169,4 +168,3 @@ class MachOPatcherViewController: UIThemedTableViewController {
         self.dismiss(animated: true)
     }
 }
-#endif /* !TROLLSTORE_ENV */

@@ -118,20 +118,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate, UITabBarControllerDeleg
             return;
         }
         
-#if !TROLLSTORE_ENV
-        if(!liveProcessIsAvailable())
-        {
-            let label = UILabel()
-            label.text = "NSExtension missing, make sure you keep the extension when installing."
-            label.frame = UIScreen.main.bounds
-            label.numberOfLines = 0
-            self.window?.addSubview(label)
-            self.window?.makeKeyAndVisible()
-            self.window?.bringSubviewToFront(label)
-            return
-        }
-#endif // !TROLLSTORE_ENV
-        
         NXBootstrap.shared().bootstrap()
         
         let themedTabViewController: UIThemedTabViewController = UIThemedTabViewController()

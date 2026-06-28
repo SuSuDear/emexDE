@@ -106,10 +106,6 @@ int environment_init(EnvironmentExec exec,
          * that exist within the same reality.
          */
         environment_cred_init();
-#if !TROLLSTORE_ENV
-        environment_posix_spawn_init();
-        environment_vfork_init();
-#endif
         environment_sysctl_init();
         environment_libproc_init();
         environment_ioctl_init();

@@ -287,7 +287,6 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
             XCButton.stopSpinning()
         }
 
-#if TROLLSTORE_ENV
         if self.project.projectConfig.schemeKind == .app {
             do {
                 let entitlementsPath = try NXTrollStoreSupport.projectEntitlementsPath(forProjectPath: self.project.url.path)
@@ -307,49 +306,6 @@ class Builder: NSObject, MDKDriverDelegate, MDKPhaseRunnerDelegate {
             macho_after_sign(self.project.machoURL.path, self.project.entitlementsConfig.entitlement)
             try self.package()
         }
-#else
-        if(buildType == .Run) {
-            if self.project.projectConfig.schemeKind == .app {
-                do {
-                    let entitlementsPath = try NXTrollStoreSupport.projectEntitlementsPath(forProjectPath: self.project.url.path)
-                    try NXTrollStoreSupport.signExecutable(atPath: self.project.machoURL.path, entitlementsPath: entitlementsPath)
-                    try self.package()
-                    try NXTrollStoreSupport.installIpa(atPath: self.project.packageURL.path)
-                    try NXTrollStoreSupport.openApplication(withBundleIdentifier: self.project.projectConfig.bundleid)
-                } catch {
-                    throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:error.localizedDescription])
-                }
-            } else if self.project.projectConfig.schemeKind == .utility {
-#if TROLLSTORE_ENV
-                throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"Running utility projects is not supported in TrollStore builds."])
-#else
-                if LCUtils.certificateData == nil {
-                    throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"No code signature present to perform signing, import code signature in Settings > Certificate. Note that the code signature must be the same code signature used to sign SuCode."])
-                }
-
-                MachOObject.signBinary(atPath: self.project.machoURL.path)
-                macho_after_sign(self.project.machoURL.path, self.project.entitlementsConfig.entitlement)
-
-                if let path: String = LDEApplicationWorkspace.shared().fastpathUtility(self.project.machoURL.path) {
-                    DispatchQueue.main.sync {
-                        let TerminalSession: NXWindowSessionTerminal = NXWindowSessionTerminal(utilityPath: path)
-                        NXWindowServer.shared().openWindow(with: TerminalSession, withCompletion: nil)
-                    }
-                } else {
-                    throw NSError(domain: "com.susu.code.builder.install", code: 1, userInfo: [NSLocalizedDescriptionKey:"Failed to fastpath install utility"])
-                }
-#endif /* TROLLSTORE_ENV */
-            }
-        } else {
-            if self.project.projectConfig.schemeKind == .app {
-                let entitlementsPath = try NXTrollStoreSupport.projectEntitlementsPath(forProjectPath: self.project.url.path)
-                try NXTrollStoreSupport.signExecutable(atPath: self.project.machoURL.path, entitlementsPath: entitlementsPath)
-            } else {
-                macho_after_sign(self.project.machoURL.path, self.project.entitlementsConfig.entitlement)
-            }
-            try self.package()
-        }
-#endif // TROLLSTORE_ENV
     }
 
     func package() throws {

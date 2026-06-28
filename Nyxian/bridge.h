@@ -39,24 +39,6 @@
 #import <LindChain/WindowServer/NXWindowServer.h>
 #import <LindChain/ProcEnvironment/Surface/surface.h>
 
-#if !TROLLSTORE_ENV && __has_include(<LindChain/Services/applicationmgmtd/LDEApplicationWorkspace.h>) && __has_include(<LindChain/Services/containerd/PEContainer.h>)
-
-/* Daemon Interfaces Headers */
-#import <LindChain/Services/applicationmgmtd/LDEApplicationWorkspace.h>
-#import <LindChain/Services/containerd/PEContainer.h>
-
-/* Multitask Headers */
-#import <LindChain/WindowServer/Session/NXWindowSessionTerminal.h>
-#import <LindChain/ProcEnvironment/Process/PELaunchServiceRegistry.h>
-#import <LindChain/ProcEnvironment/Process/PEProcessManager.h>
-
-/* Kernel Virtualisation Layer Headers */
-#import <LindChain/ProcEnvironment/Utils/klog.h>
-#import <LindChain/ProcEnvironment/Object/MachOObject.h>
-
-bool liveProcessIsAvailable(void);
-
-#endif /* !TROLLSTORE_ENV */
 
 /* Project Headers */
 #import <LindChain/Project/NXUser.h>
