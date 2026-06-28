@@ -332,7 +332,7 @@ class CodeEditorViewController: UIViewController, NXDocumentDelegate {
         guard let range = textView.selectedTextRange else { return }
 
         DispatchQueue.main.async {
-            let caretRect = self.textView.firstRect(for: range)
+            let caretRect = self.textView.caretRect(for: range.end)
             guard !caretRect.isNull, !caretRect.isEmpty else { return }
 
             let inset = self.textView.adjustedContentInset
@@ -598,9 +598,11 @@ class CodeEditorViewController: UIViewController, NXDocumentDelegate {
         textView.verticalScrollIndicatorInsets.bottom = bottomInset
 
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-            guard self.shouldAdjustLocationAfterKeyboard else { return }
-            self.scrollToLocationIfNeeded(self.location, flash: false)
-            self.shouldAdjustLocationAfterKeyboard = false
+            if self.shouldAdjustLocationAfterKeyboard {
+                self.scrollToLocationIfNeeded(self.location, flash: false)
+                self.shouldAdjustLocationAfterKeyboard = false
+            }
+            self.scrollSelectionAboveKeyboardIfNeeded()
         }
     }
 
