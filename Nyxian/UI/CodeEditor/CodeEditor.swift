@@ -47,8 +47,6 @@ class CodeEditorViewController: UIViewController, NXDocumentDelegate {
     private(set) var coordinator: Coordinator?
     private(set) var database: DebugDatabase?
     private(set) var location: CCSourceLocation?
-    private var shouldAdjustLocationAfterKeyboard = false
-    private var isRefreshingSelectionForKeyboard = false
     private(set) var floatingToolbar: UIToolbar?
     private(set) var floatingToolbarBottomConstraint: NSLayoutConstraint?
     
@@ -278,8 +276,6 @@ class CodeEditorViewController: UIViewController, NXDocumentDelegate {
     }
     
     func goto(location: CCSourceLocation?) {
-        self.location = location
-        self.shouldAdjustLocationAfterKeyboard = location != nil
         let line = location?.line
         let column = location?.column
         
@@ -294,67 +290,30 @@ class CodeEditorViewController: UIViewController, NXDocumentDelegate {
             let clampedColumn = min(Int(column), lineText.count)
             let offset = lines.prefix(Int(line - 1)).reduce(0) { $0 + $1.count + 1 } + clampedColumn
 
+            guard let rect = self.textView.rectForLine(Int(line)) else { return }
+
             guard let start = self.textView.position(from: self.textView.beginningOfDocument, offset: offset) else { return }
             self.textView.selectedTextRange = self.textView.textRange(from: start, to: start)
             self.textView.becomeFirstResponder()
 
-            self.scrollToLocationIfNeeded(location, flash: true)
-        }
-    }
+            let visibleRect = CGRect(
+                x: self.textView.contentOffset.x,
+                y: self.textView.contentOffset.y,
+                width: self.textView.bounds.width,
+                height: self.textView.bounds.height
+            )
 
-    private func scrollToLocationIfNeeded(_ location: CCSourceLocation?, flash: Bool) {
-        guard let line = location?.line, line > 0 else { return }
-        guard let rect = self.textView.rectForLine(Int(line)) else { return }
-
-        let inset = self.textView.adjustedContentInset
-        let visibleRect = CGRect(
-            x: self.textView.contentOffset.x + inset.left,
-            y: self.textView.contentOffset.y + inset.top,
-            width: self.textView.bounds.width - inset.left - inset.right,
-            height: self.textView.bounds.height - inset.top - inset.bottom
-        )
-
-        if visibleRect.contains(rect) {
-            if flash { self.flashLine(rect: rect) }
-            return
-        }
-
-        let targetOffsetY = rect.midY - (visibleRect.height * 0.35)
-        let maxOffsetY = max(self.textView.contentSize.height + inset.bottom - self.textView.bounds.height, 0)
-        let clampedOffsetY = max(min(targetOffsetY, maxOffsetY), -inset.top)
-
-        self.textView.setContentOffset(CGPoint(x: self.textView.contentOffset.x, y: clampedOffsetY), animated: false)
-        if flash { self.flashLine(rect: rect) }
-    }
-
-    func scrollSelectionAboveKeyboardIfNeeded() {
-        guard textView.isFirstResponder else { return }
-        guard textView.adjustedContentInset.bottom > 0 else { return }
-        guard !isRefreshingSelectionForKeyboard else { return }
-
-        DispatchQueue.main.async {
-            guard let range = self.textView.selectedTextRange else { return }
-            self.isRefreshingSelectionForKeyboard = true
-
-            let temporaryRange: UITextRange?
-            if let next = self.textView.position(from: range.end, offset: 1) {
-                temporaryRange = self.textView.textRange(from: next, to: next)
-            } else if let previous = self.textView.position(from: range.start, offset: -1) {
-                temporaryRange = self.textView.textRange(from: previous, to: previous)
-            } else {
-                temporaryRange = nil
+            guard !visibleRect.contains(rect) else {
+                self.flashLine(rect: rect)
+                return
             }
 
-            if let temporaryRange = temporaryRange {
-                self.textView.selectedTextRange = temporaryRange
-                DispatchQueue.main.async {
-                    self.textView.selectedTextRange = range
-                    self.isRefreshingSelectionForKeyboard = false
-                }
-            } else {
-                self.textView.selectedTextRange = range
-                self.isRefreshingSelectionForKeyboard = false
-            }
+            let targetOffsetY = rect.origin.y - self.textView.textContainerInset.top
+            let maxOffsetY = max(self.textView.contentSize.height - self.textView.bounds.height, 0)
+            let clampedOffsetY = max(min(targetOffsetY, maxOffsetY), 0)
+
+            self.textView.contentOffset = CGPoint(x: 0, y: clampedOffsetY)
+            self.flashLine(rect: rect)
         }
     }
 
@@ -601,17 +560,6 @@ class CodeEditorViewController: UIViewController, NXDocumentDelegate {
         
         textView.contentInset.bottom = bottomInset
         textView.verticalScrollIndicatorInsets.bottom = bottomInset
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-            if self.shouldAdjustLocationAfterKeyboard {
-                self.scrollToLocationIfNeeded(self.location, flash: false)
-                self.shouldAdjustLocationAfterKeyboard = false
-            }
-            self.scrollSelectionAboveKeyboardIfNeeded()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.scrollSelectionAboveKeyboardIfNeeded()
-            }
-        }
     }
 
     @objc func keyboardWillHide(notification: NSNotification) {
