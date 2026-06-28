@@ -400,14 +400,24 @@ import UIKit
             throw NSError(domain: "com.susu.code.projectIcon", code: 3, userInfo: [NSLocalizedDescriptionKey: "Invalid Project.plist"])
         }
 
-        var bundleInfo = plist["NXBundleInfo"] as? [String: Any] ?? [:]
-        bundleInfo["CFBundleIcons"] = [
+        let iconInfo: [String: Any] = [
             "CFBundlePrimaryIcon": [
                 "CFBundleIconFiles": ["AppIcon60x60"],
                 "CFBundleIconName": "AppIcon"
             ]
         ]
-        plist["NXBundleInfo"] = bundleInfo
+
+        if var bundleInfo = plist["NXBundleInfo"] as? [String: Any] {
+            bundleInfo["CFBundleIcons"] = iconInfo
+            plist["NXBundleInfo"] = bundleInfo
+        } else if var bundleInfo = plist["LDEBundleInfo"] as? [String: Any] {
+            bundleInfo["CFBundleIcons"] = iconInfo
+            plist["LDEBundleInfo"] = bundleInfo
+        } else {
+            plist["NXBundleInfo"] = [
+                "CFBundleIcons": iconInfo
+            ]
+        }
 
         let outputData = try PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0)
         try outputData.write(to: plistURL, options: .atomic)
