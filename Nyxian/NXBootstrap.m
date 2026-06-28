@@ -57,11 +57,7 @@
 - (NSURL*)rootURL
 {
     dispatch_once(&_gatherRootURLOnce, ^{
-#if !JAILBREAK_ENV
         _rootURL = [NSURL fileURLWithPath:[[@"/private" stringByAppendingPathComponent:NSHomeDirectory()] stringByAppendingPathComponent:@"/Documents"]];
-#else
-        _rootURL = [NSURL fileURLWithPath:[[@"/private" stringByAppendingPathComponent:NSHomeDirectory()] stringByAppendingPathComponent:@"/Documents/com.susu.code.root"]];
-#endif /* !JAILBREAK_ENV */
     });
     return _rootURL;
 }

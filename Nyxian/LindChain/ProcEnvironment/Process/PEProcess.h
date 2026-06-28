@@ -30,9 +30,7 @@
 
 @interface PEProcess : NSObject <FBProcessObserver,FBProcessManagerObserver>
 
-#if !JAILBREAK_ENV
 @property (nonatomic) ksurface_proc_t *proc;
-#endif /* !JAILBREAK_ENV */
 
 @property (nonatomic,strong) FBProcess *process;
 @property (nonatomic,strong) UIImage *snapshot;
@@ -52,9 +50,7 @@
 // Callback
 @property (nonatomic, copy) void (^exitingCallback)(void);
 
-#if !JAILBREAK_ENV
 - (instancetype)initWithItems:(NSDictionary*)items withKernelSurfaceProcess:(ksurface_proc_t*)proc;
-#endif /* !JAILBREAK_ENV */
 
 - (void)sendSignal:(int)signal;
 - (BOOL)terminate;

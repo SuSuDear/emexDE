@@ -23,8 +23,6 @@
 #import <LindChain/ProcEnvironment/Utils/klog.h>
 #import <LindChain/ProcEnvironment/syscall.h>
 
-#if !JAILBREAK_ENV
-
 __attribute__((optnone))
 task_t ktfp(mach_port_t exceptionPort)
 {
@@ -178,5 +176,3 @@ out_destroy_request:
     return exportedTask;
 #endif /* HOST_ENV */
 }
-
-#endif /* !JAILBREAK_ENV */

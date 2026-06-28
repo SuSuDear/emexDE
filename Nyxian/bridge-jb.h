@@ -19,8 +19,7 @@
  along with Nyxian. If not, see <https://www.gnu.org/licenses/>.
 */
 
-/* idk somehow the bridging header needs its own */
-#define JAILBREAK_ENV 1
+/* Legacy jailbreak bridging header retained but no longer selected by the project. */
 
 /* Apple Private API Headers */
 #import <LindChain/Private/UIKitPrivate.h>

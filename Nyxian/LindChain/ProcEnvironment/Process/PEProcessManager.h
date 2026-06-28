@@ -30,9 +30,7 @@
 - (instancetype)init;
 + (instancetype)shared;
 
-#if !JAILBREAK_ENV
 - (pid_t)spawnProcessWithItems:(NSDictionary*)items withKernelSurfaceProcess:(ksurface_proc_t*)proc;
-#endif /* !JAILBREAK_ENV */
 
 - (PEProcess*)processForProcessIdentifier:(pid_t)pid;
 - (void)unregisterProcessWithProcessIdentifier:(pid_t)pid;

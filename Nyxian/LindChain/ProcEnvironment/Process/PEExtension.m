@@ -198,16 +198,11 @@ FBProcess *PESpawnFBProcess(NSDictionary *items)
 __attribute__((constructor))
 static void start_environment(int argc, char *argv[])
 {
-#if !JAILBREAK_ENV && !TROLLSTORE_ENV
+#if !TROLLSTORE_ENV
     if(liveProcessIsAvailable())
     {
         environment_init(EnvironmentExecCustom, NSBundle.mainBundle.executablePath, argc, argv);
         [PELaunchServiceRegistry shared]; /* invokes launch services startup*/
     }
-#elif JAILBREAK_ENV
-    if(getsid(getpid()) != getpid())
-    {
-        return 0;
-    }
-#endif /* !JAILBREAK_ENV */
+#endif /* !TROLLSTORE_ENV */
 }

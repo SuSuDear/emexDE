@@ -31,8 +31,6 @@
 #import <LindChain/Utils/Utils.h>
 #import <LindChain/TrollStoreSupport/NXTrollStoreSupport.h>
 
-#if !JAILBREAK_ENV
-
 /* LiveContainer Headers */
 #import <LindChain/LiveContainer/LCUtils.h>
 #import <LindChain/LiveContainer/LCMachOUtils.h>
@@ -59,8 +57,6 @@
 bool liveProcessIsAvailable(void);
 
 #endif /* !TROLLSTORE_ENV */
-
-#endif /* !JAILBREAK_ENV */
 
 /* Project Headers */
 #import <LindChain/Project/NXUser.h>
