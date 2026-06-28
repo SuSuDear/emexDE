@@ -227,7 +227,7 @@ class UIDebugViewController: UITableViewController {
 
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = String(format: L10n("%@ • %d"), localizedDebugObjectTitle(title), sortedDebugObjects[section].debugItems.count)
+        label.text = "\(title) • \(sortedDebugObjects[section].debugItems.count)"
         label.font = UIFont.preferredFont(forTextStyle: .footnote)
         label.textColor = .label
         label.numberOfLines = 1
@@ -247,10 +247,6 @@ class UIDebugViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return UITableView.automaticDimension
     }
-
-    private func localizedDebugObjectTitle(_ title: String) -> String {
-        title == "Internal" ? L10n("Internal") : title
-    }
     
     override func numberOfSections(in tableView: UITableView) -> Int {
         return sortedDebugObjects.count
@@ -258,7 +254,7 @@ class UIDebugViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let items = sortedDebugObjects[indexPath.section].debugItems
-        let item = (items.count > 0) ? items[indexPath.row] : DebugItem(severity: .note, message: L10n("Contains no messages"))
+        let item = (items.count > 0) ? items[indexPath.row] : DebugItem(severity: .note, message: "Contains no messages")
         
         let cell = UITableViewCell()
         cell.textLabel?.text = item.message

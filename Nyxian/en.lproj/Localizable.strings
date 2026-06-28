@@ -126,6 +126,3 @@
 "Applications" = "Applications";
 "Utilities" = "Utilities";
 "Unknown" = "Unknown";
-"%@ • %d" = "%@ • %d";
-"Internal" = "Internal";
-"Contains no messages" = "Contains no messages";
