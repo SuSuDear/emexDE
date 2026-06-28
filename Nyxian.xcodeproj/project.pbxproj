@@ -151,8 +151,6 @@
 		798BBD332F1D265200CBB23F /* Exceptions for "Nyxian" folder in "SuCode" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				LindChain/JBSupport/Shell.m,
-				LindChain/JBSupport/tshelper,
 				LindChain/LiveContainer/LCBootstrap.m,
 				LindChain/LiveContainer/Tweaks/Dead10ccFix.m,
 				LindChain/LiveContainer/Tweaks/Dyld.m,
@@ -851,7 +849,6 @@
 					"$(PROJECT_DIR)/Nyxian",
 					"$(PROJECT_DIR)/Nyxian/LindChain/Synpush",
 					"$(PROJECT_DIR)/Nyxian/LindChain",
-					"$(PROJECT_DIR)/Nyxian/LindChain/JBSupport",
 					"$(PROJECT_DIR)/Nyxian/LindChain/CoreCompilerSupportLibs",
 					"$(PROJECT_DIR)/Nyxian/LindChain/CoreCompilerSupportLibs/CoreCompilerSupportLibs",
 					"$(PROJECT_DIR)/CoreCompiler/CoreCompilerSupportLibs",
@@ -969,7 +966,6 @@
 					"$(PROJECT_DIR)/Nyxian",
 					"$(PROJECT_DIR)/Nyxian/LindChain/Synpush",
 					"$(PROJECT_DIR)/Nyxian/LindChain",
-					"$(PROJECT_DIR)/Nyxian/LindChain/JBSupport",
 					"$(PROJECT_DIR)/Nyxian/LindChain/CoreCompilerSupportLibs",
 					"$(PROJECT_DIR)/Nyxian/LindChain/CoreCompilerSupportLibs/CoreCompilerSupportLibs",
 					"$(PROJECT_DIR)/CoreCompiler/CoreCompilerSupportLibs",
@@ -1388,7 +1384,6 @@
 					"$(PROJECT_DIR)/Nyxian",
 					"$(PROJECT_DIR)/Nyxian/LindChain/Synpush",
 					"$(PROJECT_DIR)/Nyxian/LindChain",
-					"$(PROJECT_DIR)/Nyxian/LindChain/JBSupport",
 					"$(PROJECT_DIR)/Nyxian/LindChain/CoreCompilerSupportLibs",
 					"$(PROJECT_DIR)/Nyxian/LindChain/CoreCompilerSupportLibs/CoreCompilerSupportLibs",
 				);
@@ -1510,7 +1505,6 @@
 					"$(PROJECT_DIR)/Nyxian",
 					"$(PROJECT_DIR)/Nyxian/LindChain/Synpush",
 					"$(PROJECT_DIR)/Nyxian/LindChain",
-					"$(PROJECT_DIR)/Nyxian/LindChain/JBSupport",
 					"$(PROJECT_DIR)/Nyxian/LindChain/CoreCompilerSupportLibs",
 					"$(PROJECT_DIR)/Nyxian/LindChain/CoreCompilerSupportLibs/CoreCompilerSupportLibs",
 				);
