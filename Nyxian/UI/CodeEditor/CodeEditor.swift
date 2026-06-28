@@ -48,6 +48,7 @@ class CodeEditorViewController: UIViewController, NXDocumentDelegate {
     private(set) var database: DebugDatabase?
     private(set) var location: CCSourceLocation?
     private var shouldAdjustLocationAfterKeyboard = false
+    private var keyboardTopInView: CGFloat?
     private(set) var floatingToolbar: UIToolbar?
     private(set) var floatingToolbarBottomConstraint: NSLayoutConstraint?
     
@@ -329,27 +330,23 @@ class CodeEditorViewController: UIViewController, NXDocumentDelegate {
     func scrollSelectionAboveKeyboardIfNeeded() {
         guard textView.isFirstResponder else { return }
         guard textView.adjustedContentInset.bottom > 0 else { return }
+        guard let keyboardTopInView = keyboardTopInView else { return }
         guard let range = textView.selectedTextRange else { return }
 
         DispatchQueue.main.async {
             let caretRect = self.textView.caretRect(for: range.end)
             guard !caretRect.isNull, !caretRect.isEmpty else { return }
 
+            let caretInView = self.textView.convert(caretRect, to: self.view)
+            let bottomPadding: CGFloat = 24
+            let overlap = caretInView.maxY + bottomPadding - keyboardTopInView
+            guard overlap > 0 else { return }
+
             let inset = self.textView.adjustedContentInset
-            let visibleRect = CGRect(
-                x: self.textView.contentOffset.x + inset.left,
-                y: self.textView.contentOffset.y + inset.top,
-                width: self.textView.bounds.width - inset.left - inset.right,
-                height: self.textView.bounds.height - inset.top - inset.bottom
-            ).insetBy(dx: 0, dy: 8)
+            let maxOffsetY = max(self.textView.contentSize.height + inset.bottom - self.textView.bounds.height, -inset.top)
+            let targetOffsetY = min(self.textView.contentOffset.y + overlap, maxOffsetY)
 
-            guard !visibleRect.contains(caretRect) else { return }
-
-            let targetOffsetY = caretRect.midY - (visibleRect.height * 0.65)
-            let maxOffsetY = max(self.textView.contentSize.height + inset.bottom - self.textView.bounds.height, 0)
-            let clampedOffsetY = max(min(targetOffsetY, maxOffsetY), -inset.top)
-
-            self.textView.setContentOffset(CGPoint(x: self.textView.contentOffset.x, y: clampedOffsetY), animated: true)
+            self.textView.setContentOffset(CGPoint(x: self.textView.contentOffset.x, y: targetOffsetY), animated: true)
         }
     }
 
@@ -580,6 +577,7 @@ class CodeEditorViewController: UIViewController, NXDocumentDelegate {
               let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
         
         let keyboardInView = view.convert(keyboardFrame, from: nil)
+        self.keyboardTopInView = keyboardInView.minY
         let overlap = max(0, view.bounds.maxY - keyboardInView.minY)
 
         let bottomInset: CGFloat
@@ -603,6 +601,9 @@ class CodeEditorViewController: UIViewController, NXDocumentDelegate {
                 self.shouldAdjustLocationAfterKeyboard = false
             }
             self.scrollSelectionAboveKeyboardIfNeeded()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.scrollSelectionAboveKeyboardIfNeeded()
+            }
         }
     }
 
@@ -611,11 +612,13 @@ class CodeEditorViewController: UIViewController, NXDocumentDelegate {
               let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else {
             textView.contentInset = .zero
             textView.scrollIndicatorInsets = .zero
+            keyboardTopInView = nil
             return
         }
 
         textView.contentInset = .zero
         textView.verticalScrollIndicatorInsets = .zero
+        keyboardTopInView = nil
 
         if #available(iOS 26.0, *), let floatingToolbar = self.floatingToolbar {
             UIView.animate(withDuration: duration) {
