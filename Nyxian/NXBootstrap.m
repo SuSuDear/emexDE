@@ -371,7 +371,7 @@
     
     while(self.version != NXBOOTSTRAP_NEWEST_VERSION)
     {
-        relax();
+        [NSThread sleepForTimeInterval:0.05];
     }
     
     [XCButton switchImageWithSystemName:@"hammer.fill" animated:YES];
