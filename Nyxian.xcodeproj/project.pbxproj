@@ -151,13 +151,6 @@
 		798BBD332F1D265200CBB23F /* Exceptions for "Nyxian" folder in "SuCode" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				LindChain/LiveContainer/LCBootstrap.m,
-				LindChain/LiveContainer/Tweaks/Dead10ccFix.m,
-				LindChain/LiveContainer/Tweaks/Dyld.m,
-				"LindChain/LiveContainer/Tweaks/NSFileManager+GuestHooks.m",
-				LindChain/LiveContainer/Tweaks/NSUserDefaults.m,
-				LindChain/LiveContainer/Tweaks/SecItem.m,
-				"LindChain/LiveContainer/Tweaks/UIKit+GuestHooksInit.m",
 			);
 			target = AF9916D82DC8C42200DDF895 /* SuCode */;
 		};
@@ -276,11 +269,9 @@
 		AFF4DBDB2DCA5DEA00B1B5F9 /* Exceptions for "Nyxian" folder in "Embed Libraries" phase from "SuCode" target */ = {
 			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
 			attributesByRelativePath = {
-				LindChain/OpenSSL.xcframework = (CodeSignOnCopy, RemoveHeadersOnCopy, );
 			};
 			buildPhase = AFF4DB332DCA57EC00B1B5F9 /* Embed Libraries */;
 			membershipExceptions = (
-				LindChain/OpenSSL.xcframework,
 			);
 		};
 /* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */

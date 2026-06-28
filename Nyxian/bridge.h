@@ -31,10 +31,7 @@
 #import <LindChain/Utils/Utils.h>
 #import <LindChain/TrollStoreSupport/NXTrollStoreSupport.h>
 
-/* LiveContainer Headers */
-#import <LindChain/LiveContainer/LCUtils.h>
-#import <LindChain/LiveContainer/LCMachOUtils.h>
-#import <LindChain/LiveContainer/ZSign/zsigner.h>
+/* LindChain Runtime Headers */
 #import <LindChain/ProcEnvironment/Surface/trust.h>
 #import <LindChain/WindowServer/NXWindowServer.h>
 #import <LindChain/ProcEnvironment/Surface/surface.h>

@@ -29,7 +29,6 @@
 #include <stdbool.h>
 #include <fcntl.h>
 
-typedef struct ksurface_proc ksurface_proc_t;
 typedef struct ksurface_ent_blob ksurface_ent_blob_t;
 typedef struct ksurface_ent_result ksurface_ent_result_t;
 
@@ -122,21 +121,17 @@ typedef CF_OPTIONS(uint64_t, PEEntitlement) {
 struct __attribute__((packed)) ksurface_ent_blob {
     PEEntitlement entitlement;
     char cdhash[USER_FSIGNATURES_CDHASH_LEN];
-    uint64_t nonce;
-    uint8_t mac[72];
-    size_t mac_len;
 };
 
 struct ksurface_ent_result {
     struct ksurface_ent_blob blob;
     bool cdhash_valid;
-    bool blob_valid;
 };
 
 #define entitlement_got_entitlement(present,needed) ((present & needed) == needed)
 
 kern_return_t entitlement_token_mach_gen(ksurface_ent_blob_t *blob, const char *cdhash, PEEntitlement entitlement);
-kern_return_t entitlement_mach_verify(ksurface_ent_result_t *mach, uint8_t *pub_key, size_t pub_key_len);
+kern_return_t entitlement_mach_verify(ksurface_ent_result_t *mach);
 PEEntitlement entitlement_get_path(const char *path, bool *wasLocallySigned);
 bool entitlement_set_path(const char *path, PEEntitlement entitlement);
 
