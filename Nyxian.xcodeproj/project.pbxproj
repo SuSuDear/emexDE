@@ -151,7 +151,6 @@
 		798BBD332F1D265200CBB23F /* Exceptions for "Nyxian" folder in "SuCode" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				UI/Settings/MachOPatcherViewController.swift,
 				LindChain/LiveContainer/LCBootstrap.m,
 				LindChain/LiveContainer/Tweaks/Dead10ccFix.m,
 				LindChain/LiveContainer/Tweaks/Dyld.m,
@@ -159,31 +158,6 @@
 				LindChain/LiveContainer/Tweaks/NSUserDefaults.m,
 				LindChain/LiveContainer/Tweaks/SecItem.m,
 				"LindChain/LiveContainer/Tweaks/UIKit+GuestHooksInit.m",
-				LindChain/ProcEnvironment/Process/PEBootstrapRegistry.m,
-				LindChain/ProcEnvironment/Process/PELaunchService.m,
-				LindChain/ProcEnvironment/Process/PELaunchServiceRegistry.m,
-				LindChain/ProcEnvironment/Process/PEProcess.m,
-				LindChain/ProcEnvironment/Process/PEProcessManager.m,
-				LindChain/ProcEnvironment/Server/Server.m,
-				LindChain/ProcEnvironment/Server/ServerSession.m,
-				LindChain/ProcEnvironment/Surface/proc/fork.m,
-				LindChain/ProcEnvironment/Surface/sys/compat/pectl.m,
-				LindChain/ProcEnvironment/Surface/sys/compat/kbdctl.m,
-				LindChain/ProcEnvironment/Surface/sys/proc/kill.m,
-				LindChain/ProcEnvironment/Surface/sys/proc/wait4.c,
-				LindChain/ProcEnvironment/Surface/tty/tty.m,
-				LindChain/ProcEnvironment/application.m,
-				LindChain/ProcEnvironment/cred.c,
-				LindChain/ProcEnvironment/ioctl.c,
-				LindChain/ProcEnvironment/kbdportal.m,
-				LindChain/ProcEnvironment/libproc.m,
-				LindChain/ProcEnvironment/posix_spawn.m,
-				LindChain/ProcEnvironment/proxy.m,
-				LindChain/ProcEnvironment/syscall.c,
-				LindChain/ProcEnvironment/sysctl.c,
-				LindChain/ProcEnvironment/tfp.c,
-				LindChain/ProcEnvironment/vfork.c,
-				LindChain/WindowServer/Session/NXWindowSessionTerminal.m,
 			);
 			target = AF9916D82DC8C42200DDF895 /* SuCode */;
 		};

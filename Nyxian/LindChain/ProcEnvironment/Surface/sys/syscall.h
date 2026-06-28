@@ -23,7 +23,6 @@
 #define SURFACE_SYS_SYSCALL_H
 
 /* headers to syscall handlers*/
-#include <LindChain/ProcEnvironment/Surface/sys/proc/kill.h>
 #include <LindChain/ProcEnvironment/Surface/sys/cred/setuid.h>
 #include <LindChain/ProcEnvironment/Surface/sys/cred/setgid.h>
 #include <LindChain/ProcEnvironment/Surface/sys/compat/getent.h>
@@ -36,12 +35,9 @@
 #include <LindChain/ProcEnvironment/Surface/sys/cred/getsid.h>
 #include <LindChain/ProcEnvironment/Surface/sys/cred/setsid.h>
 #include <LindChain/ProcEnvironment/Surface/sys/host/sysctl.h>
-#include <LindChain/ProcEnvironment/Surface/sys/proc/wait4.h>
 #include <LindChain/ProcEnvironment/Surface/sys/host/ioctl.h>
 #include <LindChain/ProcEnvironment/Surface/sys/compat/setent.h>
 #include <LindChain/ProcEnvironment/Surface/sys/compat/waittask.h>
-#include <LindChain/ProcEnvironment/Surface/sys/compat/pectl.h>
-#include <LindChain/ProcEnvironment/Surface/sys/compat/kbdctl.h>
 #include <sys/syscall.h>
 
 /* additional nyxian syscalls for now */
@@ -55,9 +51,6 @@
 #define SYS_handoffep   757         /* handoff exception port to kvirt */
 #define SYS_setent      758         /* sets entitlements (sanitized ofc) */
 #define SYS_waittask    759         /* waits till task port of a task is available */
-#define SYS_pectl       760         /* utility for many proc environment operations */
-#define SYS_kbdctl      761
-
 #define SYS_N 22
 
 typedef struct {

@@ -19,7 +19,6 @@
  along with Nyxian. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#import <LindChain/ProcEnvironment/environment.h>
 #import <LindChain/ProcEnvironment/Object/MachOObject.h>
 #import <LindChain/LiveContainer/LCUtils.h>
 #import <LindChain/LiveContainer/LCMachOUtils.h>

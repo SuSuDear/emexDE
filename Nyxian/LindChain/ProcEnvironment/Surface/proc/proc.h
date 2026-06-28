@@ -22,7 +22,6 @@
 #ifndef PROC_PROC_H
 #define PROC_PROC_H
 
-#include <LindChain/ProcEnvironment/Surface/proc/fork.h>
 #include <LindChain/ProcEnvironment/Surface/proc/def.h>
 #include <LindChain/ProcEnvironment/Surface/proc/insert.h>
 #include <LindChain/ProcEnvironment/Surface/proc/list.h>

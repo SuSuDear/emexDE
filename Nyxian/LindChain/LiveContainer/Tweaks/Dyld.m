@@ -28,8 +28,6 @@
 #import <LindChain/litehook/litehook.h>
 #import "LCMachOUtils.h"
 #import "../utils.h"
-#import <LindChain/ProcEnvironment/environment.h>
-#import <LindChain/ProcEnvironment/syscall.h>
 
 typedef struct {
     uint32_t platform;
@@ -115,15 +113,6 @@ DEFINE_HOOK(dlopen, void *, (const char * __path,
     LCMachO *machO = LCMapMachO(__path, true);
     bool cs_valid = LCCheckCodeSignature(machO);
     LCUnmapMachO(machO);
-    if(!cs_valid)
-    {
-        /* sign if invalid */
-        if((int)environment_syscall(SYS_pectl, PECTL_CS_SIGN_PATH, __path, MACH_PORT_NULL) == 0)
-        {
-            refreshFile(__path);
-        }
-    }
-    
     /* continue with opening */
     return ORIG_FUNC(dlopen)(__path, __mode);
 }

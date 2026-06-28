@@ -28,18 +28,8 @@
 #import <Foundation/Foundation.h>
 
 /* ----------------------------------------------------------------------
- *  Environment API Headers
+ *  Retained ProcEnvironment Headers
  * -------------------------------------------------------------------- */
-#import <LindChain/ProcEnvironment/proxy.h>
-#import <LindChain/ProcEnvironment/tfp.h>
-#import <LindChain/ProcEnvironment/libproc.h>
-#import <LindChain/ProcEnvironment/application.h>
-#import <LindChain/ProcEnvironment/posix_spawn.h>
-#import <LindChain/ProcEnvironment/sysctl.h>
-#import <LindChain/ProcEnvironment/ioctl.h>
-#import <LindChain/ProcEnvironment/vfork.h>
-#import <LindChain/ProcEnvironment/cred.h>
-#import <LindChain/ProcEnvironment/kbdportal.h>
 #import <LindChain/ProcEnvironment/Object/PEMachPort.h>
 #import <LindChain/ProcEnvironment/Object/FDMapObject.h>
 #import <LindChain/ProcEnvironment/Surface/surface.h>
@@ -47,64 +37,5 @@
 #import <LindChain/ProcEnvironment/Surface/permit.h>
 #import <LindChain/ProcEnvironment/Surface/entitlement.h>
 
-/*!
- @enum `EnvironmentExec`
- @abstract Defines how the environment shall be executed.
- */
-typedef NS_ENUM(NSInteger, EnvironmentExec) {
-    /*! No environment execution type set */
-    EnvironmentExecNone = 0,
-    
-    /*! The environment will execute after init using LiveContainer and will return the exit code of the executable from `environment_init` */
-    EnvironmentExecLiveContainer = 1,
-    
-    /*! The environment wont execute anything and will straightup return for a custom execution method `environment_init` */
-    EnvironmentExecCustom  = 2,
-};
-
-/*!
- @function `environment_client_connect_to_host`
- @abstract Connects the client to the host environment using a preshipped endpoint.
- @discussion
-    This function establishes a connection between a guest process and
-    its host environment. The provided endpoint must have been exported
-    by the host.
-
- @param endpoint
-    Endpoint send by the host environment to the guest to connect to.
- */
-void environment_client_connect_to_host(NSXPCListenerEndpoint *endpoint) __attribute__((deprecated("Use environment_client_connect_to_syscall_proxy(1) instead")));
-
-/*!
- @function `environment_client_connect_to_syscall_proxy`
- @abstract Connects the client to the syscall proxy using a preshipped mach port object(mpo).
- @discussion
-    This function establishes a connection between a guest process and
-    its host environments syscall proxy. The provided endpoint must have been exported
-    by the host.
-
- @param port
-    Mach port send by the host environment to the guest to connect to.
- */
-void environment_client_connect_to_syscall_proxy(PEMachPort *port);
-
-/*!
- @function `environment_init`
- @abstract Initializes the environment with a given role.
- @discussion
-    This function initializes the environment with the given role. It can and shall only be called once.
- 
- @param exec
-    Represents how the environment shall act after init.
- @param executablePath
-    Executable path of the target binary.
- @param argc
-    Item count of argv array.
- @param argv
-    Arguments used for the binary.
- @return
-    Exit code of the process or environment it self.
- */
-int environment_init(EnvironmentExec exec, NSString *executablePath, int argc, char *argv[]);
 
 #endif /* PROCENVIRONMENT_ENVIRONMENT_H */
