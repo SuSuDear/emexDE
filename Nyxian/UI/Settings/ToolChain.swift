@@ -29,7 +29,7 @@ class ToolChainController: UIThemedTableViewController {
         
         tableView.register(ToggleTableCell.self, forCellReuseIdentifier: ToggleTableCell.reuseIdentifier)
         
-        self.title = "Toolchain"
+        self.title = L10n("Toolchain")
         
         self.tableView.translatesAutoresizingMaskIntoConstraints = false
         self.tableView.rowHeight = UITableView.automaticDimension
@@ -46,11 +46,11 @@ class ToolChainController: UIThemedTableViewController {
     override func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         switch section {
         case 0:
-            return "An incremental build compiles only the parts of the code that have changed, reducing build times by avoiding a full rebuild of the entire project."
+            return L10n("An incremental build compiles only the parts of the code that have changed, reducing build times by avoiding a full rebuild of the entire project.")
         case 1:
-            return "Threading in compilation refers to the compiler's ability to perform tasks in parallel like parsing, code generation, and optimization across multiple CPU threads to speed up the build process."
+            return L10n("Threading in compilation refers to the compiler's ability to perform tasks in parallel like parsing, code generation, and optimization across multiple CPU threads to speed up the build process.")
         case 2:
-            return "This clears caches that were created for performance."
+            return L10n("This clears caches that were created for performance.")
         default:
             return nil
         }
@@ -59,9 +59,9 @@ class ToolChainController: UIThemedTableViewController {
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
         case 0:
-            return "Features"
+            return L10n("Features")
         case 2:
-            return "Actions"
+            return L10n("Actions")
         default:
             return nil
         }
@@ -73,21 +73,21 @@ class ToolChainController: UIThemedTableViewController {
         switch indexPath.section {
         case 0:
             cell = tableView.dequeueReusableCell(withIdentifier: ToggleTableCell.reuseIdentifier, for: indexPath) as! ToggleTableCell
-            (cell as! ToggleTableCell).configure(title: "Incremental Build", key: "LDEIncrementalBuild", defaultValue: true)
+            (cell as! ToggleTableCell).configure(title: L10n("Incremental Build"), key: "LDEIncrementalBuild", defaultValue: true)
             break
         case 1:
             let optimCpuCount: Int = (Int)(CCGetMaximumPerformanceCores())
-            cell = StepperTableCell(title: "Use Threads", key: "cputhreads", defaultValue: optimCpuCount, minValue: 1, maxValue: optimCpuCount)
+            cell = StepperTableCell(title: L10n("Use Threads"), key: "cputhreads", defaultValue: optimCpuCount, minValue: 1, maxValue: optimCpuCount)
             break
         default:
             switch(indexPath.row) {
             case 0:
                 cell = UITableViewCell()
-                cell.textLabel?.text = "Clear Module Cache"
+                cell.textLabel?.text = L10n("Clear Module Cache")
                 break
             default:
                 cell = UITableViewCell()
-                cell.textLabel?.text = "Clear Project Cache"
+                cell.textLabel?.text = L10n("Clear Project Cache")
                 break
             }
             break

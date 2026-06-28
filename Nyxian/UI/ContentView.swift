@@ -483,7 +483,7 @@ import UIKit
 
     override func tableView(_ tableView: UITableView, contextMenuConfigurationForRowAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-            let export: UIAction = UIAction(title: "Export", image: UIImage(systemName: "square.and.arrow.up.fill")) { [weak self] _ in
+            let export: UIAction = UIAction(title: L10n("Export"), image: UIImage(systemName: "square.and.arrow.up.fill")) { [weak self] _ in
                 DispatchQueue.global().async {
                     guard let self = self else { return }
 
@@ -498,16 +498,16 @@ import UIKit
                 }
             }
 
-            let item: UIAction = UIAction(title: "Remove", image: UIImage(systemName: "trash.fill"), attributes: .destructive) { _ in
+            let item: UIAction = UIAction(title: L10n("Remove"), image: UIImage(systemName: "trash.fill"), attributes: .destructive) { _ in
                 let keys = Array(self.projectsList.keys).sorted()
                 let key = keys[indexPath.section]
                 let sectionProjects = self.projectsList[key] ?? []
                 let project = sectionProjects[indexPath.row]
 
                 self.presentConfirmationAlert(
-                    title: "Warning",
-                    message: "Are you sure you want to remove \"\(project.projectConfig.displayName!)\"?",
-                    confirmTitle: "Remove",
+                    title: L10n("Warning"),
+                    message: String(format: L10n("Are you sure you want to remove \"%@\"?"), project.projectConfig.displayName!),
+                    confirmTitle: L10n("Remove"),
                     confirmStyle: .destructive)
                 { [weak self] in
                     guard let self = self else { return }
@@ -738,13 +738,13 @@ struct ProjectTemplateOptionsView: View {
         VStack(spacing: 12) {
             VStack(spacing: 0) {
                 templateTextField(
-                    label: "Product Name",
-                    placeholder: "Product Name",
+                    label: L10n("Product Name"),
+                    placeholder: L10n("Product Name"),
                     text: $model.productName
                 )
                 themedDivider
                 templateTextField(
-                    label: "Organization Identifier",
+                    label: L10n("Organization Identifier"),
                     placeholder: "com.example",
                     text: $model.organizationIdentifier,
                     keyboardType: .URL
@@ -758,7 +758,7 @@ struct ProjectTemplateOptionsView: View {
             VStack(spacing: 8) {
                 if model.showsAppOptions {
                     ProjectTemplatePickerRow(
-                        title: "Interface:",
+                        title: L10n("Interface:"),
                         options: model.interfaceOptions,
                         disabledIDs: model.interfaceDisabledIDs,
                         selectionID: Binding(
@@ -769,7 +769,7 @@ struct ProjectTemplateOptionsView: View {
                 }
 
                 ProjectTemplatePickerRow(
-                    title: "Language:",
+                    title: L10n("Language:"),
                     options: model.languageOptions,
                     selectionID: Binding(
                         get: { model.languageSelection },
@@ -793,7 +793,7 @@ struct ProjectTemplateOptionsView: View {
 
     private var generatedIdentifierRow: some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text("Bundle Identifier")
+            Text(L10n("Bundle Identifier"))
                 .font(.caption)
                 .foregroundStyle(secondaryTextColor)
             Text(model.bundleIdentifier.isEmpty ? " " : model.bundleIdentifier)

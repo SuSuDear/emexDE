@@ -46,7 +46,7 @@ class KernelLogViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Kernel Log"
+        title = L10n("Kernel Log")
         view.backgroundColor = .systemBackground
 
         setupLayout()
@@ -76,11 +76,11 @@ class KernelLogViewController: UIViewController {
 
     private func setupNavigationItems() {
         navigationItem.rightBarButtonItems = [
-            UIBarButtonItem(title: "Copy",
+            UIBarButtonItem(title: L10n("Copy"),
                             style: .plain,
                             target: self,
                             action: #selector(copyLog)),
-            UIBarButtonItem(title: "Refresh",
+            UIBarButtonItem(title: L10n("Refresh"),
                             style: .plain,
                             target: self,
                             action: #selector(refreshLog))
@@ -92,7 +92,7 @@ class KernelLogViewController: UIViewController {
             if let log = klog_dump() {
                 label.text = log as String
             } else {
-                label.text = "Kernel logging disabled."
+                label.text = L10n("Kernel logging disabled.")
             }
         }
         self.scrollView.layoutSubviews()
@@ -100,10 +100,10 @@ class KernelLogViewController: UIViewController {
 
     @objc private func copyLog() {
         UIPasteboard.general.string = label.text
-        let alert = UIAlertController(title: "Copied",
-                                      message: "The log has been copied to the clipboard.",
+        let alert = UIAlertController(title: L10n("Copied"),
+                                      message: L10n("The log has been copied to the clipboard."),
                                       preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        alert.addAction(UIAlertAction(title: L10n("OK"), style: .default))
         present(alert, animated: true)
     }
 }

@@ -32,7 +32,7 @@ class SettingsViewController: UIThemedTableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = "Settings"
+        self.title = L10n("Settings")
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -56,16 +56,16 @@ class SettingsViewController: UIThemedTableViewController {
                     return "gearshape.2.fill"
                 }
             }())
-            cell.textLabel?.text = "Toolchain"
+            cell.textLabel?.text = L10n("Toolchain")
             break
         case 1:
             cell.imageView?.image = UIImage(systemName: "paintbrush.fill")
-            cell.textLabel?.text = "Customization"
+            cell.textLabel?.text = L10n("Customization")
             break
 #if DEBUG
         case 2:
             cell.imageView?.image = UIImage(systemName: "ant.fill")
-            cell.textLabel?.text = "Kernel Log"
+            cell.textLabel?.text = L10n("Kernel Log")
             break
 #endif // DEBUG
         default:

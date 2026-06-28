@@ -134,7 +134,7 @@ import UniformTypeIdentifiers
         }
         
         if UIDevice.current.userInterfaceIdiom == .pad, !self.isSublink {
-            self.navigationItem.setLeftBarButton(UIBarButtonItem(primaryAction: UIAction(title: "Close") { [weak self] _ in
+            self.navigationItem.setLeftBarButton(UIBarButtonItem(primaryAction: UIAction(title: L10n("Close")) { [weak self] _ in
                 guard let self = self else { return }
                 UserDefaults.standard.set(nil, forKey: "LDELastProjectSelected")
                 self.dismiss(animated: true)
@@ -159,17 +159,17 @@ import UniformTypeIdentifiers
         navigationItem.rightBarButtonItem?.isEnabled = !isSelecting
 
         if isSelecting {
-            let deleteButton = UIBarButtonItem(title: "Delete", style: .plain, target: self, action: #selector(deleteSelected))
+            let deleteButton = UIBarButtonItem(title: L10n("Delete"), style: .plain, target: self, action: #selector(deleteSelected))
             deleteButton.tintColor = .systemRed
-            let copyButton = UIBarButtonItem(title: "Copy", style: .plain, target: self, action: #selector(copySelected))
-            let shareButton = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(shareSelected))
+            let copyButton = UIBarButtonItem(title: L10n("Copy"), style: .plain, target: self, action: #selector(copySelected))
+            let shareButton = UIBarButtonItem(title: L10n("Share"), style: .plain, target: self, action: #selector(shareSelected))
             let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
             
             setToolbarItems([deleteButton, spacer, copyButton, spacer, shareButton], animated: true)
             navigationController?.setToolbarHidden(false, animated: true)
             tabBarController?.tabBar.isHidden = true
             
-            let doneButton = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(toggleSelectionMode))
+            let doneButton = UIBarButtonItem(title: L10n("Done"), style: .plain, target: self, action: #selector(toggleSelectionMode))
             navigationItem.setLeftBarButton(doneButton, animated: true)
             self.refreshControl = nil
         } else {
@@ -179,7 +179,7 @@ import UniformTypeIdentifiers
             
             if UIDevice.current.userInterfaceIdiom == .pad,
                !self.isSublink {
-                self.navigationItem.setLeftBarButton(UIBarButtonItem(primaryAction: UIAction(title: "Close") { [weak self] _ in
+                self.navigationItem.setLeftBarButton(UIBarButtonItem(primaryAction: UIAction(title: L10n("Close")) { [weak self] _ in
                     guard let self = self else { return }
                     UserDefaults.standard.set(nil, forKey: "LDELastProjectSelected")
                     self.dismiss(animated: true)
@@ -198,12 +198,12 @@ import UniformTypeIdentifiers
         guard !selectedPaths.isEmpty else { return }
 
         let alert = UIAlertController(
-            title: "Delete \(selectedPaths.count) item\(selectedPaths.count == 1 ? "" : "s")?",
-            message: "This action cannot be undone.",
+            title: selectedPaths.count == 1 ? String(format: L10n("Delete %d item?"), selectedPaths.count) : String(format: L10n("Delete %d items?"), selectedPaths.count),
+            message: L10n("This action cannot be undone."),
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        alert.addAction(UIAlertAction(title: "Delete", style: .destructive) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: L10n("Cancel"), style: .cancel))
+        alert.addAction(UIAlertAction(title: L10n("Delete"), style: .destructive) { [weak self] _ in
             guard let self = self else { return }
 
             for path in self.selectedPaths {
@@ -247,26 +247,26 @@ import UniformTypeIdentifiers
 
     func createEntry(mode: FileListEntry.FileListEntryType) {
         let alert: UIAlertController = UIAlertController(
-            title: "Create \((mode == .file) ? "File" : "Folder")",
+            title: String(format: L10n("Create %@"), mode == .file ? L10n("File") : L10n("Folder")),
             message: nil,
             preferredStyle: .alert
         )
         
         alert.addTextField { textField in
-            textField.placeholder = "Name"
+            textField.placeholder = L10n("Name")
         }
         
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        alert.addAction(UIAlertAction(title: "Submit", style: .default) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: L10n("Cancel"), style: .cancel))
+        alert.addAction(UIAlertAction(title: L10n("Submit"), style: .default) { [weak self] _ in
             guard let self = self else { return }
             let destination: URL = URL(fileURLWithPath: self.path).appendingPathComponent(alert.textFields![0].text ?? "")
             
             var isDirectory: ObjCBool = ObjCBool(false)
             if FileManager.default.fileExists(atPath: destination.path, isDirectory: &isDirectory) {
                 self.presentConfirmationAlert(
-                    title: mode == .dir ? "Error" : "Warning",
-                    message: "\(isDirectory.boolValue ? "Folder" : "File") with the name \"\(destination.lastPathComponent)\" already exists. \(!isDirectory.boolValue ? "" : "Folders cannot be removed!")",
-                    confirmTitle: "Overwrite",
+                    title: mode == .dir ? L10n("Error") : L10n("Warning"),
+                    message: String(format: L10n("%@ with the name \"%@\" already exists. %@"), isDirectory.boolValue ? L10n("Folder") : L10n("File"), destination.lastPathComponent, !isDirectory.boolValue ? "" : L10n("Folders cannot be removed!")),
+                    confirmTitle: L10n("Overwrite"),
                     confirmStyle: .destructive,
                     confirmHandler: {
                         try? String(NXUser.shared().generateFileCreationContent(forName: destination.lastPathComponent)).write(to: destination, atomically: true, encoding: .utf8)
@@ -294,19 +294,19 @@ import UniformTypeIdentifiers
         if !self.isSublink, UIDevice.current.userInterfaceIdiom != .pad, let project = self.project {
             var projectMenuElements: [UIMenuElement] = []
             if project.projectConfig.schemeKind == .app {
-                projectMenuElements.append(UIAction(title: "Run", image: UIImage(systemName: "play.fill"), handler: { [weak self] _ in
+                projectMenuElements.append(UIAction(title: L10n("Run"), image: UIImage(systemName: "play.fill"), handler: { [weak self] _ in
                     guard let self = self else { return }
                     buildProjectWithArgumentUI(targetViewController: self, project: project, buildType: .Run)
                 }))
             }
             if project.projectConfig.schemeKind == .app || project.projectConfig.schemeKind == .utility {
-                projectMenuElements.append(UIAction(title: "Export", image: UIImage(systemName: "archivebox.fill"), handler: { [weak self] _ in
+                projectMenuElements.append(UIAction(title: L10n("Export"), image: UIImage(systemName: "archivebox.fill"), handler: { [weak self] _ in
                     guard let self = self else { return }
                     buildProjectWithArgumentUI(targetViewController: self, project: project, buildType: .InstallPackagedApp)
                 }))
             }
             if project.projectConfig.schemeKind == .app || project.projectConfig.schemeKind == .utility {
-                projectMenuElements.append(UIAction(title: "Issue Navigator", image: UIImage(systemName: "exclamationmark.triangle.fill"), handler: { [weak self] _ in
+                projectMenuElements.append(UIAction(title: L10n("Issue Navigator"), image: UIImage(systemName: "exclamationmark.triangle.fill"), handler: { [weak self] _ in
                     guard let self = self else { return }
                     let loggerView = UINavigationController(rootViewController: UIDebugViewController(project: project))
                     loggerView.modalPresentationStyle = .formSheet
@@ -316,17 +316,17 @@ import UniformTypeIdentifiers
             
             rootMenuChildren.append({
                 if #available(iOS 17.0, *) {
-                    return UIMenu(title: "Project", options: [.displayAsPalette, .displayInline], children: projectMenuElements.reversed())
+                    return UIMenu(title: L10n("Project"), options: [.displayAsPalette, .displayInline], children: projectMenuElements.reversed())
                 } else {
-                    return UIMenu(title: "Project", options: [.displayInline], children: projectMenuElements)
+                    return UIMenu(title: L10n("Project"), options: [.displayInline], children: projectMenuElements)
                 }
             }())
         }
         
         if !self.isSublink {
-            rootMenuChildren.append(UIMenu(title: "System", options: [.displayInline], children: [
+            rootMenuChildren.append(UIMenu(title: L10n("System"), options: [.displayInline], children: [
                 UIAction(
-                    title: "Browse SDK",
+                    title: L10n("Browse SDK"),
                     image: UIImage(systemName: "books.vertical.fill")
                 ) { [weak self] _ in
                     guard let self = self else { return }
@@ -339,7 +339,7 @@ import UniformTypeIdentifiers
                     self.navigationController?.pushViewController(fileVC, animated: true)
                 },
                 UIAction(
-                    title: "Browse Cache",
+                    title: L10n("Browse Cache"),
                     image: UIImage(systemName: "folder.fill.badge.person.crop")
                 ) { [weak self] _ in
                     guard let self = self else { return }
@@ -352,7 +352,7 @@ import UniformTypeIdentifiers
                     self.navigationController?.pushViewController(fileVC, animated: true)
                 },
                 UIAction(
-                    title: "Configure",
+                    title: L10n("Configure"),
                     image: UIImage(systemName: "folder.fill.badge.gearshape")
                 ) { [weak self] _ in
                     guard let self = self else { return }
@@ -370,16 +370,16 @@ import UniformTypeIdentifiers
             // The generic file system menu
             var fileMenuElements: [UIMenuElement] = []
             var createMenuElements: [UIMenuElement] = []
-            createMenuElements.append(UIAction(title: "File", image: UIImage(systemName: "doc.fill"), handler: { [weak self] _ in
+            createMenuElements.append(UIAction(title: L10n("File"), image: UIImage(systemName: "doc.fill"), handler: { [weak self] _ in
                 guard let self = self else { return }
                 self.createEntry(mode: .file)
             }))
-            createMenuElements.append(UIAction(title: "Folder", image: UIImage(systemName: "folder.fill"), handler: { [weak self] _ in
+            createMenuElements.append(UIAction(title: L10n("Folder"), image: UIImage(systemName: "folder.fill"), handler: { [weak self] _ in
                 guard let self = self else { return }
                 self.createEntry(mode: .dir)
             }))
-            fileMenuElements.append(UIMenu(title: "New", image: UIImage(systemName: "plus.circle.fill"), children: createMenuElements))
-            fileMenuElements.append(UIAction(title: "Paste", image: UIImage(systemName: {
+            fileMenuElements.append(UIMenu(title: L10n("New"), image: UIImage(systemName: "plus.circle.fill"), children: createMenuElements))
+            fileMenuElements.append(UIAction(title: L10n("Paste"), image: UIImage(systemName: {
                 if #available(iOS 16.0, *) {
                     return "list.bullet.clipboard.fill"
                 } else {
@@ -391,7 +391,7 @@ import UniformTypeIdentifiers
                     self.addFile(destination: file)
                 }
             }))
-            fileMenuElements.append(UIAction(title: "Import", image: UIImage(systemName: "square.and.arrow.down.fill")) { [weak self] _ in
+            fileMenuElements.append(UIAction(title: L10n("Import"), image: UIImage(systemName: "square.and.arrow.down.fill")) { [weak self] _ in
                 guard let self = self else { return }
                 let documentPicker: UIDocumentPickerViewController = UIDocumentPickerViewController(forOpeningContentTypes: [.item], asCopy: true)
                 documentPicker.allowsMultipleSelection = true
@@ -399,12 +399,12 @@ import UniformTypeIdentifiers
                 documentPicker.delegate = self
                 self.present(documentPicker, animated: true)
             })
-            fileMenuElements.append(UIAction(title: "Select", image: UIImage(systemName: "checkmark.circle.fill")) { [weak self] _ in
+            fileMenuElements.append(UIAction(title: L10n("Select"), image: UIImage(systemName: "checkmark.circle.fill")) { [weak self] _ in
                 guard let self = self else { return }
                 self.toggleSelectionMode()
             })
 
-            rootMenuChildren.append(UIMenu(title: "File", options: [.displayInline], children: fileMenuElements))
+            rootMenuChildren.append(UIMenu(title: L10n("File"), options: [.displayInline], children: fileMenuElements))
         }
         
         return UIMenu(children: rootMenuChildren)
@@ -431,7 +431,7 @@ import UniformTypeIdentifiers
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] suggestedActions in
             guard let self = self else { return UIMenu() }
             
-            let copyAction = UIAction(title: "Copy", image: UIImage(systemName: {
+            let copyAction = UIAction(title: L10n("Copy"), image: UIImage(systemName: {
                 if #available(iOS 18.0, *) {
                     return "document.on.clipboard"
                 } else {
@@ -440,7 +440,7 @@ import UniformTypeIdentifiers
             }())) { action in
                 PasteBoardServices.copy(mode: .copy, paths: [self.entries[indexPath.row].path])
             }
-            let moveAction = UIAction(title: "Move", image: UIImage(systemName: "arrow.right")) { [weak self] action in
+            let moveAction = UIAction(title: L10n("Move"), image: UIImage(systemName: "arrow.right")) { [weak self] action in
                 guard let self = self else { return }
                 let entry = self.entries[indexPath.row]
                 PasteBoardServices.onMove = { [weak self] in
@@ -450,23 +450,23 @@ import UniformTypeIdentifiers
                 }
                 PasteBoardServices.copy(mode: .move, paths: [entry.path])
             }
-            let renameAction = UIAction(title: "Rename", image: UIImage(systemName: "rectangle.and.pencil.and.ellipsis")) { [weak self] action in
+            let renameAction = UIAction(title: L10n("Rename"), image: UIImage(systemName: "rectangle.and.pencil.and.ellipsis")) { [weak self] action in
                 guard let self = self else { return }
                 let entry: FileListEntry = self.entries[indexPath.row]
                 
                 let alert: UIAlertController = UIAlertController(
-                    title: "Rename \(entry.type == .dir ? "Folder" : "File")",
+                    title: String(format: L10n("Rename %@"), entry.type == .dir ? L10n("Folder") : L10n("File")),
                     message: nil,
                     preferredStyle: .alert
                 )
                 
                 alert.addTextField { textField in
-                    textField.placeholder = "Filename"
+                    textField.placeholder = L10n("Filename")
                     textField.text = entry.name
                 }
                 
-                alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-                alert.addAction(UIAlertAction(title: "Rename", style: .default, handler: { [weak self] _ in
+                alert.addAction(UIAlertAction(title: L10n("Cancel"), style: .cancel))
+                alert.addAction(UIAlertAction(title: L10n("Rename"), style: .default, handler: { [weak self] _ in
                     guard let self = self else { return }
                     let newName = alert.textFields![0].text ?? "0"
                     try? FileManager.default.moveItem(atPath: "\(self.path)/\(entry.name)", toPath: "\(self.path)/\(newName)")
@@ -480,12 +480,12 @@ import UniformTypeIdentifiers
                 
                 self.present(alert, animated: true)
             }
-            let shareAction = UIAction(title: "Share", image: UIImage(systemName: "square.and.arrow.up.fill")) { [weak self] action in
+            let shareAction = UIAction(title: L10n("Share"), image: UIImage(systemName: "square.and.arrow.up.fill")) { [weak self] action in
                 guard let self = self else { return }
                 let entry: FileListEntry = self.entries[indexPath.row]
                 share(url: URL(fileURLWithPath: "\(self.path)/\(entry.name)"), remove: false)
             }
-            let deleteAction = UIAction(title: "Remove", image: UIImage(systemName: "trash.fill"), attributes: .destructive) { [weak self] action in
+            let deleteAction = UIAction(title: L10n("Remove"), image: UIImage(systemName: "trash.fill"), attributes: .destructive) { [weak self] action in
                 guard let self = self else { return }
                 let entry = self.entries[indexPath.row]
                 let fileUrl: URL = URL(fileURLWithPath: "\(self.path)/\(entry.name)")

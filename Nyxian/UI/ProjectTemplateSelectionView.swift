@@ -32,8 +32,8 @@ struct ProjectTemplateSelectionView: View {
     var body: some View {
         VStack(spacing: 8) {
             templateRow(
-                title: "App",
-                subtitle: "Application project",
+                title: L10n("App"),
+                subtitle: L10n("Application project"),
                 systemImage: {
                     if #available(iOS 18.0, *) {
                         return "appstore.app.fill"
@@ -52,15 +52,15 @@ struct ProjectTemplateSelectionView: View {
             )
             
             templateRow(
-                title: "Utility",
-                subtitle: "Command line tool project",
+                title: L10n("Utility"),
+                subtitle: L10n("Command line tool project"),
                 systemImage: "terminal.fill",
                 schemeKind: .utility
             )
             
             templateRow(
-                title: "Library",
-                subtitle: "Library project",
+                title: L10n("Library"),
+                subtitle: L10n("Library project"),
                 systemImage: "building.columns.fill",
                 schemeKind: .library,
                 isEnabled: false

@@ -38,17 +38,17 @@ class CustomizationViewController: UIThemedTableViewController {
         
         tableView.register(ToggleTableCell.self, forCellReuseIdentifier: ToggleTableCell.reuseIdentifier)
         
-        self.title = "Customization"
+        self.title = L10n("Customization")
     }
     
     override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         switch section {
         case 0:
-            return "Credentials"
+            return L10n("Credentials")
         case 1:
-            return "Themes"
+            return L10n("Themes")
         case 2:
-            return "Icons"
+            return L10n("Icons")
         default:
             return nil
         }
@@ -91,9 +91,9 @@ class CustomizationViewController: UIThemedTableViewController {
         
         if indexPath.section == 0 {
             if indexPath.row == 0 {
-                cell = NXTextFieldTableCell(title: "Username", hint: "Anonym", key: "LDEUsername", defaultValue: "Anonym")
+                cell = NXTextFieldTableCell(title: L10n("Username"), hint: "Anonym", key: "LDEUsername", defaultValue: "Anonym")
             } else {
-                cell = NXTextFieldTableCell(title: "Hostname", hint: "localhost", key: "LDEHostname", defaultValue: "localhost") { newValue in
+                cell = NXTextFieldTableCell(title: L10n("Hostname"), hint: "localhost", key: "LDEHostname", defaultValue: "localhost") { newValue in
                     ksurface_sethostname(newValue)
                 }
             }
@@ -115,40 +115,40 @@ int main(void)
                 for theme in LDEThemeReader.shared.themes {
                     options.append(theme.name)
                 }
-                cell = PickerTableCell(options: options, title: "Theme", key: "LDETheme", defaultValue: 0)
+                cell = PickerTableCell(options: options, title: L10n("Theme"), key: "LDETheme", defaultValue: 0)
                 (cell as! PickerTableCell).callback = { selected in
                     self.themePreviewCell!.switchTheme(theme: LDEThemeReader.shared.themes[selected])
                     LDEThemeReader.shared.selectedThemeIndex = selected
                     RevertUI()
                 }
             } else if indexPath.row == 2 {
-                cell = StepperTableCell(title: "Font Size", key: "LDEFontSize", defaultValue: 12, minValue: 6, maxValue: 20)
+                cell = StepperTableCell(title: L10n("Font Size"), key: "LDEFontSize", defaultValue: 12, minValue: 6, maxValue: 20)
                 (cell as! StepperTableCell).callback = { newValue in
                     self.themePreviewCell!.switchTheme(theme: LDEThemeReader.shared.currentlySelectedTheme())
                 }
             } else if indexPath.row == 3 {
                 cell = tableView.dequeueReusableCell(withIdentifier: ToggleTableCell.reuseIdentifier, for: indexPath) as! ToggleTableCell
-                (cell as! ToggleTableCell).configure(title: "Show Line Numbers", key: "LDEShowLineNumbers", defaultValue: true) { newValue in
+                (cell as! ToggleTableCell).configure(title: L10n("Show Line Numbers"), key: "LDEShowLineNumbers", defaultValue: true) { newValue in
                     self.themePreviewCell!.switchTheme(theme: LDEThemeReader.shared.currentlySelectedTheme())
                 }
             } else if indexPath.row == 4 {
                 cell = tableView.dequeueReusableCell(withIdentifier: ToggleTableCell.reuseIdentifier, for: indexPath) as! ToggleTableCell
-                (cell as! ToggleTableCell).configure(title: "Show Spaces", key: "LDEShowSpaces", defaultValue: true) { newValue in
+                (cell as! ToggleTableCell).configure(title: L10n("Show Spaces"), key: "LDEShowSpaces", defaultValue: true) { newValue in
                     self.themePreviewCell!.switchTheme(theme: LDEThemeReader.shared.currentlySelectedTheme())
                 }
             } else if indexPath.row == 5 {
                 cell = tableView.dequeueReusableCell(withIdentifier: ToggleTableCell.reuseIdentifier, for: indexPath) as! ToggleTableCell
-                (cell as! ToggleTableCell).configure(title: "Wrap Lines", key: "LDEWrapLines", defaultValue: true) { newValue in
+                (cell as! ToggleTableCell).configure(title: L10n("Wrap Lines"), key: "LDEWrapLines", defaultValue: true) { newValue in
                     self.themePreviewCell!.switchTheme(theme: LDEThemeReader.shared.currentlySelectedTheme())
                 }
             } else if indexPath.row == 6 {
                 cell = tableView.dequeueReusableCell(withIdentifier: ToggleTableCell.reuseIdentifier, for: indexPath) as! ToggleTableCell
-                (cell as! ToggleTableCell).configure(title: "Show Line Breaks", key: "LDEShowLineBreaks", defaultValue: true) { newValue in
+                (cell as! ToggleTableCell).configure(title: L10n("Show Line Breaks"), key: "LDEShowLineBreaks", defaultValue: true) { newValue in
                     self.themePreviewCell!.switchTheme(theme: LDEThemeReader.shared.currentlySelectedTheme())
                 }
             } else {
                 cell = tableView.dequeueReusableCell(withIdentifier: ToggleTableCell.reuseIdentifier, for: indexPath) as! ToggleTableCell
-                (cell as! ToggleTableCell).configure(title: "Autoindent", key: "LDEAutoindent", defaultValue: true)
+                (cell as! ToggleTableCell).configure(title: L10n("Autoindent"), key: "LDEAutoindent", defaultValue: true)
             }
         } else {
             cell = UITableViewCell(style: .default, reuseIdentifier: nil)

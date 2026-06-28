@@ -71,7 +71,7 @@ struct ProjectCreationSheetView: View {
     }
     
     private var header: some View {
-        Text(model.step == .template ? "Choose a template for your new project" : "Choose options for your new project")
+        Text(model.step == .template ? L10n("Choose a template for your new project") : L10n("Choose options for your new project"))
             .font(.title3.weight(.semibold))
             .multilineTextAlignment(.leading)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -83,19 +83,19 @@ struct ProjectCreationSheetView: View {
     
     private var controls: some View {
         HStack(spacing: 12) {
-            Button("Cancel", action: onCancel)
+            Button(L10n("Cancel"), action: onCancel)
                 .buttonStyle(ProjectCreationSecondaryButtonStyle())
             
             Spacer(minLength: 12)
             
             if model.step == .options {
-                Button("Previous") {
+                Button(L10n("Previous")) {
                     withAnimation(.snappy) { model.step = .template }
                 }
                 .buttonStyle(ProjectCreationSecondaryButtonStyle())
             }
             
-            Button(model.step == .template ? "Next" : "Create") {
+            Button(model.step == .template ? L10n("Next") : L10n("Create")) {
                 if model.step == .template {
                     withAnimation(.snappy) { model.step = .options }
                 } else {
