@@ -360,28 +360,6 @@ void DyldHooksInit(void)
 {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        PEEntitlement ownEntitlements = environment_syscall(SYS_getent);
-        if(entitlement_got_entitlement(ownEntitlements, PEEntitlementDyldHideLiveProcess))
-        {
-            int imageCount = _dyld_image_count();
-            for(int i = 0; i < imageCount; ++i)
-            {
-                const struct mach_header* currentImageHeader = _dyld_get_image_header(i);
-                if(currentImageHeader->filetype == MH_EXECUTE)
-                {
-                    lcImageIndex = i;
-                    break;
-                }
-            }
-            
-            DO_HOOK_GLOBAL(dlsym);
-            DO_HOOK_GLOBAL(_dyld_image_count);
-            DO_HOOK_GLOBAL(_dyld_get_image_header);
-            DO_HOOK_GLOBAL(_dyld_get_image_vmaddr_slide);
-            DO_HOOK_GLOBAL(_dyld_get_image_name);
-            DO_HOOK_GLOBAL(dlopen);
-        }
-        
         guestAppSdkVersion = getDyldImageBuildVersion(getGuestAppHeader()).version;
         if(!initGuestSDKVersionInfo() ||
            !performHookDyldApi("dyld_program_sdk_at_least", 1, NULL, hook_dyld_program_sdk_at_least) ||

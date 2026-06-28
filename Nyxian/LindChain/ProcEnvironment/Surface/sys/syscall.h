@@ -31,7 +31,6 @@
 #include <LindChain/ProcEnvironment/Surface/sys/cred/getgid.h>
 #include <LindChain/ProcEnvironment/Surface/sys/compat/gettask.h>
 #include <LindChain/ProcEnvironment/Surface/sys/compat/procpath.h>
-#include <LindChain/ProcEnvironment/Surface/sys/compat/handoffep.h>
 #include <LindChain/ProcEnvironment/Surface/sys/cred/getsid.h>
 #include <LindChain/ProcEnvironment/Surface/sys/cred/setsid.h>
 #include <LindChain/ProcEnvironment/Surface/sys/host/sysctl.h>
@@ -48,10 +47,9 @@
 #define SYS_gettask     754         /* gets task port */
 #define SYS_procpath    755         /* gets process path of a pid */
 #define SYS_procbsd     756         /* MARK: deprecated.. use SYS_sysctl instead */
-#define SYS_handoffep   757         /* handoff exception port to kvirt */
 #define SYS_setent      758         /* sets entitlements (sanitized ofc) */
 #define SYS_waittask    759         /* waits till task port of a task is available */
-#define SYS_N 22
+#define SYS_N 21
 
 typedef struct {
     const char *name;
