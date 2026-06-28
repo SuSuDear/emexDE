@@ -544,7 +544,7 @@ import UniformTypeIdentifiers
                         self.entries.append(FileListEntry.getEntry(ofPath: folder.path))
                         self.tableView.reloadData()
                     } else {
-                        NotificationServer.NotifyUser(level: .error, notification: "Failed to unzip \(fileListEntry.path)")
+                        NotificationServer.NotifyUser(level: .error, notification: String(format: L10n("Failed to unzip %@"), fileListEntry.path))
                     }
                 }
             } else {

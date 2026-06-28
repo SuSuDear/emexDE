@@ -26,9 +26,9 @@ enum FlagType {
     
     var title: String {
         switch self {
-            case .clang: return "Clang Flags"
-            case .swift: return "Swift Flags"
-            case .linker: return "Other Linker Flags"
+            case .clang: return L10n("Clang Flags")
+            case .swift: return L10n("Swift Flags")
+            case .linker: return L10n("Other Linker Flags")
         }
     }
 }
@@ -87,7 +87,7 @@ class FlagsEditViewController: UIThemedTableViewController {
                 return cell
             case .add:
                 let cell = tableView.dequeueReusableCell(withIdentifier: addFlagCell, for: indexPath)
-                cell.textLabel?.text = "Add Flag…"
+                cell.textLabel?.text = L10n("Add Flag…")
                 cell.textLabel?.textColor = view.tintColor
                 return cell
         }
@@ -157,7 +157,7 @@ class FlagsEditViewController: UIThemedTableViewController {
     }
 
     private func presentAddAlert() {
-        presentFlagAlert(title: "Add Flag", existingValue: nil) { [weak self] value in
+        presentFlagAlert(title: L10n("Add Flag"), existingValue: nil) { [weak self] value in
             guard let self else { return }
             self.flags.append(value)
             let ip = IndexPath(row: self.flags.count - 1, section: Section.flags.rawValue)
@@ -167,7 +167,7 @@ class FlagsEditViewController: UIThemedTableViewController {
     }
 
     private func presentEditAlert(editing row: Int) {
-        presentFlagAlert(title: "Edit Flag", existingValue: flags[row]) { [weak self] value in
+        presentFlagAlert(title: L10n("Edit Flag"), existingValue: flags[row]) { [weak self] value in
             guard let self else { return }
             self.flags[row] = value
             let ip = IndexPath(row: row, section: Section.flags.rawValue)
@@ -181,21 +181,21 @@ class FlagsEditViewController: UIThemedTableViewController {
 
         alert.addTextField { field in
             field.text = existingValue
-            field.placeholder = "-flag or -DKEY=VALUE"
+            field.placeholder = L10n("-flag or -DKEY=VALUE")
             field.font = .monospacedSystemFont(ofSize: 14, weight: .regular)
             field.autocorrectionType = .no
             field.autocapitalizationType = .none
             field.clearButtonMode = .whileEditing
         }
 
-        let confirm = UIAlertAction(title: existingValue == nil ? "Add" : "Save", style: .default) { _ in
+        let confirm = UIAlertAction(title: existingValue == nil ? L10n("Add") : L10n("Save"), style: .default) { _ in
             let value = alert.textFields?.first?.text?.trimmingCharacters(in: .whitespaces) ?? ""
             guard !value.isEmpty else { return }
             completion(value)
         }
 
         alert.addAction(confirm)
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: L10n("Cancel"), style: .cancel))
         alert.preferredAction = confirm
 
         present(alert, animated: true)
@@ -260,10 +260,10 @@ class ProjectConfigViewController: UIThemedTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = "Project Configuration"
+        title = L10n("Project Configuration")
         
         let saveButton: UIBarButtonItem = UIBarButtonItem()
-        saveButton.title = "Save"
+        saveButton.title = L10n("Save")
         saveButton.target = self
         saveButton.action = #selector(saveTapped)
         saveButton.isEnabled = false
@@ -283,9 +283,9 @@ class ProjectConfigViewController: UIThemedTableViewController {
 
         var header: String {
             switch self {
-                case .general: return "General"
-                case .deplyment: return "Deployment"
-                case .buildFlags: return "Build Flags"
+                case .general: return L10n("General")
+                case .deplyment: return L10n("Deployment")
+                case .buildFlags: return L10n("Build Flags")
             }
         }
     }
@@ -299,11 +299,11 @@ class ProjectConfigViewController: UIThemedTableViewController {
 
         var title: String {
             switch self {
-                case .displayName: return "Display Name"
-                case .executable: return "Executable"
-                case .bundleIdentifier: return "Bundle Identifier"
-                case .bundleVersion: return "Bundle Version"
-                case .bundleShortVersion: return "Bundle Short Version"
+                case .displayName: return L10n("Display Name")
+                case .executable: return L10n("Executable")
+                case .bundleIdentifier: return L10n("Bundle Identifier")
+                case .bundleVersion: return L10n("Bundle Version")
+                case .bundleShortVersion: return L10n("Bundle Short Version")
             }
         }
     }
@@ -313,7 +313,7 @@ class ProjectConfigViewController: UIThemedTableViewController {
 
         var title: String {
             switch self {
-                case .deployVersion: return "Deployment Target"
+                case .deployVersion: return L10n("Deployment Target")
             }
         }
     }
@@ -325,9 +325,9 @@ class ProjectConfigViewController: UIThemedTableViewController {
 
         var title: String {
             switch self {
-                case .clangFlags: return "Clang Flags"
-                case .swiftFlags: return "Swift Flags"
-                case .linkerFlags: return "Other Linker Flags"
+                case .clangFlags: return L10n("Clang Flags")
+                case .swiftFlags: return L10n("Swift Flags")
+                case .linkerFlags: return L10n("Other Linker Flags")
             }
         }
     }
@@ -360,11 +360,11 @@ class ProjectConfigViewController: UIThemedTableViewController {
                 let row = GeneralRow(rawValue: indexPath.row)!
                 cell.textLabel?.text = row.title
                 switch row {
-                    case .displayName: cell.detailTextLabel?.text = pendingDisplayName.isEmpty ? "Not Set" : pendingDisplayName
-                    case .executable: cell.detailTextLabel?.text = pendingExecutable.isEmpty ? "Not Set" : pendingExecutable
-                    case .bundleIdentifier: cell.detailTextLabel?.text = pendingBundleIdentifier.isEmpty ? "Not Set" : pendingBundleIdentifier
-                    case .bundleVersion: cell.detailTextLabel?.text = pendingBundleVersion.isEmpty ? "Not Set" : pendingBundleVersion
-                    case .bundleShortVersion: cell.detailTextLabel?.text = pendingBundleShortVersion.isEmpty ? "Not Set" : pendingBundleShortVersion
+                    case .displayName: cell.detailTextLabel?.text = pendingDisplayName.isEmpty ? L10n("Not Set") : pendingDisplayName
+                    case .executable: cell.detailTextLabel?.text = pendingExecutable.isEmpty ? L10n("Not Set") : pendingExecutable
+                    case .bundleIdentifier: cell.detailTextLabel?.text = pendingBundleIdentifier.isEmpty ? L10n("Not Set") : pendingBundleIdentifier
+                    case .bundleVersion: cell.detailTextLabel?.text = pendingBundleVersion.isEmpty ? L10n("Not Set") : pendingBundleVersion
+                    case .bundleShortVersion: cell.detailTextLabel?.text = pendingBundleShortVersion.isEmpty ? L10n("Not Set") : pendingBundleShortVersion
                 }
             case .deplyment:
                 let row = DeploymentRow(rawValue: indexPath.row)!
@@ -396,34 +396,34 @@ class ProjectConfigViewController: UIThemedTableViewController {
             case .general:
                 switch GeneralRow(rawValue: indexPath.row)! {
                     case .displayName:
-                        presentTextAlert(title: "Display Name", current: pendingDisplayName, placeholder: "Hello") {
+                        presentTextAlert(title: L10n("Display Name"), current: pendingDisplayName, placeholder: "Hello") {
                             self.pendingDisplayName = $0
                             self.markDirty()
                         }
                     case .executable:
-                        presentTextAlert(title: "Executable", current: pendingExecutable, placeholder: "hello") {
+                        presentTextAlert(title: L10n("Executable"), current: pendingExecutable, placeholder: "hello") {
                             self.pendingExecutable = $0;
                             self.markDirty()
                         }
                     case .bundleIdentifier:
-                        presentTextAlert(title: "Bundle Identifier", current: pendingBundleIdentifier, placeholder: "com.nyxian.example") {
+                        presentTextAlert(title: L10n("Bundle Identifier"), current: pendingBundleIdentifier, placeholder: "com.nyxian.example") {
                             self.pendingBundleIdentifier = $0;
                             self.markDirty()
                         }
                     case .bundleVersion:
-                        presentTextAlert(title: "Bundle Version", current: pendingBundleVersion, placeholder: "1.0") {
+                        presentTextAlert(title: L10n("Bundle Version"), current: pendingBundleVersion, placeholder: "1.0") {
                             self.pendingBundleVersion = $0;
                             self.markDirty()
                         }
                     case .bundleShortVersion:
-                        presentTextAlert(title: "Bundle Short Version", current: pendingBundleShortVersion, placeholder: "1.0") {
+                        presentTextAlert(title: L10n("Bundle Short Version"), current: pendingBundleShortVersion, placeholder: "1.0") {
                             self.pendingBundleShortVersion = $0;
                             self.markDirty()
                         }
                 }
             case .deplyment:
                 switch DeploymentRow(rawValue: indexPath.row)! {
-                    case .deployVersion: pushVersionPicker(title: "Deployment Target",  current: pendingDeployVersion) { self.pendingDeployVersion = $0; self.markDirty() }
+                    case .deployVersion: pushVersionPicker(title: L10n("Deployment Target"),  current: pendingDeployVersion) { self.pendingDeployVersion = $0; self.markDirty() }
                 }
             case .buildFlags:
                 switch BuildFlagRow(rawValue: indexPath.row)! {
@@ -477,14 +477,14 @@ class ProjectConfigViewController: UIThemedTableViewController {
             field.autocapitalizationType = .none
             field.clearButtonMode = .whileEditing
         }
-        let save = UIAlertAction(title: "Save", style: .default) { _ in
+        let save = UIAlertAction(title: L10n("Save"), style: .default) { _ in
             let value = alert.textFields?.first?.text?.trimmingCharacters(in: .whitespaces) ?? ""
             guard !value.isEmpty else { return }
             completion(value)
             self.tableView.reloadData()
         }
         alert.addAction(save)
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: L10n("Cancel"), style: .cancel))
         alert.preferredAction = save
         present(alert, animated: true)
     }
@@ -530,6 +530,6 @@ class ProjectConfigViewController: UIThemedTableViewController {
     }
 
     private func subtitle(for flags: [String]) -> String {
-        flags.isEmpty ? "None" : flags.joined(separator: " ")
+        flags.isEmpty ? L10n("None") : flags.joined(separator: " ")
     }
 }

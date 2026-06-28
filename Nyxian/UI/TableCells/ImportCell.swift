@@ -44,7 +44,7 @@ class ImportTableCell: UITableViewCell, UIDocumentPickerDelegate {
     private func setupViews() {
         selectionStyle = .none
 
-        importButton.setTitle("Import", for: .normal)
+        importButton.setTitle(L10n("Import"), for: .normal)
         importButton.setTitleColor(UIColor.systemBlue, for: .normal)
         importButton.contentHorizontalAlignment = .left
         importButton.addTarget(self, action: #selector(openPicker), for: .touchUpInside)

@@ -43,7 +43,7 @@ import UIKit
 
         self.tableView.register(ProjectTableCell.self, forCellReuseIdentifier: ProjectTableCell.reuseIdentifier)
 
-        self.title = "Projects"
+        self.title = L10n("Projects")
 
         let createItem = UIBarButtonItem(
             barButtonSystemItem: .add,
@@ -218,7 +218,7 @@ import UIKit
     private func createProject(from optionsModel: ProjectTemplateOptionsModel) -> Bool {
         let name = optionsModel.productName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty else {
-            NotificationServer.NotifyUser(level: .error, notification: "Product name is required")
+            NotificationServer.NotifyUser(level: .error, notification: L10n("Product name is required"))
             return false
         }
 
@@ -233,7 +233,7 @@ import UIKit
             withLanguageKind: optionsModel.selectedLanguage,
             withInterfaceKind: optionsModel.selectedInterface) else
         {
-            NotificationServer.NotifyUser(level: .error, notification: "Failed to create project")
+            NotificationServer.NotifyUser(level: .error, notification: L10n("Failed to create project"))
             return false
         }
 
@@ -327,7 +327,7 @@ import UIKit
     private func presentIconPicker(for project: NXProject, at indexPath: IndexPath) {
         guard canPickIcon(for: project) else { return }
         guard UIImagePickerController.isSourceTypeAvailable(.photoLibrary) else {
-            NotificationServer.NotifyUser(level: .error, notification: "Photo Library is not available")
+            NotificationServer.NotifyUser(level: .error, notification: L10n("Photo Library is not available"))
             return
         }
 

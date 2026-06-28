@@ -240,14 +240,14 @@ extension UIViewController {
     func presentConfirmationAlert(
         title: String,
         message: String,
-        confirmTitle: String = "Confirm",
+        confirmTitle: String = L10n("Confirm"),
         confirmStyle: UIAlertAction.Style = .default,
         confirmHandler: @escaping () -> Void,
         addHandler: Bool = true
     ) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alert.addAction(UIAlertAction(title: L10n("Cancel"), style: .cancel))
         
         if addHandler {
             alert.addAction(UIAlertAction(title: confirmTitle, style: confirmStyle) { _ in

@@ -71,14 +71,14 @@ class MainSplitViewController: UISplitViewController, UISplitViewControllerDeleg
     }
 
     override var keyCommands: [UIKeyCommand]? {
-        let closeCommand = UIKeyCommand(title: "Close", action: #selector(self.detailVC?.closeCurrentTab), input: "W", modifierFlags: [.command])
+        let closeCommand = UIKeyCommand(title: L10n("Close"), action: #selector(self.detailVC?.closeCurrentTab), input: "W", modifierFlags: [.command])
 
         if #available(iOS 15.0, *) {
             closeCommand.wantsPriorityOverSystemBehavior = true
         }
 
         if self.project.projectConfig.schemeKind == .app {
-            let runCommand = UIKeyCommand(title: "Run", action: #selector(self.invokeBuild), input: "R", modifierFlags: [.command])
+            let runCommand = UIKeyCommand(title: L10n("Run"), action: #selector(self.invokeBuild), input: "R", modifierFlags: [.command])
             return [closeCommand, runCommand]
         }
 
