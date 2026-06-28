@@ -122,3 +122,7 @@
 "Failed to create project" = "Failed to create project";
 "Photo Library is not available" = "Photo Library is not available";
 "Failed to unzip %@" = "Failed to unzip %@";
+"%@ (%d)" = "%@ (%d)";
+"Applications" = "Applications";
+"Utilities" = "Utilities";
+"Unknown" = "Unknown";

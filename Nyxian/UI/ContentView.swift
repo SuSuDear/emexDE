@@ -259,7 +259,16 @@ import UIKit
         let keys = Array(self.projectsList.keys).sorted()
         let key = keys[section]
         let sectionProjects = self.projectsList[key] ?? []
-        return "\(key.capitalized) (\(sectionProjects.count))"
+        return String(format: L10n("%@ (%d)"), localizedProjectSectionTitle(for: key), sectionProjects.count)
+    }
+
+    private func localizedProjectSectionTitle(for key: String) -> String {
+        switch key.lowercased() {
+            case "applications": return L10n("Applications")
+            case "utilities": return L10n("Utilities")
+            case "unknown": return L10n("Unknown")
+            default: return key.capitalized
+        }
     }
 
     private func defaultIcon(for project: NXProject) -> UIImage? {

@@ -122,3 +122,7 @@
 "Failed to create project" = "创建项目失败";
 "Photo Library is not available" = "照片图库不可用";
 "Failed to unzip %@" = "解压失败：%@";
+"%@ (%d)" = "%@ (%d)";
+"Applications" = "应用程序";
+"Utilities" = "工具";
+"Unknown" = "未知";
