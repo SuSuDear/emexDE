@@ -126,3 +126,6 @@
 "Applications" = "应用程序";
 "Utilities" = "工具";
 "Unknown" = "未知";
+"%@ • %d" = "%@ • %d";
+"Internal" = "内部";
+"Contains no messages" = "没有消息";
