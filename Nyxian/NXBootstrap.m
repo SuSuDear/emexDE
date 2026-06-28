@@ -23,7 +23,6 @@
 #import <UI/XCodeButton.h>
 #import <LindChain/Utils/Zip.h>
 #import <LindChain/Downloader/fdownload.h>
-#import <LindChain/ProcEnvironment/Surface/extra/relax.h>
 #import <SuCode-Swift.h>
 #import <MobileDevelopmentKit/MDKThreadPool.h>
 
